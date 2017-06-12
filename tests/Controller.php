@@ -70,7 +70,6 @@ abstract class Controller extends ArrayDataSets
         }
         $controller = strtolower($controller);
         $module = join('/', $initRuter);
-        $module = preg_replace('/([a-z])([A-Z])/', '${1}-${2}', $module);
         if (!is_string($module)) {
             throw new Exception(var_dump($module));
         }
