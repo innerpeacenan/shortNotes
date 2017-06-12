@@ -3,6 +3,6 @@
     <customer customer_id="1" firstname="John" lastname="Smith"
               email="john.smith@localhost"/>
     <customer customer_id="2" firstname="Jenny" lastname="Smith"
-              email="jenny.smith@localhost"/>
+          email="jenny.smith@localhost"/>
 </dataset>
 

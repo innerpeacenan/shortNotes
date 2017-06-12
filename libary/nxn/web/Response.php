@@ -17,5 +17,14 @@ namespace nxn\web;
  */
 class Response
 {
+   public static function redirect (string $url){
+       // check if the hander has been sent before,otherwise an notice error will be throw!
+       if(headers_sent()) return;
+       header('location:'.$url);
+   }
 
+   public static function deleteCookie($cookieName){
+       setcookie($cookieName,null);
+   }
 }
+

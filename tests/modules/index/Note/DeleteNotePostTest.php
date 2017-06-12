@@ -5,26 +5,18 @@
  * Date: 6/10/17
  * Time: 12:55 PM
  */
-namespace tests\modules\index\NoteController;
+namespace tests\modules\index\Note;
 
 use n\models\Notes;
-use n\modules\index\controllers\NoteController;
-use tests\lib\ArrayDataSets;
+use tests\Controller;
 
 /**
- * Class TestNoteController
  * @runTestsInSeparateProcesses
- * @package tests
  * Description: description
  * Indicates that all tests in a test class should be run in a separate PHP process.
  */
-class DeleteNotePostTest extends ArrayDataSets
+class DeleteNotePostTest extends Controller
 {
-    /**
-     * @var NoteController
-     */
-    public $stub;
-
     public function dataSet()
     {
         return [
@@ -55,33 +47,26 @@ class DeleteNotePostTest extends ArrayDataSets
         ];
     }
 
+    public function setRequest()
+    {
+        $_REQUEST['id'] = 112;
+    }
 
     public function testDelteNote()
     {
-        // todo 写一个方法,根据方法名称,还原请求路由,
-        //写一个方法,实现action强制有返回值
-        $c = preg_split('/,/',get_called_class(),-1,PREG_SPLIT_NO_EMPTY);
-//tests\modules\index\NoteController\DeleteNotePostTest
-//        [$c[2],preg_split('/(?=[A-Z])/', substr($c[3],0,-10), -1, PREG_SPLIT_NO_EMPTY),$c[4]];
-//       2,3,4
-        $_REQUEST['id'] = 112;
-        $_SERVER['REQUEST_URI'] = '/index/note/delete-note';
-        $_SERVER['REQUEST_METHOD'] = 'POST';
-        $ini = require(__DIR__ . '/../../../../config/test.php');
-        $result = (new \nxn\web\Application($ini))->run();
-        $this->assertTrue($result['status']);
-//        Failed asserting that an object is empty.
+        // 这个数据在测试数据桩里边
         $ar = (new Notes())->load(112);
         $this->assertNull($ar);
     }
 
     /**
      * @expectedException \PHPUnit_Framework_Error_Notice
-     * @expectedExceptionMessage  Undefined index: REQUEST_URI
+     * @expectedExceptionMessage  Undefined index: id
      * 测试各个测试组建能否较好的彼此隔离
+     * 这个测试案例写在这里其实不太合适,主要是为了测试 run test in separate process 是否工作正常
      */
     public function testOk()
     {
-        $_SERVER['REQUEST_URI'];
+        $_SERVER['id'];
     }
 }

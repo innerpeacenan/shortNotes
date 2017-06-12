@@ -1,6 +1,7 @@
 <?php
 namespace tests;
-use tests\lib\ArrayDataSets;
+
+use tests\ArrayDataSets;
 use yii\base\Exception;
 
 /**
@@ -11,62 +12,83 @@ use yii\base\Exception;
  * Time: xx:xx
  * Description: description
  */
-class Controller extends ArrayDataSets
+abstract class Controller extends ArrayDataSets
 {
     /**
-     * @var null|string
+     * set gloabe variouble when need
+     */
+    abstract public function setRequest();
+
     /**
-     * @access
-     * @return void
-     * Created by: xiaoning nan
-     * Last Modify: xiaoning nan
      * Description:
      * 根据当前的控制器,解析出原始请求的路由
-     *
      */
-    public function initRequest()
+    private function initRequest()
     {
 //tests\modules\index\Note\DeleteNotePostTest
-        $str = get_called_class();
+        $initRuter = get_called_class();
         $baseNameSpace = 'tests\\modules\\';
-        if ((strncmp($str, $baseNameSpace, strlen($baseNameSpace)))) {
+        if ((strncmp($initRuter, $baseNameSpace, strlen($baseNameSpace)))) {
             throw new Exception("can not get ruote from class name,error class name space?");
         } else {
-            $str = substr($str, strlen($baseNameSpace));
+            $initRuter = substr($initRuter, strlen($baseNameSpace));
         }
-        $str = preg_split('/,/', $str, -1, PREG_SPLIT_NO_EMPTY);
-        $action = array_pop($str);
+//        error spliter \',' ,use \\ as spliter in namespace string
+//        preg_split(): No ending delimiter '/' found
+//        @todo 弄明白为什么需要四个反斜线
+        $initRuter = preg_split('/\\\\/', $initRuter, -1, PREG_SPLIT_NO_EMPTY);
+        $action = array_pop($initRuter);
+        if (substr_compare($action, "Test", -4, 4) !== 0) {
+            throw new Exception('Test case name must end with \'test\'');
+        }
+        $action = substr($action, 0, strlen($action) - 4);
+//       DeleteNotePost
         $methods = ['POST', 'GET', 'DELETE', 'PUT', 'HEAD', 'OPTION', 'CONNECTION'];
         foreach ($methods as $method) {
-            if (($pos = stripos($action, $method)) !== false) {
-                $_SERVER['REQUEST_METHOD'] = $method;
+            $len = strlen($method);
+//      the forth parameter true means case insensitive
+            if (substr_compare($action, $method, -$len, $len, true) === 0) {
                 // it is camelcased
-                $action = substr($action, 0, -$pos);
-                $action = preg_replace('/(([a-z])[A-Z])/', '${1}-${2}', $action);
+                $action = substr($action, 0, -$len);
+                $action = preg_replace('/([a-z])([A-Z])/', '${1}-${2}', $action);
                 if (!is_string($action)) {
                     throw new Exception('error regular expression, or some other error');
                 } else {
                     $action = strtolower($action);
                 }
-//                preg_split('/([A-Z])/', $ta, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
-//        [$c[2],preg_split('/(?=[A-Z])/', substr($c[3],0,-10), -1, PREG_SPLIT_NO_EMPTY),$c[4]];
+                $_SERVER['REQUEST_METHOD'] = $method;
+                break;
             }
         }
-        $controller = array_pop($str);
-        $controller = preg_replace('/(([a-z])[A-Z])/', '${1}-${2}', $controller);
+        if (!isset($_SERVER['REQUEST_METHOD'])) {
+            throw new Exception('invalid action path or name?');
+        }
+        $controller = array_pop($initRuter);
+        $controller = preg_replace('/([a-z])([A-Z])/', '${1}-${2}', $controller);
         if (!is_string($controller)) {
             throw new Exception(var_dump($controller));
         }
         $controller = strtolower($controller);
-        $module = $str;
-        $module = preg_replace('/(([a-z])[A-Z])/', '${1}-${2}', $module);
+        $module = join('/', $initRuter);
+        $module = preg_replace('/([a-z])([A-Z])/', '${1}-${2}', $module);
         if (!is_string($module)) {
             throw new Exception(var_dump($module));
         }
         $module = strtolower($module);
-        $_SERVER['REQUEST_URL'] = join('/', [$module, $controller . $action]);
-        $ini = require(__DIR__ . '/../../config/test.php');
+//        uri Uniform Resource Identifier (URI)
+        $_SERVER['REQUEST_URI'] = join('/', [$module, $controller, $action]);
+        require(__DIR__ . '/../config/debug.php');
+        $ini = require(__DIR__ . '/../config/test.php');
         // 约定一个全局变量,用于测试返回的数据
         (new \nxn\web\Application($ini))->run();
+    }
+
+
+    public function setUp()
+    {
+        parent::setUp();
+        //初始化请求
+        $this->setRequest();
+        $this->initRequest();
     }
 }

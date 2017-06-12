@@ -1,19 +1,28 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: root
- * Date: 5/29/17
- * Time: 9:34 AM
- */
-<?
-php
-use yii\helpers\Html;
-use yii\helpers\Url;
-use app\classes\Utility;
-?>
-<?= \app\classes\Utility::navstring() ?>
-<div class="pd-10">
-    <div style="width:100%;margin:0px auto;">
+function ve($var)
+{
+    header('Content-type: text/html; charset=utf-8');
+    echo "<pre>";
+    var_export($var);
+    echo "</pre>";
+}
 
-    </div>
-</div>
+function l(array $kv)
+{
+    foreach ($kv as $k => $v) {
+        if (!is_resource($v)) {
+            $GLOBALS['PHP_UNIT_TEST'][$k] = unserialize(serialize($v));
+        } else {
+            throw new Exception('resource could not be logged!');
+        }
+    }
+}
+
+function t(string $k)
+{
+    if (isset($GLOBALS['PHP_UNIT_TEST'][$k])) {
+        return $GLOBALS['PHP_UNIT_TEST'][$k];
+    } else {
+        return null;
+    }
+}

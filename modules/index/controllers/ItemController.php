@@ -23,7 +23,6 @@ class ItemController
 
     public function __construct()
     {
-        $config = \N::$app->conf['db'];
         $this->db = \N::createObject($config = \N::$app->conf['db']);
     }
 
@@ -38,11 +37,18 @@ class ItemController
         /**
          * use fetchAll to fetch all items
          */
-        $st = $db->prepare('select * from `items` where `fid` = :fid AND status = "enable" ORDER BY `rank` DESC');
-        $st->bindValue(':fid', $fid, PDO::PARAM_INT);
-        $st->execute();
+        $sql = 'select * from `items` where `fid` = :fid AND status = "enable" ORDER BY `rank` DESC';
+        $param = [
+        ':fid'=>$fid,
+        ];
+//     array_map() expects parameter 1 to be a valid callback, non-static method PDO::quote() cannot be called statically
+        $param = array_map([$db,'quote'],$param);
+        $sql = strtr($sql,$param);
+        $st = $db->query($sql);
+//        $st = $db->prepare('select * from `items` where `fid` = :fid AND status = "enable" ORDER BY `rank` DESC');
+//        $st->bindValue(':fid', $fid, PDO::PARAM_INT);
+//        $st->execute();
         $result = $st->fetchAll(PDO::FETCH_ASSOC);
-
         foreach ($result as $i => $row) {
             // 给前台checkbox 用的
             $result[$i]['status'] = ($row['status'] === 'enable') ? false : true;

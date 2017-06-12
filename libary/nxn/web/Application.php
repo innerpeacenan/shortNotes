@@ -23,7 +23,7 @@ class Application extends Container
     public $router = [
         'module' => 'n\\modules\\index\\controllers\\',
         'controller' => 'n\\modules\\index\\controllers\\IndexController',
-        'action' => 'indexAction'
+        'action' => 'indexGET'
     ];
 
     /**
@@ -35,7 +35,6 @@ class Application extends Container
     {
         \N::$app = $this;
         $this->conf = $config;
-        //@todo @do more
     }
 
     /**
@@ -56,7 +55,7 @@ class Application extends Container
      * @param  array | null $router
      * @return void
      * @throws \Exception
-     *
+     * 当不够 action部分的路径的时候,默认导向哥他请求的主页看
      */
     public function setRouter($router = null)
     {
@@ -65,12 +64,11 @@ class Application extends Container
         }
         //如果从来没有设置过,则从url中解析
         // 从 url 中解析  getfriends?fid=2Action
-        // Undefined index: REQUEST_URI
-        $baseUrl = explode('?', $_SERVER['REQUEST_URI'])[0];
+        $baseUri = explode('?', $_SERVER['REQUEST_URI'])[0];
         //经验教训: explode 之前,先检查 trim 结果是否为空
         // must trim the leading slash in request url. learn more about http
         // 这里主意运算符的优先级别
-        if (($rest = trim($baseUrl, '/')) !== '') {
+        if (($rest = trim($baseUri, '/')) !== '') {
             $r = $this->router;
             $part = explode('/', $rest);
             $method = $_SERVER['REQUEST_METHOD'];
@@ -83,16 +81,17 @@ class Application extends Container
                 case 2:
                     $r['controller'] = $r['module'] . static::camelCase($part[0]) . 'Controller';
 
-                    $r['action'] = lcfirst(static::camelCase($part[1])) . $method ;
+                    $r['action'] = lcfirst(static::camelCase($part[1])) . $method;
                     break;
                 case 3:
                     // modules is just like a directory, do not need to camel case
-                    $r['module'] = 'n\\modules\\' .$part[0] . '\\controllers\\';
+                    $r['module'] = 'n\\modules\\' . $part[0] . '\\controllers\\';
                     $r['controller'] = $r['module'] . static::camelCase($part[1]) . 'Controller';
                     $r['action'] = lcfirst(static::camelCase($part[2])) . $method;
                     break;
                 default:
                     header('HTTP/1.1 400 BAD REQUEST(invalide reuqest path)', true, 400);
+                    echo 'hello';
                     exit();
             }
             // 如何防止破坏变量系统呢
@@ -103,11 +102,14 @@ class Application extends Container
         //@todo 需要封装一个简单的 response 类，以更据不同的情况，返回不同的状态码
         if (!class_exists($controller, true)) {
             header('HTTP/1.1 400 BAD REQUEST(invalide controller)', true, 400);
+            header('Content-type:text/html;charset=utf-8');
+            echo '400 BAD REQUEST(invalide controller)';
             exit();
         }
         $this->controller = new $controller();
         if (!method_exists($this->controller, $this->router['action'])) {
             header('HTTP/1.1 400 BAD REQUEST(invalide action)', true, 400);
+            echo '400 bad request,invalide action name'.var_export($this->router['action']);
             exit();
 //            throw new \Exception('404 bad request! the controller file is:' . $this->getControllerName($this->router));
         }
@@ -145,6 +147,6 @@ class Application extends Container
     {
         $this->container = new Container();
         \N::$app = $this;
-        $this->runAction();
+        return $this->runAction();
     }
 }

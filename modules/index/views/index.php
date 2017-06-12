@@ -6,44 +6,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/css/bootstrap.css">
     <link rel="stylesheet" href="/css/index.css">
-<!--    <link rel="stylesheet" href="/highlight/styles/rainbow.css">-->
-    <link href="http://cdn.bootcss.com/highlight.js/8.0/styles/monokai_sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/highlight/styles/rainbow.css">
+    <!--    <link href="http://cdn.bootcss.com/highlight.js/8.0/styles/monokai_sublime.min.css" rel="stylesheet">-->
     <script src="http://cdn.bootcss.com/highlight.js/8.0/highlight.min.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
     <!--<link href="/css/mricode.pagination.css" rel="stylesheet" />-->
-<!--    <script src="https://cdn.bootcss.com/marked/0.3.6/marked.js"></script>-->
+    <!--    <script src="https://cdn.bootcss.com/marked/0.3.6/marked.js"></script>-->
+    <!--<script src="http://miaolz123.github.io/vue-markdown/dist/vue-markdown.js"></script>-->
     <script src="/js/md.js"></script>
     <script src="/js/jquery-2.0.2.js"></script>
     <script src="/js/common.js"></script>
     <script src="/js/bootstrap.js"></script>
-    <script src="/js/loadash.js"></script>
     <script src="/js/vue-2-3.js"></script>
     <script src="/js/index.js"></script>
 
 </head>
 <body>
 
-<!-- @done 数据绑定特别爽,醉主要尽然可以和 jquery 混合使用,特别爽,明天完成编辑,保存和删除三项, -->
-<!--@done 重新设计数据库模式,修改现有的 JSON 交互格式 -->
-<!--@done 添加一个新的 note -->
-<!--    @todo 整体调整样式-->
-<!--@todo 加入早期设计的text-area auto-height得特征，并弄清楚其原理-->
-<!--@todo 表结构，加入排序号码，tem 设计未无限级属性结构 ->
-<!--@todo 写一套登录系统,研究 session, cookie 管理, 验证码的实现机制, 邮箱实现机制和通信原理等内容, 这一块的工作量其实还是蛮大的-->
-<!--@todo 写一套后端简单的 mvc 路由机制，脱离对 zend frame work 这个庞大的框架的依赖 -->
-<!--@todo 重新设计表表结构(i),通过url后后面部分,在得到Module,controller和action信息后,将其余部分设计为`current working directory`,从而实现用数据库数结构模拟文件结构->
-<!--@todo 设计一个命令输入框,通过该输入框,可以作一些更灵活的工作,具体的需求还需要进一步明确（rm,mv,cp,link,touch etc）,同时加计算机网络安全方面的知识，预防安全问题-->
-<!--@todo 添加前后台的数据过滤-->
-
-<!-- @todo 采用这种方法可以跳转到页面指定的位置，但是，这是什么原理呢，为什么没有包括url部分呢？window.location.href="#note_22" -->
-<!--<script src="http://miaolz123.github.io/vue-markdown/dist/vue-markdown.js"></script>-->
-
+<!--@todo 重新设计表表结构(i),通过url后后面部分,在得到Module,controller和action信息后,将其余部分设计为`current working directory`,从而实现用数据库数结构模拟文件结构-->
 <header>
-    <div id="header" class="row text-center">
-        <input class="col-lg-12" placeholder="command line,support mv,cp,ls,etc">
-        <div class="col-lg-12">&nbsp;</div>
-        <h6><span>beta 1.1</span>(第<span class="countdown"></span>天)</h6>
-    </div>
+<!--    <div id="header" class="row text-center">-->
+<!--        <input class="col-lg-12" placeholder="command line,support mv,cp,ls,etc">-->
+<!--        <div class="col-lg-12">&nbsp;</div>-->
+<!--        <h6><span>beta 1.1</span>(第<span class="countdown"></span>天)</h6>-->
+<!--    </div>-->
 </header>
 
 <div class="clearfix"></div>
@@ -73,7 +59,7 @@
                         @dragover.prevent @drop="drop(item)">
                         <div class="checkbox">
                             <!--[v-model="something" is just syntactic sugar](http://stackoverflow.com/questions/41001192/setting-a-checkbox-as-checked-with-vue-js)-->
-                            <!--                            v-model can only bind property -->
+                            <!-- v-model can only bind property -->
                             <input type="checkbox" v-model="item.status" v-on:click.stop="draft(item,index)"/>
                             <label for="checkbox">
                                 <span><a :href="'/index/index?fid=' + item.id" target="_blank">{{item.id}}</a> </span>
@@ -185,9 +171,8 @@
         movenote: '/note/movenote',
         savenote: "/note/save-note",
         deletenote: "/note/delete-note",
-
-        // @todo 后面这几个还没有用到,留着备用
         changefriend: '/note/change-item',
+//        后面的留着备用
         updatelatesttime: '/ajax/uplatesttime',
         webpage: 'index',
         linkto: "/index/recycle"
@@ -205,7 +190,5 @@
     }
 
 </script>
-
-
 </body>
 </html>
