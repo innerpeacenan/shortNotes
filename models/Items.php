@@ -34,8 +34,7 @@ class Items extends ActiveRecord
 
     public function testInvoice()
     {
-        $dataSet = new
-        \PHPUnit_Extensions_Database_DataSet_QueryDataSet
+        $dataSet = new \PHPUnit_Extensions_Database_DataSet_QueryDataSet
         ($this->getConnection());
         $dataSet->addTable('customer');
         $dataSet->addTable('product');

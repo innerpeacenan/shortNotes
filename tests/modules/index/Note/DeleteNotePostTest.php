@@ -52,7 +52,7 @@ class DeleteNotePostTest extends Controller
         $_REQUEST['id'] = 112;
     }
 
-    public function testDelteNote()
+    public function testDeleteNote()
     {
         // 这个数据在测试数据桩里边
         $ar = (new Notes())->load(112);

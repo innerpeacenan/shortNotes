@@ -8,7 +8,8 @@
 namespace tests;
 
 use n\models\Items;
-use tests\lib\ArrayDataSets;
+use nxn\web\Application;
+use \PDO;
 
 /**
  * Description: description
@@ -57,24 +58,40 @@ class ItemTest extends ArrayDataSets
         // 得先运行父类方法,以便准备好运行的基镜(texture)
         parent::setUp();
         // 设置该表的字增主键从6开始
-        $this->stub->query("ALTER TABLE `items` AUTO_INCREMENT = 6;");
-        /**
-         * 匿名类,阅后即焚, php7 新特性
-         * @var @anonymous  $temp
-         *
-         */
+        $this->pdo->query("ALTER TABLE `items` AUTO_INCREMENT = 6;");
+        // active record 依赖 application
+        $config = [
+//    PHPUnit_Framework_Exception: PHP Fatal error:  Uncaught PDOException: You cannot serialize or unserialize PDO instances in -:336
+// 当以多进程的方式跨库操作的时候,会报上面的错误
+            'db' => [
+                'class' => 'PDO',
+                'params' => [
+                    'mysql:host=localhost;dbname=notes_test',
+                    'root',
+                    1111111,
+                    [
+                        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+                        PDO::ATTR_PERSISTENT => true,
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    ]
+                ]
+            ],
+        ];
+//  prerequisites list: Application
+        \N::$app = new Application($config);
+//      需要将 config 配置过来
+        \N::$app->conf = $config;
         $this->items = new  Items ();
         // 特别注意,各个方法的数据库数据虽然会每次都清空,但是全局变量,类的静态变量等不会被清空,创建的对象也不会销毁,只是彼此间不再统一作用域名里边罢了
-//        var_dump($this->items->getPrimaryKey());
     }
 
-   public function tearDown()
-   {
-       parent::tearDown();
-       if (isset($this->items)){
+    public function tearDown()
+    {
+        parent::tearDown();
+        if (isset($this->items)) {
 //           $this->items->setPrimaryKey('id');
-       }
-   }
+        }
+    }
 
     /**
      * @access
@@ -155,6 +172,4 @@ class ItemTest extends ArrayDataSets
         $this->assertEquals("phpUnit", $items->name);
         $this->assertTrue($items->delete());
     }
-
-
 }

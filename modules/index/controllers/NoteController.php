@@ -52,35 +52,13 @@ class NoteController
 
     public function saveNotePOST()
     {
-        $status = true;
         $message = "";
-        $id = "";
-        /**
-         * @var PDO $db
-         */
-        $db = $this->db;
-        if (empty($_REQUEST['id'])) {
-            $st = $db->prepare('insert into notes (item_id,content) value (:item_id , :content)');
-            $st->bindValue(':item_id', intval($_REQUEST['item_id']), PDO::PARAM_INT);
-            $st->bindValue(':content', $_REQUEST['content'], PDO::PARAM_STR);
-            $status = $st->execute();
-            if ($status) {
-                $id = $db->lastInsertId();
-            } else {
-                $message = $st->errorInfo();
-            }
-        } else {
-            $sql = 'update notes set content = :content where id = :id';
-            $param = [
-                ':id' => $_REQUEST['id'],
-                ':content' => $_REQUEST['content'],
-            ];
+        $note = (new Notes());
+        $note->setAttributes($_REQUEST);
+        $status = $note->save(false);
+        $id = $note->id;
 //     array_map() expects parameter 1 to be a valid callback, non-static method PDO::quote() cannot be called statically
 //            可以工作,先在看来,对非字符串通常不作任何处理
-            $param = array_map([$db, 'quote'], $param);
-            $sql = strtr($sql, $param);
-            $status = $db->exec($sql);
-        }
         Ajax::json($status, $id, $message);
     }
 
@@ -99,7 +77,8 @@ class NoteController
             Ajax::json(false);
             return;
         }
-        $note->item_id = $_REQUEST['itemId'];
+        $note-> scenario = 'update';
+        $note->setAttributes($_REQUEST);
         l(['type_of_item_id' => $note->item_id]);;
         $status = $note->update(false);
         l(['status' => $status]);;

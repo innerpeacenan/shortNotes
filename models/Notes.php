@@ -1,6 +1,8 @@
 <?php
 namespace n\models;
+
 use \nxn\db\ActiveRecord;
+
 /**
  * Class Notes
  * @package N\models
@@ -12,6 +14,13 @@ use \nxn\db\ActiveRecord;
  */
 class Notes extends ActiveRecord
 {
+    /**
+     * @var array 首次测试了 map 方法,起作用了
+     */
+    public static $map = [
+        'update' => ['itemId' => 'item_id'],
+    ];
+
     public static function tableName()
     {
         return 'notes';
@@ -26,4 +35,5 @@ class Notes extends ActiveRecord
     {
         return static::$_primaryKey;
     }
+
 }

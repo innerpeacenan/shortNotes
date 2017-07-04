@@ -3,9 +3,9 @@ namespace n\modules\index\controllers;
 
 use nxn\web\Ajax;
 use PDO;
+use nxn\db\Query;
 
 /**
- * @todo 解决了部分问题,重新设计路由机制,让路由功能更加健全
  * Class AjaxController
  * @package n\modules\index
  * User: xiaoning nan
@@ -23,32 +23,16 @@ class ItemController
 
     public function __construct()
     {
-        $this->db = \N::createObject($config = \N::$app->conf['db']);
+        $this->db = \N::createObject('db');
     }
 
 //---------------------------------Items-------------------------------------
     public function getItemsPOST()
     {
         $fid = isset($_REQUEST['fid']) ? intval($_REQUEST['fid']) : 0;
-        /**
-         * @var PDO $db
-         */
-        $db = $this->db;
-        /**
-         * use fetchAll to fetch all items
-         */
         $sql = 'select * from `items` where `fid` = :fid AND status = "enable" ORDER BY `rank` DESC';
-        $param = [
-        ':fid'=>$fid,
-        ];
-//     array_map() expects parameter 1 to be a valid callback, non-static method PDO::quote() cannot be called statically
-        $param = array_map([$db,'quote'],$param);
-        $sql = strtr($sql,$param);
-        $st = $db->query($sql);
-//        $st = $db->prepare('select * from `items` where `fid` = :fid AND status = "enable" ORDER BY `rank` DESC');
-//        $st->bindValue(':fid', $fid, PDO::PARAM_INT);
-//        $st->execute();
-        $result = $st->fetchAll(PDO::FETCH_ASSOC);
+        $param = [':fid' => $fid];
+        $result = Query::all($sql, $param);
         foreach ($result as $i => $row) {
             // 给前台checkbox 用的
             $result[$i]['status'] = ($row['status'] === 'enable') ? false : true;
@@ -104,6 +88,7 @@ class ItemController
          * @todo fuck this is source of bug to put pareInt($_REQUEST['name']) here
          */
         if ($_REQUEST['id']) {
+
             $st = $db->prepare('update items set name = :name WHERE id = :id');
             $st->bindValue(':name', $_REQUEST['name'], PDO::PARAM_STR);
             $st->bindValue(':id', intval($_REQUEST['id']), PDO::PARAM_INT);
@@ -195,21 +180,9 @@ class ItemController
 
     public function getItemNotesPOST()
     {
-        /**
-         * @var PDO $db
-         */
-        $db = $this->db;
-        /**
-         * use fetchAll to fetch all items
-         */
-        $st = $db->prepare('select * from `notes` where `item_id` = :item_id ORDER BY `c_time` DESC');
-        /**
-         *copy error, take a rest
-         * PDO 不会自动将数据转化未整型,需要手动转化,以使得索引可以得到充分利用
-         */
-        $st->bindValue(':item_id', intval($_REQUEST['item_id']), PDO::PARAM_INT);
-        $st->execute();
-        $result = $st->fetchAll(PDO::FETCH_ASSOC);
+        $sql = 'select * from `notes` where `item_id` = :item_id ORDER BY `c_time` DESC';
+        $params = [':item_id' => intval($_REQUEST['item_id'])];
+        $result = Query::all($sql, $params);
         Ajax::json(true, $result, 'success');
     }
 

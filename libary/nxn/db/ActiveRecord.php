@@ -1,6 +1,7 @@
 <?php
 namespace nxn\db;
 
+use nxn\web\Application;
 use PDO;
 use yii\base\Exception;
 
@@ -102,8 +103,8 @@ class ActiveRecord
     public function __construct()
     {   // 确定db
         if (!isset(static::$db)) {
-            static::$db = \N::createObject($config = \N::$app->conf['db']);
-            static::$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            static::$db = \N::$app->db;
+//            static::$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         }
         $this->tableSchema();
     }
@@ -223,6 +224,7 @@ class ActiveRecord
      *
      * Description:
      * bug: 之前传入不是数字,当然不是字符串了
+     * bug: 之前传入的字符串未进行类型转换,查询的主键可能是直接从前台传递过来的
      */
     public function load($primaryKeyVal)
     {
@@ -240,12 +242,14 @@ class ActiveRecord
                 if ($valType === false) {
                     throw new Exception('invalid varible set to column:' . $column . var_dump($val));
                 }
+                settype($val, static::$_columns[$column]['type']);
                 $params[':' . $column] = [$val, $this->PDOType($val)];
             }
         } elseif (is_string($primaryKeyVal) || is_integer($primaryKeyVal)) {
-            // 主键一般都是数字,不许要转化
             $column = static::$_primaryKey[0];
             $conditon[] = static::quoteName($column) . ' =:' . $column;
+//            进行必要的类型转化, 查询的值可能是直接从前端传过来的
+            settype($primaryKeyVal, static::$_columns[$column]['type']);
             $params[':' . $column] = [$primaryKeyVal, $this->PDOType($primaryKeyVal)];
         } else {
             return null;
@@ -334,7 +338,8 @@ class ActiveRecord
         if (empty($this->_attributes)) return 0;
         foreach (static::$_columns as $name => $def) {
             //如果值未null,检查是否允许未null,如果允许,跳过.不允许,检查是否有默认值,如果有默认值,则赋予默认值,否则,直接返回
-            if (in_array($name, static::$_primaryKey)) {
+            if (in_array($name, static::$_primaryKey) || true === static::$_columns[$name]['allowNull']) {
+//@ 完善默认值处理方案,保证插入后,每个元素都是有值的
                 continue;
             }
             if (isset($this->_attributes[$name])) {
@@ -349,6 +354,7 @@ class ActiveRecord
                 $set[self::quoteName($name)] = ':' . $name;
                 $params[':' . $name] = [$val, $this->PDOType($val)];
             } else {
+//             todo add information to error message
                 return 0;
             }
         }
@@ -365,6 +371,40 @@ class ActiveRecord
             // 设置自增键
             $this->_attributes[static::$_autoIncrement] = static::$db->lastInsertId();
             $this->afterInsert();
+        }
+        return $status;
+    }
+
+    /**
+     * @access
+     * @param bool $validate
+     * @return bool|int
+     * Created by: xiaoning nan
+     * Last Modify: xiaoning nan
+     *
+     *
+     *
+     * Description:
+     * 要求主键不能从0开始,前端有时候会传 0 过来
+     *
+     *
+     */
+    public function save(bool $validate)
+    {
+        if ($validate) {
+            $valid = $this->validate();
+            if (!$valid) return false;
+        }
+        $tableName = self::quoteName($this->tableName());
+        $set = [];
+        $params = [];
+//        按照 attributes 去插入,保证除了自增主键外,其他各个键都有值插入
+        if (empty($this->_attributes)) return 0;
+        // 插入和更新的程序写反了
+        if (empty($this->_attributes[static::$_primaryKey[0]])) {
+            $status = $this->insert(false);
+        } else {
+            $status = $this->update(false);
         }
         return $status;
     }

@@ -1,7 +1,7 @@
 <?php
 namespace tests;
 
-use tests\ArrayDataSets;
+
 use yii\base\Exception;
 
 /**

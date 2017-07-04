@@ -1,28 +1,30 @@
 <?php
 namespace nxn\web;
 
-use nxn\web\di\Container;
+use nxn\di\Container;
 
 
 /**
  * @todo 目前还很不健全,需要进一步优化, 但是我还没有想好怎么做
  * @package nxn\web
- * User: xiaoning nan
- * Date: 2017-05-{13}
- * Time: xx:xx
  * Description: description
+ *
+ * @ 重构,重新写一个 component 类用于依赖加载的单例模式的处理
  */
 class Application extends Container
 {
     public $conf;
+    /**
+     * @var Container 注入的新建对象的容器
+     */
     public $container;
     /**
      * [module,controller,action]
-     * @var array | null null on default and array consist of module, controller , action when called [[Application::setRouter]]
+     * @var array  array consist of module, controller , action whill be reswhen called [[Application::setRouter]]
      */
     public $router = [
         'module' => 'n\\modules\\index\\controllers\\',
-        'controller' => 'n\\modules\\index\\controllers\\IndexController',
+        'controller' => 'IndexController',
         'action' => 'indexGET'
     ];
 
@@ -33,21 +35,30 @@ class Application extends Container
 
     public function __construct($config)
     {
+        $this->container = new Container();
         \N::$app = $this;
         $this->conf = $config;
     }
 
     /**
      * 借助依赖注入容器，实例化对象
-     * @param $name
+     * @param string $name 一个配置的别名
      * @return object
+     * @throws \Exception getting non-exists and non-configured property
      */
     public function __get($name)
     {
-        $this->conf[$name];
-        $conf['params'] = isset($conf['params']) ? $conf['params'] : [];
-        $conf['config'] = isset($conf['config']) ? $conf['config'] : [];
-        return $this->get($conf['class'], $conf['params'], $conf['config']);
+        if (method_exists($this, 'get' . $name)) {
+            $getter = 'get' . $name;
+            // $getter  后边跟一对 () 表示调用该方法,而不是调用该属性.这样当 $name = "db' 的时候,getDb()才能够被调用
+            return $this->$getter();
+        }
+        if (isset(\N::$app->conf[$name])) {
+            // 直接按照别名取,这样会按照单例模式处理
+            return $this->container->get($name);
+        }
+        throw new \Exception('getting non-exists and non-configured property: ' . $name . ' of object: '
+            . get_class($this));
     }
 
     /**
@@ -55,65 +66,29 @@ class Application extends Container
      * @param  array | null $router
      * @return void
      * @throws \Exception
-     * 当不够 action部分的路径的时候,默认导向哥他请求的主页看
+     * 当不够 action 部分的路径的时候,默认导向哥他请求的主页看
      */
     public function setRouter($router = null)
     {
         if (isset($router)) {
             $this->router = $router;
+            return;
         }
         //如果从来没有设置过,则从url中解析
         // 从 url 中解析  getfriends?fid=2Action
+//       防止有 '/' 这种类型的路径直接访问
         $baseUri = explode('?', $_SERVER['REQUEST_URI'])[0];
-        //经验教训: explode 之前,先检查 trim 结果是否为空
-        // must trim the leading slash in request url. learn more about http
-        // 这里主意运算符的优先级别
-        if (($rest = trim($baseUri, '/')) !== '') {
-            $r = $this->router;
-            $part = explode('/', $rest);
-            $method = $_SERVER['REQUEST_METHOD'];
-            switch (count($part)) {
-                case 0:
-                    break;// if no path decleared, use default
-                case 1:
-                    $r['action'] = lcfirst(static::camelCase($part[0])) . $method;
-                    break;
-                case 2:
-                    $r['controller'] = $r['module'] . static::camelCase($part[0]) . 'Controller';
-
-                    $r['action'] = lcfirst(static::camelCase($part[1])) . $method;
-                    break;
-                case 3:
-                    // modules is just like a directory, do not need to camel case
-                    $r['module'] = 'n\\modules\\' . $part[0] . '\\controllers\\';
-                    $r['controller'] = $r['module'] . static::camelCase($part[1]) . 'Controller';
-                    $r['action'] = lcfirst(static::camelCase($part[2])) . $method;
-                    break;
-                default:
-                    header('HTTP/1.1 400 BAD REQUEST(invalide reuqest path)', true, 400);
-                    echo 'hello';
-                    exit();
-            }
-            // 如何防止破坏变量系统呢
-            $this->router = $r;
-        }
-        $controller = $this->router['controller'];
-        //@ 修改了 autoload 类，优化了请求的状态返回
-        //@todo 需要封装一个简单的 response 类，以更据不同的情况，返回不同的状态码
-        if (!class_exists($controller, true)) {
-            header('HTTP/1.1 400 BAD REQUEST(invalide controller)', true, 400);
-            header('Content-type:text/html;charset=utf-8');
-            echo '400 BAD REQUEST(invalide controller)';
-            exit();
-        }
-        $this->controller = new $controller();
-        if (!method_exists($this->controller, $this->router['action'])) {
-            header('HTTP/1.1 400 BAD REQUEST(invalide action)', true, 400);
-            echo '400 bad request,invalide action name'.var_export($this->router['action']);
-            exit();
-//            throw new \Exception('404 bad request! the controller file is:' . $this->getControllerName($this->router));
-        }
-
+        $method = $_SERVER['REQUEST_METHOD'];
+        $left = preg_split('/\\//', $baseUri, -1, PREG_GREP_INVERT);
+        if (empty($left)) return;
+        // 夜叉找到action部分 item/get-items
+        // 如果找不到,且不空
+        $this->router['action'] = lcfirst(static::camelCase(array_pop($left))) . $method;
+        if (empty($left)) return;
+        $this->router['controller'] = static::camelCase(array_pop($left)) . 'Controller';
+        if (empty($left)) return;
+        // 到 module 的时候,只做简单的替换,大小写等其他信息均保留
+        $this->router['module'] = 'n\\modules\\' . join('\\', $left) . '\\controllers\\';
     }
 
     /**
@@ -121,9 +96,6 @@ class Application extends Container
      * @param $string
      * @return string
      * turn string like 'information-detect' into 'InformationDetect'
-     *
-     *
-     *
      */
     public static function camelCase($string)
     {
@@ -139,14 +111,32 @@ class Application extends Container
     public function runAction()
     {
         $this->setRouter();
-        // 解析 action 的类名称
+        $controller = $this->router['module'] . $this->router['controller'];
+        if (!class_exists($controller, true)) {
+            header('HTTP/1.1 400 BAD REQUEST(invalide controller)', true, 400);
+            header('Content-type:text/html;charset=utf-8');
+            echo '400 BAD REQUEST(invalide controller)';
+            exit();
+        }
+        $this->controller = new $controller();
+//        var_dump($this->router['action']);exit();
+        if (!method_exists($this->controller, $this->router['action'])) {
+            $msg = 'HTTP/1.1 400 BAD REQUEST(invalid action' . print_r($this->router) . ')';
+            header($msg, true, 400);
+            echo '400 bad request,invalide action name' . var_export($this->router['action']);
+            exit();
+        }        // 解析 action 的类名称
         return call_user_func([$this->controller, $this->router['action']]);
     }
 
     public function run()
     {
-        $this->container = new Container();
-        \N::$app = $this;
         return $this->runAction();
+    }
+
+
+    public function getDb()
+    {
+        return \N::createObject('db');
     }
 }

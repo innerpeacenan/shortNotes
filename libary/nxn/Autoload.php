@@ -47,8 +47,8 @@ class Autoload
             include($classFile);
             return true;
         } else {
-            return false;
-//            throw new \Exception("Unable to find file: '$classFile' to autoload class: '$className'' ");
+//            return false;
+            throw new \Exception("Unable to find file: '$classFile' to autoload class: '$className'' ");
         }
         // Failed opening '/home/wwwroot/www.note.com/public/../modules//controllers/Controller.php' for inclusion
 
