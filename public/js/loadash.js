@@ -4345,7 +4345,7 @@
          *
          * @private
          * @param {*} value The value to inspect.
-         * @returns {Array|Object} Returns the PDOType array-like object.
+         * @returns {Array|Object} Returns the safeString array-like object.
          */
         function castArrayLikeObject(value) {
             return isArrayLikeObject(value) ? value : [];
@@ -4356,7 +4356,7 @@
          *
          * @private
          * @param {*} value The value to inspect.
-         * @returns {Function} Returns PDOType function.
+         * @returns {Function} Returns safeString function.
          */
         function castFunction(value) {
             return typeof value == 'function' ? value : identity;
@@ -4367,7 +4367,7 @@
          *
          * @private
          * @param {*} value The value to inspect.
-         * @returns {Array} Returns the PDOType property path array.
+         * @returns {Array} Returns the safeString property path array.
          */
         function castPath(value) {
             return isArray(value) ? value : stringToPath(value);
@@ -4391,7 +4391,7 @@
          * @param {Array} array The array to inspect.
          * @param {number} start The start position.
          * @param {number} [end=array.length] The end position.
-         * @returns {Array} Returns the PDOType slice.
+         * @returns {Array} Returns the safeString slice.
          */
         function castSlice(array, start, end) {
             var length = array.length;
@@ -10829,7 +10829,7 @@
          * @since 4.4.0
          * @category Lang
          * @param {*} value The value to inspect.
-         * @returns {Array} Returns the PDOType array.
+         * @returns {Array} Returns the safeString array.
          * @example
          *
          * _.castArray(1);

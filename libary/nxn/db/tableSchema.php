@@ -56,7 +56,6 @@ trait TableSchema
 
         }
         $row = $st->fetch(\PDO::FETCH_ASSOC);
-        // @todo 版本之前有差异?
         if (isset($row['Create Table'])) {
             $sql = $row['Create Table'];
         } else {

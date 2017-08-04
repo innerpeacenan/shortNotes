@@ -44,4 +44,22 @@ abstract class ArrayDataSets extends \PHPUnit_Extensions_Database_TestCase
         $this->pdo = $conn->getConnection();
         $this->pdo->query("set foreign_key_checks=0");
     }
+    /**
+     * @access
+     * @param $obj
+     * @return  mixed
+     * 用于获取对象的
+     */
+    public function getInvisableProperty($obj, $property)
+    {
+        $r = new  \ReflectionObject($obj);
+        $p = $r->getProperty($property);
+        $p->setAccessible(true); // <--- you set the property to public before you read the value
+        $reult = $p->getValue($obj);
+//      不要影响该类的属性的正常使用
+        $p->setAccessible(false);
+        return $reult;
+    }
+
+
 }

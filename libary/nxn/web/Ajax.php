@@ -28,9 +28,10 @@ class Ajax
         if (!headers_sent()) {
             header('Content-Type:application/json; charset=utf-8');
 //   傻了,我说之前怎么没有输出,都没有 echo ,怎么会有输出呢?哈哈
-            if (!N_TEST) {
+            if (!N_DEBUG) {
                 echo $json = json_encode($row);
             }
+            return "";
         } else {
             throw new \Exception('head has already set!');
         }

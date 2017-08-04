@@ -1,18 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:v-on="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/css/bootstrap.css">
     <link rel="stylesheet" href="/css/index.css">
-    <link rel="stylesheet" href="/highlight/styles/rainbow.css">
-    <!--    <link href="http://cdn.bootcss.com/highlight.js/8.0/styles/monokai_sublime.min.css" rel="stylesheet">-->
+    <link href="http://cdn.bootcss.com/highlight.js/8.0/styles/monokai_sublime.min.css" rel="stylesheet">
     <script src="http://cdn.bootcss.com/highlight.js/8.0/highlight.min.js"></script>
-    <script>hljs.initHighlightingOnLoad();</script>
-    <!--<link href="/css/mricode.pagination.css" rel="stylesheet" />-->
-    <!--    <script src="https://cdn.bootcss.com/marked/0.3.6/marked.js"></script>-->
-    <!--<script src="http://miaolz123.github.io/vue-markdown/dist/vue-markdown.js"></script>-->
     <script src="/js/md.js"></script>
     <script src="/js/jquery-2.0.2.js"></script>
     <script src="/js/common.js"></script>
@@ -22,24 +17,20 @@
 
 </head>
 <body>
-
-<!--@todo 重新设计表表结构(i),通过url后后面部分,在得到Module,controller和action信息后,将其余部分设计为`current working directory`,从而实现用数据库数结构模拟文件结构-->
 <header>
-<!--    <div id="header" class="row text-center">-->
-<!--        <input class="col-lg-12" placeholder="command line,support mv,cp,ls,etc">-->
-<!--        <div class="col-lg-12">&nbsp;</div>-->
-<!--        <h6><span>beta 1.1</span>(第<span class="countdown"></span>天)</h6>-->
-<!--    </div>-->
+    <div id="header" class="row text-center">
+        <input class="col-lg-12" placeholder="command line,support mv,cp,ls,etc">
+        <div class="col-lg-12">&nbsp;</div>
+        <h6><span>test</span>(第<span class="countdown"></span>天)</h6>
+    </div>
 </header>
-
 <div class="clearfix"></div>
-
 <div id="ffz_app">
-    <!--        items   -->
     <div class="col-lg-4" id="j_items">
         <div class="panel panel-primary">
             <div class="panel-heading">
-                <span class="glyphicon glyphicon-list"></span>事项列表(回头替换为目录名称)
+                <span class="glyphicon glyphicon-list"></span>事项列表
+                <span v-on:click.stop ="parentDir">上一级目录</span>
                 <div class="pull-right action-buttons">
                     <div class="btn-group pull-right">
                         <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
@@ -55,47 +46,33 @@
             </div>
             <div class="panel-body">
                 <ul class="list-group" v-for="(item,index) in items">
-                    <li class="list-group-item" v-on:click="getNotes(item)" draggable='true' @dragstart="drag(item)"
+                    <li class="list-group-item" v-on:click.stop="getNotes(item)" draggable='true' @dragstart="drag(item)"
                         @dragover.prevent @drop="drop(item)">
                         <div class="checkbox">
-                            <!--[v-model="something" is just syntactic sugar](http://stackoverflow.com/questions/41001192/setting-a-checkbox-as-checked-with-vue-js)-->
-                            <!-- v-model can only bind property -->
                             <input type="checkbox" v-model="item.status" v-on:click.stop="draft(item,index)"/>
                             <label for="checkbox">
-                                <span><a :href="'/index/index?fid=' + item.id" target="_blank">{{item.id}}</a> </span>
+                                <a style="display: inline-block" v-on:click.stop="subDir(item)"><span>{{item.id}}</span></a>
                                 <span v-show="!item.seen">{{item.name}}</span>
                                 <input v-model="item.name" v-on:click.stop="" v-show="item.seen"
                                        v-on:keyup.esc="save(item)">
                             </label>
                         </div>
                         <div class="pull-right action-buttons">
-                            <!--                                添加-->
                             <a v-on:click.stop="add()"><span class="glyphicon glyphicon-plus-sign" title="添加新事项"></span></a>
-                            <!--                                编辑-->
-                            <a v-on:click.stop="item.seen = !item.seen"><span
-                                    class="glyphicon glyphicon-pencil" title="编辑事项"></span></a>
-                            <a v-on:click.stop="save(item)"><span title="保存事项"
-                                                                  class="glyphicon glyphicon-saved"></span></a>
-
-                            <!--                                <a v-on:click.stop=""><span class="glyphicon glyphicon-flag"></span></a>-->
-                            <a v-on:click.stop=""><span class="glyphicon glyphicon-warning-sign"
-                                                        title="请慎重双击右边的删除按钮"></span></a>
-                            <a v-on:click.stop="" v-on:dblclick.stop="del(index)"><span
-                                    class="glyphicon glyphicon-trash" title="删除事项"></span></a>
+                            <a v-on:click.stop="edit(item)"><span class="glyphicon glyphicon-pencil" title="编辑事项"></span></a>
+                            <a v-on:click.stop="save(item)"><span class="glyphicon glyphicon-saved" title="保存事项" ></span></a>
+                            <a @click.stop="" @dblclick.stop="del(index)"><span class="glyphicon glyphicon-trash" title="删除事项"></span></a>
                         </div>
                     </li>
                 </ul>
             </div>
         </div>
     </div>
-    <!--        notes-->
     <div id="c_notes" class="panel-heading">
         <ul id="j_notes" class="col-lg-8">
-            <!--            use :id to indict this is an auto_generated_id-->
             <li v-for="(note,index) in notes" :id="'note_' + note.id">
                 <span>{{note.id}}</span>
                 <span class="hidden-xs">{{note.c_time}}</span>
-                <!--[You can surround the element with a template and use the v-if/v-else there:](https://jsfiddle.net/frfekkf5/7/)-->
                 <span>
                     <select v-model="note.item_id" @change="mv(note,index)">
                         <template v-if="note.item_id == item.id">
@@ -106,14 +83,13 @@
                         </template>
                 </select>
                 </span>
-
                 <div class="pull-right action-buttons">
                     <span v-on:click.stop="add()">
                         <a class="glyphicon glyphicon-plus-sign" title="添加笔记">
                         </a>
                     </span>
                     &nbsp;
-                    <span v-on:click.stop="note.seen = !note.seen">
+                    <span v-on:click.stop="edit(note)">
                         <a class="glyphicon glyphicon-edit" title="编辑笔记">
                         </a>
                     </span>
@@ -128,11 +104,12 @@
                     </span>
                 </div>
                 <div>
-                    <textarea class="col-xs-12" v-if="note.seen" v-model="note.content" v-on:keyup.esc="save(note)"
-                              v-on:keyup.enter="h($event,note)" @focus="h($event,note)" @paste="h($event,note)"
+                    <textarea class="col-xs-12" v-if="note.seen" :value="note.content"
+                              v-on:keyup.esc="save(note,$event)"
+                              v-on:keyup.enter="h($event)" @focus="h($event,note)" @paste="h($event,note)"
                               v-focus></textarea>
-                    <div class="textarea" v-show="!note.seen" @dblclick.stop="note.seen = !note.seen"
-                         v-html="compiledMarkdown(note)" v-highlightjs></div>
+                    <div class="textarea" v-if="!note.seen" @dblclick.stop="edit(note)"
+                         v-html="note.md" v-highlightjs></div>
                 </div>
             </li>
         </ul>
@@ -158,6 +135,7 @@
     URL_Manager = {
         // used
         loaddata: '/item/get-items',
+        parentDir : '/item/parent-dir',
         // used
         savefriend: '/item/save-item',
         // used
@@ -168,14 +146,9 @@
         itemDraft: "/item/itemDraft",
         getnotes: '/item/get-item-notes',
         // move note
-        movenote: '/note/movenote',
+        movenote: '/note/move-note',
         savenote: "/note/save-note",
         deletenote: "/note/delete-note",
-        changefriend: '/note/change-item',
-//        后面的留着备用
-        updatelatesttime: '/ajax/uplatesttime',
-        webpage: 'index',
-        linkto: "/index/recycle"
     };
 
     /**
@@ -190,5 +163,7 @@
     }
 
 </script>
+
+
 </body>
 </html>

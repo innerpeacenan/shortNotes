@@ -2,14 +2,13 @@
 namespace nxn\db;
 
 use PDO;
-use yii\base\Exception;
 
 class ActiveRecord
 {
     /**
      * @var PDO
      */
-    public static $db;
+    public $db;
 
     /**
      * @var  string scenario for validate and map front end input to column of model
@@ -46,21 +45,20 @@ class ActiveRecord
      * @var array
      * bug fix: 之前给 primaryKey 默认值为 ['id'] ,在 getTableSchema 方法中又对此进行了叠加,
      */
-    protected static $_primaryKey = [];
+    protected $_primaryKey = [];
 
 
     /**
      * @var string
      */
-    protected static $_autoIncrement = 'id';
+    protected $_autoIncrement = 'id';
     /**
      * @var array
      * mysql timestamp 数据类型只能通过字符串比较 日期(2017-05-08) 和 日期时间(2017-05-04 19:02:38) 格式都支持
-     * 如果 [[type]] 是数组,则表示枚举类型,该数据用于检查输入的合法性
-     * //@todo 注释需要进一步补全
-     * ['columnName'=>['type'=>'boolearn|integer|double|string','allowNull'=>true,'default'=>'CURRENT_TIMESTAMP',comment=>'comment']
+     * null  true 表示允许为空
+     * ['columnName'=>['Type'=>'boolearn|integer|double|string','Null'=>true,'Default'=>'CURRENT_TIMESTAMP',Comment=>'comment']
      */
-    protected static $_columns = [];
+    protected $_columns = [];
 
     /**
      * @var array
@@ -101,10 +99,7 @@ class ActiveRecord
 
     public function __construct()
     {   // 确定db
-        if (!isset(static::$db)) {
-            static::$db = \N::createObject($config = \N::$app->conf['db']);
-            static::$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        }
+        $this->db = \N::$app->db;// 模型
         $this->tableSchema();
     }
 
@@ -119,7 +114,7 @@ class ActiveRecord
      */
     public static function tableName()
     {
-        return '';
+        throw new \Exception('tableName must be override by subClass of ' . get_class());
     }
 
     public function getValidator()
@@ -140,6 +135,11 @@ class ActiveRecord
         }
     }
 
+    public function getAttribute()
+    {
+        return $this->_attributes;
+    }
+
     /**
      * @param array $columns
      * @return void
@@ -154,6 +154,11 @@ class ActiveRecord
 //      这样可以保证 AR 赋予了正确的类型
             $this->$name = $value;
         }
+    }
+
+    public function getOldAttribute()
+    {
+        return $this->_oldAttributes;
     }
 
     /**
@@ -178,37 +183,23 @@ class ActiveRecord
      */
     public function tableSchema($tableName = null)
     {
-        if (!empty(static::$_columns)) {
-            return true;
-        }
-        if (empty($tableName)) {
-            $tableName = $this->tableName();
-        }
-        // PDOStatement <b>PDO::query</b> returns a PDOStatement object, or <b>FALSE</b>on failure.
-        $st = static::$db->query('show full columns from ' . static::quoteName($tableName));
+        $tableName = $tableName ?? $this->tableName();
+        $st = $this->db->query('show full columns from ' . static::quoteName($tableName));
         if (false === $st) return false;
         $columns = $st->fetchAll(PDO::FETCH_ASSOC);
         foreach ($columns as $column) {
             $name = $column['Field'];
-//          得到字段是否为空
-//            bug fix history: 之前这一块逻辑写反了 mysql Null===='NO' 表示不允许为空
-            static::$_columns[$name]['allowNull'] = $column['Null'] === 'NO' ? false : true;
-            static::$_columns[$name]['default'] = $column['Default'];
-            static::$_columns[$name]['comment'] = $column['Comment'];
-// 养成将常量放到比较代码的前面的好习惯,这样如果写错了会抛出一个语法分析错误
-            if ('PRI' === $column['Key']) {
-                static::$_primaryKey[] = $name;
-            }
-            if ('auto_increment' === $column['Extra']) {
-                static::$_autoIncrement = $name;
-            }
-            // deal with type
+            $this->_columns[$name]['Null'] = $column['Null'] === 'NO' ? false : true;
+            $this->_columns[$name]['Default'] = $column['Default'];
+            $this->_columns[$name]['Comment'] = $column['Comment'];
+            if ('PRI' === $column['Key']) $this->_primaryKey[] = $name;
+            if ('auto_increment' === $column['Extra']) $this->_autoIncrement = $name;
             if (preg_match('/^(\w+)(?:\(([^\)]+)\))?/', $column['Type'], $match)) {
-                // 检查目前是否支持该类型的数据转化
-                if (isset(static::$_typeCast[$match[1]])) {
-                    static::$_columns[$name]['type'] = static::$_typeCast[$match[1]];
+                $sqlColumnType = $match[1];
+                if (isset(static::$_typeCast[$sqlColumnType])) {
+                    $this->_columns[$name]['type'] = static::$_typeCast[$sqlColumnType];
                 } else {
-                    throw new \Exception('mysql type:' . $name . ' is not included in type map yet!');
+                    throw new \Exception('mysql type:' . $sqlColumnType . ' is not included in type map yet!');
                 }
             }
         }
@@ -217,55 +208,52 @@ class ActiveRecord
 
 
     /**
-     * @access
-     * @param integer| array $primaryKeyVal 如果是数组的话,表示是联合主键键值对
-     * @return $this | null
+     * @param integer| array $primary 如果是数组的话,表示是联合主键键值对
+     * @return static | null
      *
      * Description:
-     * bug: 之前传入不是数字,当然不是字符串了
      */
-    public function load($primaryKeyVal)
+    public static function load($primary)
     {
-        $tableName = self::quoteName($this->tableName());
+        /** @var static $ar */
+        $ar = \N::createObject(['class' => get_called_class()]);
+        $tableName = self::quoteName($ar->tableName());
         // 联合主键
         $conditon = [];
-        $params = [];
-        if (is_array($primaryKeyVal)) {
-            foreach (static::$_primaryKey as $column) {
-                //  bug fixed: 之前用错了 Undefined index: id
-                $conditon[] = self::quoteName($column) . '=:' . $column;
-                $valType = static::$_columns[$column]['type'];
-                $val = $primaryKeyVal[$column];
-                $validType = settype($var, $valType);
-                if ($valType === false) {
-                    throw new Exception('invalid varible set to column:' . $column . var_dump($val));
-                }
-                $params[':' . $column] = [$val, $this->PDOType($val)];
+        if (is_string($primary) || is_integer($primary)) {
+            $columnName = $ar->_primaryKey[0];
+            $primary = [$columnName => $primary];
+        }
+        if (!is_array($primary)) {
+            if (N_DEBUG) {
+                throw new \Exception("the first parameter pass to " . __METHOD__ .
+                    ' need to be string, integer or array in hash format');
             }
-        } elseif (is_string($primaryKeyVal) || is_integer($primaryKeyVal)) {
-            // 主键一般都是数字,不许要转化
-            $column = static::$_primaryKey[0];
-            $conditon[] = static::quoteName($column) . ' =:' . $column;
-            $params[':' . $column] = [$primaryKeyVal, $this->PDOType($primaryKeyVal)];
-        } else {
             return null;
+        };
+        foreach ($ar->_primaryKey as $column) {
+            $valType = $ar->_columns[$column]['type'];
+            $val = $primary[$column];
+            $validType = settype($var, $valType);
+            if (false === $validType) {
+                throw new \Exception('invalid varible ' . print_r($var) . ' set be set for column:' . $column);
+            }
+            $conditon[] = self::quoteName($column) . '=' . $ar->safeString($val);
         }
-        $st = static::$db->prepare('SELECT * FROM ' . $tableName . ' WHERE ' . join(' AND ', $conditon));
-        foreach ($params as $param => $val) {
-            $st->bindValue($param, $val[0], $val[1]);
-        }
-        $st->execute();
+        /**
+         * @var PDO $db
+         */
+        $db = $ar->db;
+        $sql = 'SELECT * FROM ' . $tableName . ' WHERE ' . join(' AND ', $conditon);
+        $st = $db->query($sql, PDO::FETCH_ASSOC);
         if (!$st) return null;
         $row = $st->fetch(PDO::FETCH_ASSOC);
-//      Invalid argument supplied for foreach(),because it may return false
         if (!$row) return null;
         foreach ($row as $name => $value) {
-            // 对加载的值进行了类型转换
-            // bool true on success or false on failure. 不能将settype()的结果直接赋值给变量
-            settype($value, static::$_columns[$name]['type']);
-            $this->_oldAttributes[$name] = $this->_attributes[$name] = $value;
+            settype($value, $ar->_columns[$name]['type']);
+            $ar->_oldAttributes[$name] = $ar->_attributes[$name] = $value;
         }
-        return $this;
+        return $ar;
     }
 
     /**
@@ -318,53 +306,93 @@ class ActiveRecord
      * @access
      * @return boolean | integer
      * Description:
-     * 在考虑有没有必要写一套查询构建器
+     * return 1 if inserted, false on validate failure
+     */
+    public function insert($validate, $transaction = true)
+    {
+        if (true === $validate) {
+            $valid = $this->validate();
+            if (!$valid) return false;
+        }
+        $tableName = self::quoteName($this->tableName());
+// 存放字段值与字段名称的映射关系
+        $kv = [];
+//按照 columns插入,保证除了自增主键外,其他各个键都有值插入
+        if (empty($this->_attributes)) return 0;
+        foreach ($this->_columns as $name => $def) {
+            //如果值为null,检查是否允许未null,如果允许,跳过.不允许,检查是否有默认值,如果有默认值,则赋予默认值,否则,直接返回
+            if (in_array($name, $this->_primaryKey) || true === $this->_columns[$name]['Null']) {
+                continue;
+            }
+            if (isset($this->_attributes[$name])) {
+                $kv[self::quoteName($name)] = $this->safeString($this->_attributes[$name]);
+            } else if (false === $this->_columns[$name]['Null'] && isset($this->_columns[$name]['Default'])) {
+                $val = $this->columnDefaultValue($def['Default']);
+                settype($val, $def['Type']);
+                $this->_attributes[$name] = $val;
+                $kv[self::quoteName($name)] = $this->safeString($val);
+            } else {
+                if (N_DEBUG) {
+                    throw new \Exception($tableName . '.' . $name . 'must have value when insert!');
+                }
+                return 0;
+            }
+        }
+        $colums = join(',', array_keys($kv));
+        $values = join(',', array_values($kv));
+        $sql = 'INSERT INTO ' . $tableName . ' ( ' . $colums . ' ) VALUES ( ' . $values . ')';
+        if (false === $transaction) {
+            return $this->doInsert($sql);
+        }
+        if (false === $this->db->inTransaction()) {
+            $this->db->beginTransaction();
+        }
+        try {
+            $status = $this->doInsert($sql);
+            $this->db->commit();
+            return $status;
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
+
+    protected function doInsert($sql)
+    {
+        $status = $this->db->exec($sql);
+        if ($status) {
+            $this->_attributes[$this->_autoIncrement] = (int)$this->db->lastInsertId();
+            $this->_oldAttributes = $this->_attributes;
+            $this->afterInsert();
+        }
+        return $status;
+    }
+
+    /**
+     * @access
+     * @param bool $validate
+     * @return bool|int
+     * Created by: xiaoning nan
+     * Last Modify: xiaoning nan
+     *
+     *
+     *
+     * Description:
+     * 要求主键不能从0开始,前端有时候会传 0 过来
+     *
      *
      */
-    public function insert($validate)
+    public function save(bool $validate)
     {
         if ($validate) {
             $valid = $this->validate();
             if (!$valid) return false;
         }
-        $tableName = self::quoteName($this->tableName());
-        $set = [];
-        $params = [];
-//        按照 attributes 去插入,保证除了自增主键外,其他各个键都有值插入
         if (empty($this->_attributes)) return 0;
-        foreach (static::$_columns as $name => $def) {
-            //如果值未null,检查是否允许未null,如果允许,跳过.不允许,检查是否有默认值,如果有默认值,则赋予默认值,否则,直接返回
-            if (in_array($name, static::$_primaryKey)) {
-                continue;
-            }
-            if (isset($this->_attributes[$name])) {
-                $set[self::quoteName($name)] = ':' . $name;
-                $val = $this->_attributes[$name];
-                $params[':' . $name] = [$val, $this->PDOType($val)];
-            } else if (static::$_columns[$name]['allowNull'] === false && isset(static::$_columns[$name]['default'])) {
-//           要传递字符串,而不是数组
-                $val = $this->columnDefaultValue($def['default']);
-                settype($val, $def['type']);
-                $this->_attributes[$name] = $val;
-                $set[self::quoteName($name)] = ':' . $name;
-                $params[':' . $name] = [$val, $this->PDOType($val)];
-            } else {
-                return 0;
-            }
-        }
-        $colums = join(',', array_keys($set));
-        $values = join(',', array_values($set));
-        $insert = 'INSERT INTO ' . $tableName . ' ( ' . $colums . ' ) VALUES ( ' . $values . ')';
-        $st = static::$db->prepare($insert);
-        foreach ($params as $param => $val) {
-            $st->bindValue($param, $val[0], $val[1]);
-        }
-        //@todo use try catch if you what to handle with transatcion
-        $status = $st->execute();
-        if (false !== $status) {
-            // 设置自增键
-            $this->_attributes[static::$_autoIncrement] = static::$db->lastInsertId();
-            $this->afterInsert();
+        if (empty($this->_attributes[$this->_primaryKey[0]])) {
+            $status = $this->insert(false);
+        } else {
+            $status = $this->update(false);
         }
         return $status;
     }
@@ -379,10 +407,8 @@ class ActiveRecord
      * @return  int | boolean return false if input is not valid
      * Description:
      * bugfix: 检查脏值是否为空数组,如果没有数据变化,直接返回0
-     * 'name' => ''unit test'' 为什么加了一对引号呢? 最主要还没有转义 弄不明白
-     * 绑定的语句在 update 部分成功,将这部分稍作优化和进一步测试后,移植到其他方法上面
      */
-    public function update($validate = true)
+    public function update($validate = true, $transaction = true)
     {
         if ($validate) {
             $valid = $this->validate();
@@ -390,31 +416,42 @@ class ActiveRecord
         }
         $tableName = self::quoteName($this->tableName());
         $this->getDirtyAttributes();
-        $params = [];
         $set = [];
         foreach ($this->getDirtyAttributes() as $name => $value) {
-            $set[] = self::quoteName($name) . ' = :set_' . $name;
-            $params[':set_' . $name] = [$value, $this->PDOType($value)];
+            $set[] = self::quoteName($name) . ' = ' . $this->safeString($value);
         }
         if (empty($set)) return 0;
         $condition = [];
-        foreach (static::$_primaryKey as $column) {
-            $condition[] = self::quoteName($column) . '=:update_' . $column;
+        foreach ($this->_primaryKey as $column) {
             $val = $this->_attributes[$column];
-            $params[':update_' . $column] = [$val, $this->PDOType($val)];
+            $condition[] = self::quoteName($column) . ' = ' . $this->safeString($val);
         }
 //        update set 部分是用逗号连接的
-        $update = 'UPDATE ' . $tableName . ' SET ' . join(',', $set) . ' WHERE ' . join(' AND ', $condition);
-        $st = static::$db->prepare($update);
-        foreach ($params as $param => $value) {
-            $st->bindValue($param, $value[0], $value[1]);
+        $sql = 'UPDATE ' . $tableName . ' SET ' . join(',', $set) . ' WHERE ' . join(' AND ', $condition);
+        if (false === $transaction) return $this->doUpdate($sql);
+        if (false === $this->db->inTransaction()) {
+            $this->db->beginTransaction();
         }
-        $affectedNum = $st->execute();
+        try {
+            $affectedNum = $this->doUpdate($sql);
+            $this->db->commit();
+            return $affectedNum;
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
+
+
+    protected function doUpdate($sql)
+    {
+        $affectedNum = $this->db->exec($sql);
         if ($affectedNum) {
             $this->afterUpdate();
         }
         return $affectedNum;
     }
+
 
     public function afterUpdate()
     {
@@ -426,26 +463,40 @@ class ActiveRecord
      * Description:
      *
      */
-    public function delete()
+    public function delete($transaction = true)
     {
         $tableName = static::quoteName($this->tableName());
         $condition = [];
-        $params = [];
-        foreach (static::$_primaryKey as $column) {
+        foreach ($this->_primaryKey as $column) {
             if (!isset($this->_attributes[$column])) return false;
-            $condition[] = self::quoteName($column) . ' = :' . $column;
-            $params[':' . $column] = [$this->_attributes[$column], $this->PDOType($this->_attributes[$column])];
+            $condition[] = self::quoteName($column) . ' = ' . $this->safeString($this->_attributes[$column]);
         }
-        $st = static::$db->prepare('DELETE FROM ' . $tableName . ' WHERE ' . join(' AND ', $condition));
-        foreach ($params as $param => $val) {
-            $st->bindValue($param, $val[0], $val[1]);
+        $sql = 'DELETE FROM ' . $tableName . ' WHERE ' . join(' AND ', $condition);
+        if (false === $transaction) return $this->doDelete($sql);
+        if (false === $this->db->inTransaction()) {
+            $this->db->beginTransaction();
         }
-        $status = $st->execute();
-        if ($status) {
-            $this->afterDelete();
+        try {
+            $status = $this->doDelete($sql);
+            $this->db->commit();
+            return $status;
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+            throw $e;
         }
-        return $status;
     }
+
+    /**
+     * @access
+     * @return int
+     */
+    protected function doDelete($sql)
+    {
+        $affectedNum = $this->db->exec($sql);
+        if ($affectedNum) $this->afterDelete();
+        return $affectedNum;
+    }
+
 
     public function afterDelete()
     {
@@ -489,12 +540,12 @@ class ActiveRecord
             call_user_func([$this, $setter], $value);
             return;
         }
-        if (is_array($this->_attributes) && array_key_exists($name, static::$_columns)) {
-            settype($value, static::$_columns[$name]['type']);
+        if (is_array($this->_attributes) && array_key_exists($name, $this->_columns)) {
+            settype($value, $this->_columns[$name]['type']);
             $this->_attributes[$name] = $value;
         } else if (isset(static::$map[$this->scenario][$name])) {// 如果映射关系存在的话
             $name = static::$map[$this->scenario][$name];
-            settype($value, static::$_columns[$name]['type']);
+            settype($value, $this->_columns[$name]['type']);
             $this->_attributes[$name] = $value;
         } else {
             //@todo  可在 debug 模式下记录更多日志内容(包括请求的路由,方便表结构变更后,开展进行代码清理工作)
@@ -544,21 +595,19 @@ class ActiveRecord
      * @param $value
      * @return string
      * Description:
-     * 类型转换,安全存储
-     * bugfix: swich 部分未用 gettype
      */
-    public static function PDOType($value)
+    public function safeString($value)
     {
         switch (gettype($value)) {
             case 'string':
-                return \PDO::PARAM_STR;
+                return $this->db->quote($value);
             case 'boolean':
-                return \PDO::PARAM_BOOL;
+                return ($value ? "TRUE" : 'FALSE');
             case 'integer':
             case 'double':
-                return \PDO::PARAM_INT;
+                return (string)$value;
             case 'NULL':
-                return \PDO::PARAM_NULL;
+                return 'NULL';
             default:
                 throw new \Exception('column value could not be reference type!');
         }
@@ -571,9 +620,6 @@ class ActiveRecord
      *
      * Description:
      * @todo 待处理其他类型的默认值
-     *
-     *
-     *
      */
     public static function columnDefaultValue($default)
     {

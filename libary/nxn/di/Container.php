@@ -1,6 +1,6 @@
 <?php
 
-namespace nxn\web\di;
+namespace nxn\di;
 
 use ReflectionClass;
 
@@ -18,33 +18,63 @@ class Container
      * 存放单例
      * @var array
      */
-    private $_singletons;
+    private $_singletons = [];
 
     /**
-     * 设置单例对象
-     * @param string $class
-     * @param object $instance
-     * @return void
+     * @param array $singletons
      */
-    public function setSigleton($class, $instance)
+    public function setSingletons($name, $singleton)
     {
-        $this->_singletons[$class] = $instance;
+        $this->_singletons[$name] = $singleton;
     }
 
     /**
-     * 目前的方案为: 容器只缓存单例模式的实例对象,对其他类型,现场分析
-     * @access
-     * @param $class
-     * @return  object an instance of the requested class
-     *
+     * @return mixed
      */
-    public function get($class, $param = [], $config = [])
+    public function getSingleton($name)
     {
-        if (isset($this->_singletons[$class])) {
-            // singleton
-            return $this->_singletons[$class];
+        if (isset($this->_singletons[$name])) {
+            return $this->_singletons[$name];
         } else {
-            return $this->build($class, $param, $config);
+            return null;
+        }
+    }
+
+
+    /**
+     * 目前的方案为: 容器只缓存单例模式的实例对象,对其他类型,现场分析
+     * @param string|array $ini 类名称 按照 string 配置的,全部取单例,按照数组取的,每次后重新生成对象
+     * @return  object an instance of the requested class
+     * @throws \Exception
+     *
+     * if $ini is a string and not configure in the global var $config;
+     *
+     * if $ini is array but do not has a key called 'class';
+     */
+    public function get($ini)
+    {
+        if (is_string($ini)) {
+            if (isset($this->_singletons[$ini])) {
+                return $this->_singletons[$ini];
+            } elseif (isset(\N::$app->conf[$ini])) {
+                $config = \N::$app->conf[$ini];
+                $instance = $this->get($config);
+//      之前犯了一个错误,将 $ini 的数据类型变为了 array, 所以引发 illegal offset 错误
+                $this->_singletons[$ini] = $instance;
+                return $instance;
+            } else {
+                throw new \Exception($ini . 'is not configured in the global configure file!');
+            }
+        } elseif (is_array($ini)) {
+            if (!isset($ini['class'])) {
+                throw new \Exception('configure item must inclucde a \'class\' key');
+            }
+            $class = $ini['class'];
+            $params = $ini['params'] ?? [];
+            $config = $ini['config'] ?? [];
+            return $this->build($class, $params, $config);
+        } else {
+            throw new \Exception('congigure file must be array or string!');
         }
     }
 
@@ -56,7 +86,7 @@ class Container
      * @param array $params 构造函数需要使用的参数
      * @param array $config 配置参数(在对象实例化后,对对象相应的属性赋值)
      * @return object
-     * @throws \Exception
+     * @throws \Exception if the class is not instantiable
      */
     public function build($class, $params = [], $config = [])
     {
@@ -68,7 +98,9 @@ class Container
         // 递归解析构造函数的参数
         $constructor = $reflection->getConstructor();
         // 若无构造函数，直接实例化并返回
-        if ($constructor === null) $object = new $class;
+        if ($constructor === null) {
+            return new $class;
+        }
         // 取构造函数参数,通过 ReflectionParameter 数组返回参数列表
         $parameters = $constructor->getParameters();
         //根据构造函数的参数解决依赖
