@@ -1,0 +1,106 @@
+<!DOCTYPE html><html xmlns:v-on="http://www.w3.org/1999/xhtml"><head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/bootstrap.css">
+    <link rel="stylesheet" href="/css/index.css">
+    <!--    <link rel="stylesheet" href="/highlight/styles/rainbow.css">-->
+    <link href="http://cdn.bootcss.com/highlight.js/8.0/styles/monokai_sublime.min.css" rel="stylesheet">
+    <script src="http://cdn.bootcss.com/highlight.js/8.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <!--<link href="/css/mricode.pagination.css" rel="stylesheet" />-->
+    <!--    <script src="https://cdn.bootcss.com/marked/0.3.6/marked.js"></script>-->
+    <script src="/js/md.js"></script>
+    <script src="/js/jquery-2.0.2.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="/js/loadash.js"></script>
+    <script src="/js/vue-2-3.js"></script>
+    <script src="/js/index.js"></script>
+
+</head>
+<body style="">
+
+<!--@todo 写一套登录系统,研究 session, cookie 管理, 验证码的实现机制, 邮箱实现机制和通信原理等内容, 这一块的工作量其实还是蛮大的-->
+<!--@todo 重新设计表表结构(i),通过url后后面部分,在得到Module,controller和action信息后,将其余部分设计为`current working directory`,从而实现用数据库数结构模拟文件结构->
+<!--@todo 设计一个命令输入框,通过该输入框,可以作一些更灵活的工作,具体的需求还需要进一步明确（rm,mv,cp,link,touch etc）,同时加计算机网络安全方面的知识，预防安全问题-->
+<!--@todo 添加前后台的数据过滤-->
+<!--<script src="http://miaolz123.github.io/vue-markdown/dist/vue-markdown.js"></script>-->
+
+<header>
+    <div id="header" class="row text-center">
+        <input class="col-lg-12" placeholder="command line,support mv,cp,ls,etc">
+        <div class="col-lg-12">&nbsp;</div>
+        <h6><span>test</span>(第<span class="countdown">428</span>天)</h6>
+    </div>
+</header>
+
+<div class="clearfix"></div>
+
+<div id="ffz_app">
+    <!--        items   -->
+    <div id="j_items" class="col-lg-4"><div class="panel panel-primary"><div class="panel-heading"><span class="glyphicon glyphicon-list"></span>事项列表(回头替换为目录名称)
+                <div class="pull-right action-buttons"><div class="btn-group pull-right"><button type="button" data-toggle="dropdown" class="btn btn-default btn-xs dropdown-toggle"><span class="glyphicon glyphicon-cog" style="margin-right: 0px;"></span></button> <ul class="dropdown-menu slidedown"><li><a href=""><span class="glyphicon glyphicon-pencil"></span>Edit</a></li> <li><a href=""><span class="glyphicon glyphicon-trash"></span>Delete</a></li> <li><a href=""><span class="glyphicon glyphicon-flag"></span>Flag</a></li></ul></div></div></div> <div class="panel-body"><ul class="list-group"><li draggable="true" class="list-group-item"><div class="checkbox"><input type="checkbox"> <label for="checkbox"><span><a href="/index/index?fid=59" target="_blank">59</a></span> <span>todo list</span> <input style="display: none;"></label></div> <div class="pull-right action-buttons"><a><span title="添加新事项" class="glyphicon glyphicon-plus-sign"></span></a> <a><span title="编辑事项" class="glyphicon glyphicon-pencil"></span></a> <a><span title="保存事项" class="glyphicon glyphicon-saved"></span></a> <a><span title="请慎重双击右边的删除按钮" class="glyphicon glyphicon-warning-sign"></span></a> <a><span title="删除事项" class="glyphicon glyphicon-trash"></span></a></div></li></ul><ul class="list-group"><li draggable="true" class="list-group-item"><div class="checkbox"><input type="checkbox"> <label for="checkbox"><span><a href="/index/index?fid=64" target="_blank">64</a></span> <span>python</span> <input style="display: none;"></label></div> <div class="pull-right action-buttons"><a><span title="添加新事项" class="glyphicon glyphicon-plus-sign"></span></a> <a><span title="编辑事项" class="glyphicon glyphicon-pencil"></span></a> <a><span title="保存事项" class="glyphicon glyphicon-saved"></span></a> <a><span title="请慎重双击右边的删除按钮" class="glyphicon glyphicon-warning-sign"></span></a> <a><span title="删除事项" class="glyphicon glyphicon-trash"></span></a></div></li></ul><ul class="list-group"><li draggable="true" class="list-group-item"><div class="checkbox"><input type="checkbox"> <label for="checkbox"><span><a href="/index/index?fid=63" target="_blank">63</a></span> <span>http</span> <input style="display: none;"></label></div> <div class="pull-right action-buttons"><a><span title="添加新事项" class="glyphicon glyphicon-plus-sign"></span></a> <a><span title="编辑事项" class="glyphicon glyphicon-pencil"></span></a> <a><span title="保存事项" class="glyphicon glyphicon-saved"></span></a> <a><span title="请慎重双击右边的删除按钮" class="glyphicon glyphicon-warning-sign"></span></a> <a><span title="删除事项" class="glyphicon glyphicon-trash"></span></a></div></li></ul><ul class="list-group"><li draggable="true" class="list-group-item"><div class="checkbox"><input type="checkbox"> <label for="checkbox"><span><a href="/index/index?fid=62" target="_blank">62</a></span> <span>php</span> <input style="display: none;"></label></div> <div class="pull-right action-buttons"><a><span title="添加新事项" class="glyphicon glyphicon-plus-sign"></span></a> <a><span title="编辑事项" class="glyphicon glyphicon-pencil"></span></a> <a><span title="保存事项" class="glyphicon glyphicon-saved"></span></a> <a><span title="请慎重双击右边的删除按钮" class="glyphicon glyphicon-warning-sign"></span></a> <a><span title="删除事项" class="glyphicon glyphicon-trash"></span></a></div></li></ul><ul class="list-group"><li draggable="true" class="list-group-item"><div class="checkbox"><input type="checkbox"> <label for="checkbox"><span><a href="/index/index?fid=61" target="_blank">61</a></span> <span>c</span> <input style="display: none;"></label></div> <div class="pull-right action-buttons"><a><span title="添加新事项" class="glyphicon glyphicon-plus-sign"></span></a> <a><span title="编辑事项" class="glyphicon glyphicon-pencil"></span></a> <a><span title="保存事项" class="glyphicon glyphicon-saved"></span></a> <a><span title="请慎重双击右边的删除按钮" class="glyphicon glyphicon-warning-sign"></span></a> <a><span title="删除事项" class="glyphicon glyphicon-trash"></span></a></div></li></ul><ul class="list-group"><li draggable="true" class="list-group-item"><div class="checkbox"><input type="checkbox"> <label for="checkbox"><span><a href="/index/index?fid=60" target="_blank">60</a></span> <span>done</span> <input style="display: none;"></label></div> <div class="pull-right action-buttons"><a><span title="添加新事项" class="glyphicon glyphicon-plus-sign"></span></a> <a><span title="编辑事项" class="glyphicon glyphicon-pencil"></span></a> <a><span title="保存事项" class="glyphicon glyphicon-saved"></span></a> <a><span title="请慎重双击右边的删除按钮" class="glyphicon glyphicon-warning-sign"></span></a> <a><span title="删除事项" class="glyphicon glyphicon-trash"></span></a></div></li></ul><ul class="list-group"><li draggable="true" class="list-group-item"><div class="checkbox"><input type="checkbox"> <label for="checkbox"><span><a href="/index/index?fid=58" target="_blank">58</a></span> <span>do later</span> <input style="display: none;"></label></div> <div class="pull-right action-buttons"><a><span title="添加新事项" class="glyphicon glyphicon-plus-sign"></span></a> <a><span title="编辑事项" class="glyphicon glyphicon-pencil"></span></a> <a><span title="保存事项" class="glyphicon glyphicon-saved"></span></a> <a><span title="请慎重双击右边的删除按钮" class="glyphicon glyphicon-warning-sign"></span></a> <a><span title="删除事项" class="glyphicon glyphicon-trash"></span></a></div></li></ul><ul class="list-group"><li draggable="true" class="list-group-item"><div class="checkbox"><input type="checkbox"> <label for="checkbox"><span><a href="/index/index?fid=1" target="_blank">1</a></span> <span>note_requirement</span> <input style="display: none;"></label></div> <div class="pull-right action-buttons"><a><span title="添加新事项" class="glyphicon glyphicon-plus-sign"></span></a> <a><span title="编辑事项" class="glyphicon glyphicon-pencil"></span></a> <a><span title="保存事项" class="glyphicon glyphicon-saved"></span></a> <a><span title="请慎重双击右边的删除按钮" class="glyphicon glyphicon-warning-sign"></span></a> <a><span title="删除事项" class="glyphicon glyphicon-trash"></span></a></div></li></ul><ul class="list-group"><li draggable="true" class="list-group-item"><div class="checkbox"><input type="checkbox"> <label for="checkbox"><span><a href="/index/index?fid=55" target="_blank">55</a></span> <span>bug</span> <input style="display: none;"></label></div> <div class="pull-right action-buttons"><a><span title="添加新事项" class="glyphicon glyphicon-plus-sign"></span></a> <a><span title="编辑事项" class="glyphicon glyphicon-pencil"></span></a> <a><span title="保存事项" class="glyphicon glyphicon-saved"></span></a> <a><span title="请慎重双击右边的删除按钮" class="glyphicon glyphicon-warning-sign"></span></a> <a><span title="删除事项" class="glyphicon glyphicon-trash"></span></a></div></li></ul><ul class="list-group"><li draggable="true" class="list-group-item"><div class="checkbox"><input type="checkbox"> <label for="checkbox"><span><a href="/index/index?fid=8" target="_blank">8</a></span> <span>complete</span> <input style="display: none;"></label></div> <div class="pull-right action-buttons"><a><span title="添加新事项" class="glyphicon glyphicon-plus-sign"></span></a> <a><span title="编辑事项" class="glyphicon glyphicon-pencil"></span></a> <a><span title="保存事项" class="glyphicon glyphicon-saved"></span></a> <a><span title="请慎重双击右边的删除按钮" class="glyphicon glyphicon-warning-sign"></span></a> <a><span title="删除事项" class="glyphicon glyphicon-trash"></span></a></div></li></ul><ul class="list-group"><li draggable="true" class="list-group-item"><div class="checkbox"><input type="checkbox"> <label for="checkbox"><span><a href="/index/index?fid=57" target="_blank">57</a></span> <span>computing</span> <input style="display: none;"></label></div> <div class="pull-right action-buttons"><a><span title="添加新事项" class="glyphicon glyphicon-plus-sign"></span></a> <a><span title="编辑事项" class="glyphicon glyphicon-pencil"></span></a> <a><span title="保存事项" class="glyphicon glyphicon-saved"></span></a> <a><span title="请慎重双击右边的删除按钮" class="glyphicon glyphicon-warning-sign"></span></a> <a><span title="删除事项" class="glyphicon glyphicon-trash"></span></a></div></li></ul></div></div></div>
+    <!--        notes-->
+    <div id="c_notes" class="panel-heading">
+        <ul id="j_notes" class="col-lg-8"></ul>
+    </div>
+</div>
+
+<!--用来清除浮动, 针对pull-right-->
+<div class="clearfix"></div>
+<!--footer-->
+<footer class="row">
+    <p class="text-center">
+        <i>2016 All rights reserved</i><i>nxn copyright</i>
+    </p>
+</footer>
+
+<!------------------------------------------------js------------------------------------------------------------------------- --->
+
+<script>
+    /**
+     * URL 统一管理
+     * @todo 里边的部分地址需要剔除
+     */
+    URL_Manager = {
+        // used
+        loaddata: '/item/get-items',
+        // used
+        savefriend: '/item/save-item',
+        // used
+        deletefriend: "/item/delete-item",
+        // used
+        rank: '/item/rank',
+        //itemDraft
+        itemDraft: "/item/itemDraft",
+        getnotes: '/item/get-item-notes',
+        // move note
+        movenote: '/note/movenote',
+        savenote: "/note/save-note",
+        deletenote: "/note/delete-note",
+    };
+
+    /**
+     * 核心,不允许修改这些自有属性
+     */
+    for (prop in URL_Manager) {
+        if (URL_Manager.hasOwnProperty(prop)) {
+            Object.defineProperty(URL_Manager, prop, {
+                writable: false
+            })
+        }
+    }
+
+</script>
+
+
+
+
+
+
+
+
+
+
+</body></html>

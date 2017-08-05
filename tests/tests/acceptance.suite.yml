@@ -8,6 +8,10 @@ class_name: WebGuy
 modules:
     enabled:
         - WebDriver:
-        - WebHelper:
-            url: 'http://www.note.com'
+        - \Helper\Acceptance
+    config:
+        WebDriver:
+            url: 'http://www.note.git'
             browser: 'firefox'
+            window_size: maximize
+            restart: false
