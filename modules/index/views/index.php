@@ -89,7 +89,7 @@
                         </a>
                     </span>
                     &nbsp;
-                    <span v-on:click.stop="edit(note)">
+                    <span v-on:click.stop="edit(note, $event)">
                         <a class="glyphicon glyphicon-edit" title="编辑笔记">
                         </a>
                     </span>
@@ -104,9 +104,9 @@
                     </span>
                 </div>
                 <div>
-                    <textarea class="col-xs-12" v-if="note.seen" :value="note.content"
-                              v-on:keyup.esc="save(note,$event)"
-                              v-on:keyup.enter="h($event)" @focus="h($event,note)" @paste="h($event,note)"
+                    <textarea class="col-xs-12" ref = "note" v-if="note.seen" :value="note.content"
+                              v-on:keyup.esc="save(note, $event)"
+                              v-on:keyup.enter="h($event)" @focus="h($event, note)" @paste="h($event, note)"
                               v-focus></textarea>
                     <div class="textarea" v-if="!note.seen" @dblclick.stop="edit(note)"
                          v-html="note.md" v-highlightjs></div>

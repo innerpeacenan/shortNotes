@@ -93,10 +93,19 @@ $(function () {
                     target.style.height = $event.target.scrollHeight + 50 + 'px';
                 }
             },
-            save: function (note, $event) {
-                if (!note.item_id) return;
+            save: function (note) {
+                // 单击保存的时候，$event 为辅么未 undefine 呢？
+                if (this.$refs['note'] === undefined) {
+                    l('检查vue 2中添加的特殊属性 ref 是否发生变更');
+                    return
+                }
+                var value = this.$refs['note'][0].value;
+                if (!note.item_id) {
+                    l('note' + note.id + '.item_id is 0');
+                    return
+                }
                 // 将原来的及时更新改为非及时，以提高性能
-                note.content = $event.target.value;
+                note.content = value;
                 $.ajax({
                     type: 'POST',
                     url: URL_Manager.savenote,
@@ -109,8 +118,9 @@ $(function () {
                             }
                             // senitize 对 html 标签用实体替换，尽量避免跨站点脚本攻击
                             note.md = marked(note.content, {sanitize: true});
-                            note.seen = false
                         }
+                        // 不管有没有实际更新数据,都自动保存数据
+                        note.seen = false
                     }
                 })
             },

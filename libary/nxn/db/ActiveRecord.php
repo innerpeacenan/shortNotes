@@ -197,7 +197,8 @@ class ActiveRecord
             if (preg_match('/^(\w+)(?:\(([^\)]+)\))?/', $column['Type'], $match)) {
                 $sqlColumnType = $match[1];
                 if (isset(static::$_typeCast[$sqlColumnType])) {
-                    $this->_columns[$name]['type'] = static::$_typeCast[$sqlColumnType];
+                    // @todo 这么明显的一个 bug,单元测试为什么没有测试到？
+                    $this->_columns[$name]['Type'] = static::$_typeCast[$sqlColumnType];
                 } else {
                     throw new \Exception('mysql type:' . $sqlColumnType . ' is not included in type map yet!');
                 }
@@ -232,7 +233,7 @@ class ActiveRecord
             return null;
         };
         foreach ($ar->_primaryKey as $column) {
-            $valType = $ar->_columns[$column]['type'];
+            $valType = $ar->_columns[$column]['Type'];
             $val = $primary[$column];
             $validType = settype($var, $valType);
             if (false === $validType) {
@@ -250,7 +251,7 @@ class ActiveRecord
         $row = $st->fetch(PDO::FETCH_ASSOC);
         if (!$row) return null;
         foreach ($row as $name => $value) {
-            settype($value, $ar->_columns[$name]['type']);
+            settype($value, $ar->_columns[$name]['Type']);
             $ar->_oldAttributes[$name] = $ar->_attributes[$name] = $value;
         }
         return $ar;
@@ -541,11 +542,11 @@ class ActiveRecord
             return;
         }
         if (is_array($this->_attributes) && array_key_exists($name, $this->_columns)) {
-            settype($value, $this->_columns[$name]['type']);
+            settype($value, $this->_columns[$name]['Type']);
             $this->_attributes[$name] = $value;
         } else if (isset(static::$map[$this->scenario][$name])) {// 如果映射关系存在的话
             $name = static::$map[$this->scenario][$name];
-            settype($value, $this->_columns[$name]['type']);
+            settype($value, $this->_columns[$name]['Type']);
             $this->_attributes[$name] = $value;
         } else {
             //@todo  可在 debug 模式下记录更多日志内容(包括请求的路由,方便表结构变更后,开展进行代码清理工作)

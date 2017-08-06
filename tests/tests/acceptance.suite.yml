@@ -15,3 +15,9 @@ modules:
             browser: 'firefox'
             window_size: maximize
             restart: false
+            start: true
+            clear_cookies: false
+            applicationCacheEnabled: false
+            capabilities:
+                selenium.server.url: 'www.baidu.com'
+
