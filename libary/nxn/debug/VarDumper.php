@@ -7,7 +7,6 @@
  */
 namespace nxn\debug;
 
-use yii\base\Exception;
 
 /**
  * Class VarDumper
@@ -95,7 +94,7 @@ class VarDumper
                         // 打印下 debug 的信息
                         $keys = $var->__debugInfo();
                         if (!is_array($keys)) {
-                            throw new Exception('__Debug_info() must return array');
+                            throw new \Exception('__Debug_info() must return array');
                         }
                     } else {
 //         [Cannot access property started with '\0'](https://cweiske.de/tagebuch/php-property-started-nul.htm)

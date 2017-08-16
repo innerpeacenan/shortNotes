@@ -8,8 +8,6 @@ use nxn\web\Ajax;
 use nxn\web\AuthController;
 use PDO;
 use nxn\db\Query;
-use yii\base\Exception;
-use yii\db\IntegrityException;
 
 /**
  * Class AjaxController

@@ -26,7 +26,7 @@ class NoteTest extends TestCase
                     'root',
                     1111111,
                     [
-                        PDO::MYSTeQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+                        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
                         PDO::ATTR_PERSISTENT => true,
                         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                     ]
@@ -111,7 +111,6 @@ class NoteTest extends TestCase
     {
         // Array (...) does not match expected type "string".
 //      注意, primaryKey 是数组
-//      [0 => 'id',1 => 'id'] 弄清为什么会会重复
         $this->assertEquals([0 => 'id'], Notes::getPrimaryKey());
     }
 

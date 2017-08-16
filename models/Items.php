@@ -30,6 +30,7 @@ class Items extends ActiveRecord
     /**
      * @param string | array $primaryKey
      * @return void
+     *
      */
     public function setPrimaryKey($primaryKey)
     {
