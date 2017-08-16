@@ -1,6 +1,6 @@
 <?php
 defined('N_APPLICATION') or define('N_APPLICATION', __DIR__ . '/..');
-defined('N_DEBUG') or define('N_DEBUG', false);
+defined('N_DEBUG') or define('N_DEBUG', true);
 defined('N_TEST') or define('N_TEST', false);
 
 // enable error reportings

@@ -14,23 +14,33 @@
     <script src="/js/bootstrap.js"></script>
     <script src="/js/vue-2-3.js"></script>
     <script src="/js/index.js"></script>
-
 </head>
 <body>
+<style>
+
+</style>
+
 <header>
     <div id="header" class="row text-center">
-        <input class="col-lg-12" placeholder="command line,support mv,cp,ls,etc">
-        <div class="col-lg-12">&nbsp;</div>
-        <h6><span>test</span>(第<span class="countdown"></span>天)</h6>
+        <div class="col-lg-12">
+            <h3><span>make life easier</span>(第<span class="countdown"></span>天)</h3>
+        </div>
     </div>
 </header>
+<div class="clearfix"></div>
+<nav>
+    <div><a class="col-sm-4 AppHeader-navItem">首页</a></div>
+    <a class="col-sm-4 AppHeader-navItem ">命令行</a>
+    <a class="col-sm-4 AppHeader-navItem">用户</a>
+</nav>
+
 <div class="clearfix"></div>
 <div id="ffz_app">
     <div class="col-lg-4" id="j_items">
         <div class="panel panel-primary">
             <div class="panel-heading">
                 <span class="glyphicon glyphicon-list"></span>事项列表
-                <span v-on:click.stop ="parentDir">上一级目录</span>
+                <span v-on:click.stop="parentDir">上一级目录</span>
                 <div class="pull-right action-buttons">
                     <div class="btn-group pull-right">
                         <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
@@ -46,10 +56,11 @@
             </div>
             <div class="panel-body">
                 <ul class="list-group" v-for="(item,index) in items">
-                    <li class="list-group-item" v-on:click.stop="getNotes(item)" draggable='true' @dragstart="drag(item)"
+                    <li class="list-group-item" v-on:click.stop="getNotes(item)" draggable='true'
+                        @dragstart="drag(item)"
                         @dragover.prevent @drop="drop(item)">
                         <div class="checkbox">
-                            <input type="checkbox" v-model="item.status" v-on:click.stop="draft(item,index)"/>
+                            <input type="checkbox" v-on:click.stop="toggleStatus(item,index)" v-model="item.isChecked" :disabled="item.status == 1"/>
                             <label for="checkbox">
                                 <a style="display: inline-block" v-on:click.stop="subDir(item)"><span>{{item.id}}</span></a>
                                 <span v-show="!item.seen">{{item.name}}</span>
@@ -59,9 +70,11 @@
                         </div>
                         <div class="pull-right action-buttons">
                             <a v-on:click.stop="add()"><span class="glyphicon glyphicon-plus-sign" title="添加新事项"></span></a>
-                            <a v-on:click.stop="edit(item)"><span class="glyphicon glyphicon-pencil" title="编辑事项"></span></a>
-                            <a v-on:click.stop="save(item)"><span class="glyphicon glyphicon-saved" title="保存事项" ></span></a>
-                            <a @click.stop="" @dblclick.stop="del(index)"><span class="glyphicon glyphicon-trash" title="删除事项"></span></a>
+                            <a v-on:click.stop="edit(item)"><span class="glyphicon glyphicon-pencil"
+                                                                  title="编辑事项"></span></a>
+                            <a v-on:click.stop="save(item)"><span class="glyphicon glyphicon-saved" title="保存事项"></span></a>
+                            <a @click.stop="" @dblclick.stop="del(index)"><span class="glyphicon glyphicon-trash"
+                                                                                title="删除事项"></span></a>
                         </div>
                     </li>
                 </ul>
@@ -104,7 +117,7 @@
                     </span>
                 </div>
                 <div>
-                    <textarea class="col-xs-12" ref = "note" v-if="note.seen" :value="note.content"
+                    <textarea class="col-xs-12" ref="note" v-if="note.seen" :value="note.content"
                               v-on:keyup.esc="save(note, $event)"
                               v-on:keyup.enter="h($event)" @focus="h($event, note)" @paste="h($event, note)"
                               v-focus></textarea>
@@ -115,6 +128,7 @@
         </ul>
     </div>
 </div>
+
 
 <!--用来清除浮动, 针对pull-right-->
 <div class="clearfix"></div>
@@ -133,22 +147,17 @@
      * @todo 里边的部分地址需要剔除
      */
     URL_Manager = {
-        // used
-        loaddata: '/item/get-items',
-        parentDir : '/item/parent-dir',
-        // used
+        item: "/item/item",
+        items: '/item/items',
+        parentDir: '/item/parent-dir',
         savefriend: '/item/save-item',
-        // used
-        deletefriend: "/item/delete-item",
-        // used
         rank: '/item/rank',
         //itemDraft
-        itemDraft: "/item/itemDraft",
-        getnotes: '/item/get-item-notes',
-        // move note
+        itemDraft: "/item/item-draft",
+        getnotes: '/note/item-notes',
         movenote: '/note/move-note',
-        savenote: "/note/save-note",
-        deletenote: "/note/delete-note",
+        savenote: "/note/note",
+        deletenote: "/note/note",
     };
 
     /**
@@ -163,7 +172,6 @@
     }
 
 </script>
-
 
 </body>
 </html>

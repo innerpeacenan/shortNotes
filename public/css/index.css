@@ -12,15 +12,28 @@ body {
 
 /* 导航栏 */
 header {
-    /*background-color: #F0F0F0;*/
     background-color: #337ab7;
     position: fixed;
     min-width: 100%;
-    /* z-index 属性一再开头设置才能起到相应的效果*/
     z-index: 10;
     top: 0;
-    margin-bottom: 50px;
+    margin-bottom: 0;
     border-radius: 4px;
+}
+
+/* 导航栏 */
+nav {
+    background-color: #337ab7;
+    position: fixed;
+    min-width: 100%;
+    z-index: 10;
+    top: 56px;
+    margin-bottom: 30px;
+    border-radius: 4px;
+}
+
+#ffz_app {
+    margin-top: 120px;
 }
 
 /* 页脚 */
@@ -65,7 +78,7 @@ li {
 }
 
 .panel-body {
-    padding: 0px;
+    padding: 0;
 }
 
 .panel-footer .pagination {
@@ -78,7 +91,7 @@ li {
 
 .panel-body .radio, .checkbox {
     display: inline-block;
-    margin: 0px;
+    margin: 0;
 }
 
 .panel-body input[type=checkbox]:checked + label {
@@ -92,11 +105,7 @@ li {
 }
 
 .list-group {
-    margin-bottom: 0px;
-}
-
-#ffz_app {
-    margin-top: 90px;
+    margin-bottom: 0;
 }
 
 #listhead {
@@ -107,60 +116,22 @@ li {
     margin-top: 14px;
 }
 
-
-/* hight chart*/
-.hljs {
-    display: block;
-    overflow-x: auto;
-    padding: 0.5em;
-    background: #F0F0F0
+.AppHeader-navItem {
+    padding: 0 15px;
+    font-size: 15px;
+    font-weight: bold;
+    line-height: 30px;
+    text-align: center;
+    color: white;
 }
 
-.hljs, .hljs-subst {
-    color: #444
-}
-
-.hljs-comment {
-    color: #888888
-}
-
-.hljs-keyword, .hljs-attribute, .hljs-selector-tag, .hljs-meta-keyword, .hljs-doctag, .hljs-name {
-    font-weight: bold
-}
-
-.hljs-type, .hljs-string, .hljs-number, .hljs-selector-id, .hljs-selector-class, .hljs-quote, .hljs-template-tag, .hljs-deletion {
-    color: #880000
-}
-
-.hljs-title, .hljs-section {
-    color: #880000;
-    font-weight: bold
-}
-
-.hljs-regexp, .hljs-symbol, .hljs-variable, .hljs-template-variable, .hljs-link, .hljs-selector-attr, .hljs-selector-pseudo {
-    color: #BC6060
-}
-
-.hljs-literal {
-    color: #78A960
-}
-
-.hljs-built_in, .hljs-bullet, .hljs-code, .hljs-addition {
-    color: #397300
-}
-
-.hljs-meta {
-    color: #1f7199
-}
-
-.hljs-meta-string {
-    color: #4d99bf
-}
-
-.hljs-emphasis {
-    font-style: italic
-}
-
-.hljs-strong {
-    font-weight: bold
+.AppHeader-navItem:hover {
+    padding: 0 15px;
+    font-size: 15px;
+    font-weight: bolder;
+    font-style: italic;
+    line-height: 30px;
+    text-align: center;
+    text-decoration: none;
+    color: yellow;
 }

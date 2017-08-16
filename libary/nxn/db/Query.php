@@ -9,7 +9,6 @@ namespace nxn\db;
 
 /**
  * Description: description
- * @todo 这个类待进一步测试
  */
 class Query
 {
@@ -26,9 +25,21 @@ class Query
     /**
      * @return \PDO
      */
-     public static function getSlaveDb()
+    public static function getSlaveDb()
     {
         return \N::$app->get('db');
+    }
+
+    public static function bindParams($sql, $params)
+    {
+        if ($params) {
+            // quote params first
+            foreach ($params as $name => $param) {
+                $params[$name] = self::safeString($param);
+            }
+            $sql = strtr($sql, $params);
+        }
+        return $sql;
     }
 
     /**
@@ -38,11 +49,24 @@ class Query
      */
     public static function one(string $sql, array $params = [])
     {
-
-        if($params) $sql = strtr($sql, $params);
+        $sql = self::bindParams($sql, $params);
         $st = static::getSlaveDb()->query($sql);
-        if(false === $st) return  [];
+        if (false === $st) return [];
         return $row = $st->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Fetch the first column from the first row in the result set
+     * @param string $sql
+     * @param array $params
+     * @return bool|mixed
+     */
+    public static function scalar(string $sql, array $params = [])
+    {
+        $sql = self::bindParams($sql, $params);
+        $st = static::getSlaveDb()->query($sql);
+        if (false === $st) return false;
+        return $row = $st->fetch(\PDO::FETCH_COLUMN);
     }
 
     /**
@@ -52,24 +76,26 @@ class Query
      */
     public static function all(string $sql, array $params = [])
     {
-        if($params) $sql = strtr($sql, $params);
+        $sql = self::bindParams($sql, $params);
         $st = static::getSlaveDb()->query($sql);
-        if(false === $st) return [];
+        if (false === $st) return [];
         return $st->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    public function execute($sql, $params = [])
+    public static function execute($sql, $params = [])
     {
-        if($params) $sql = strtr($sql, $params);
+        $sql = self::bindParams($sql, $params);
         return static::getMasterDb()->exec($sql);
     }
 
 
     /**
-     * 想想怎么描述这个功能和可能存在的结果集覆盖问题
+     * for example: if the sql is: `select id ,name from user`,the the reult will be
+     * [ 'id1' => 'name1', 'id2' => 'name2]]
      * @param string $sql
      * @param array $params
      * @return array
+     *
      * @throws \Exception if the query result contains less than 2 colunms
      */
     public static function map(string $sql, array $params = [])
@@ -78,7 +104,8 @@ class Query
         $row = reset($rows);
         if (false === $row) return [];
         if (count($row) !== 2) {
-            throw new \Exception('the count of select items must be 2,but ' . count($row) . ' given');
+            throw new \Exception('the must be 2 columns in selection part of the sql statement, 
+            but ' . count($row) . ' selected');
         }
         $ret = [];
         foreach ($rows as $i => $row) {
@@ -120,8 +147,8 @@ class Query
         $ret1 = self::indexBy($ret1, $on);
         $ret2 = self::indexBy($ret2, $on);
         foreach ($ret1 as $on => $row) {
+            // 如果结果2中对应有相同的行，就合并
             if (array_key_exists($on, $ret2)) {
-//@todo 重点测试这个方法,了解其工作方式
                 $ret[$on] = $ret1[$on] + $ret2[$on];
             }
         }
@@ -143,6 +170,7 @@ class Query
         $counms2 = array_keys(reset($ret2));
         foreach ($ret1 as $on => $row) {
             if (!array_key_exists($on, $ret2)) {
+                // 将第二列的内容设置为空，想一想没有有必要这么做？
                 foreach ($counms2 as $key) {
                     $counms2[$key] = "";
                 }
@@ -170,4 +198,25 @@ class Query
         return $value === '' || $value === [] || $value === null || is_string($value) && trim($value) === '';
     }
 
+    /**
+     * @param $value
+     * @return string
+     * Description:
+     */
+    public static function safeString($value)
+    {
+        switch (gettype($value)) {
+            case 'string':
+                return self::getSlaveDb()->quote($value);
+            case 'boolean':
+                return ($value ? "TRUE" : 'FALSE');
+            case 'integer':
+            case 'double':
+                return (string)$value;
+            case 'NULL':
+                return 'NULL';
+            default:
+                throw new \Exception('column value could not be reference type!');
+        }
+    }
 }

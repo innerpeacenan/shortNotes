@@ -170,7 +170,7 @@ class VarDumper
      *
      *```
      */
-    public function var_export(&$var, $return = false)
+    public static function var_export(&$var, $return = false)
     {
         // tokens
         $indent = '  ';
@@ -200,10 +200,10 @@ class VarDumper
 
                     if (is_array($v)) {
                         // 数组每一层,换一行
-                        $export = $this->var_export($v, true);
+                        $export = self::var_export($v, true);
                         $v = $newLine . $export;
                     } else {
-                        $v = $this->var_export($v, true);
+                        $v = self::var_export($v, true);
                     }
                     // Piece line together (输出数组中的一个键值对)
 //                    中间过程一定要用 . 相互连接, 在在这个循环的过程中,中间的结果是要保留的
@@ -245,7 +245,7 @@ class VarDumper
                 foreach (get_object_vars($var) as $p => $ov) {
                     $out .= ' var $' . $p . ' = ';
                     if (is_array($ov)) {
-                        $export = $this->var_export($ov, true);
+                        $export = self::var_export($ov, true);
                         $out .= $newLine . $export . ';' . $newLine;
                     } else {
                         $out .= var_export($ov, true) . ';' . $newLine;

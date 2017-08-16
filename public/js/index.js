@@ -48,7 +48,7 @@ $(function () {
                 my.item = item;
                 my.items = ffz_items.items;
                 $.ajax({
-                    type: "POST",
+                    type: "GET",
                     url: URL_Manager.getnotes,
                     data: {item_id: item.id},
                     success: function (result) {
@@ -127,7 +127,7 @@ $(function () {
             mv: function (note, index) {
                 var my = this;
                 $.ajax({
-                    type: 'POST',
+                    type: 'PUT',
                     url: URL_Manager.movenote,
                     data: {
                         id: note.id,
@@ -145,7 +145,7 @@ $(function () {
             del: function (index) {
                 var my = this;
                 $.ajax({
-                    type: 'POST',
+                    type: 'DELETE',
                     url: URL_Manager.deletenote,
                     data: {
                         id: this.notes[index].id
@@ -160,14 +160,36 @@ $(function () {
 
     ffz_items = new Vue({
         el: '#j_items',
-        data: {fid: '', items: []},
+        // define related consts
+
+        data: {SHOW_GLOBAL: 1, ENABLE: 2, DRAFT: 3, fid: '', currentItem: '', items: []},
         created: function () {
             this.fid = getParam('fid');
             this.getItems()
         },
         methods: {
             newItem: function () {
-                return {id: 0, fid: this.fid, name: " ", rank: 0, seen: true}
+                return {id: 0, fid: this.fid, name: " ", rank: 0, status: this.ENABLE, isChecked: 0, seen: true}
+            },
+            sort: function () {
+                this.items.sort(function (a, b) {
+                    // less(a,b) -1,a < b, 所有排序函数都是这种规律
+                    if (parseInt(a.status) < parseInt(b.status)) {
+                        // status asc
+                        return -1
+                    } else if (a.status == b.status) {
+                        if (parseInt(a.rank) < parseInt(b.rank)) {
+                            // order desc
+                            return 1
+                        } else if (a.rank == b.rank) {
+                            return 0
+                        } else {
+                            return -1
+                        }
+                    } else {
+                        return 1
+                    }
+                });
             },
             parentDir: function () {
                 $.ajax({
@@ -196,17 +218,22 @@ $(function () {
             getItems: function () {
                 var my = this;
                 $.ajax({
-                    type: 'POST',
-                    url: URL_Manager.loaddata,
+                    type: 'GET',
+                    url: URL_Manager.items,
                     data: {fid: this.fid},
                     success: function (result) {
                         var data = result.data;
                         if (Array.isArray(data) && data.length === 0) {
                             data = [my.newItem()];
-                            data.seen = true;
                         } else {
                             data = data.map(function (one) {
                                 one.seen = false;
+                                // 全局显示的和启用的都勾选，这样更加美观
+                                if (one.status == my.ENABLE || my.SHOW_GLOBAL) {
+                                    one.isChecked = 0
+                                } else {
+                                    one.isChecked = 1
+                                }
                                 return one;
                             });
                         }
@@ -224,11 +251,10 @@ $(function () {
             },
             save: function (item) {
                 $.ajax({
-                    type: 'POST',
-                    url: URL_Manager.savefriend,
+                    type: 'put',
+                    url: URL_Manager.items,
                     data: {id: item.id, name: item.name, fid: item.fid},
                     success: function (result) {
-                        if (!result.status) return;
                         // 针对插入的情况下,取出最后插入的主键
                         if (item.id == 0) {
                             item.id = result.data.id;
@@ -241,11 +267,12 @@ $(function () {
             del: function (index) {
                 var my = this;
                 $.ajax({
-                    type: 'POST',
-                    url: URL_Manager.deletefriend,
+                    type: 'DELETE',
+                    url: URL_Manager.item,
                     data: {id: my.items[index].id},
                     success: function (result) {
-                        if (!result.status)return;
+                        if (!result.status) return;
+                        // 如果当前的笔记显示的是 要删除的item的，则清空相关比所有笔记
                         if (ffz_notes.item === my.items[index]) {
                             ffz_notes.notes = [];
                         }
@@ -259,39 +286,39 @@ $(function () {
             drop: function (item) {
                 var my = this;
                 $.ajax({
-                    type: 'POST',
+                    type: 'PUT',
                     url: URL_Manager.rank,
                     data: {
                         dragTo: item.id,
                         dragFrom: my.currentItem.id
                     },
                     success: function (result) {
-                        if (result.status !== true) return;
-                        my.currentItem.rank = item.rank - 1;
-                        my.items.sort(function (a, b) {
-                            a.rank = parseInt(a.rank);
-                            b.rank = parseInt(b.rank);
-                            return a.rank > b.rank ? -1 : ((b.rank > a.rank) ? 1 : 0);
-                        });
+                        if (!result.status) return;
+                        my.currentItem.rank = result.data.rank;
+                        my.sort()
                     }
                 });
 
             },
-            draft: function (item, index) {
+            toggleStatus: function (item, index) {
                 var my = this;
-                // 表示checkBox 被选中,希望归档
-                if (item.status !== true) return;
                 $.ajax({
-                    type: 'POST',
+                    type: 'PUT',
                     url: URL_Manager.itemDraft,
                     data: {
                         id: item.id
                     },
-                    success: function () {
-                        if (my.items[index] === ffz_notes.item) {
-                            ffz_notes.notes = []
-                        }
-                        my.items.splice(index, 1);
+                    success: function (result) {
+                        if (!result.status) return;
+                        var item = my.items[index];
+                        item.status = result.data.status;
+                        // 目前这种实现方案下，暂时不做处理了
+                        // if (item === ffz_notes.item) {
+                        //     ffz_notes.notes = []
+                        // }
+                        // my.items.splice(index, 1);
+                        // 先这样吧，放到最底部
+                        my.sort();
                     }
                 })
             }

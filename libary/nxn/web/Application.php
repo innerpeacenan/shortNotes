@@ -29,7 +29,7 @@ class Application extends Container
     ];
 
     /**
-     * @var null|  object $controller is a string before instantiate
+     * @var null| \nxn\web\Controller | \nxn\web\AuthController  $controller is a string before instantiate
      */
     public $controller;
 
@@ -74,16 +74,21 @@ class Application extends Container
             $this->router = $router;
             return;
         }
-        //如果从来没有设置过,则从url中解析
-        // 从 url 中解析  getfriends?fid=2Action
+        //如果从来没有设置过,则从uri中解析
+        // 从 uri 中解析  getfriends?fid=2Action
 //       防止有 '/' 这种类型的路径直接访问
         $baseUri = explode('?', $_SERVER['REQUEST_URI'])[0];
         $method = $_SERVER['REQUEST_METHOD'];
         $left = preg_split('/\\//', $baseUri, -1, PREG_GREP_INVERT);
         if (empty($left)) return;
-        // 夜叉找到action部分 item/get-items
-        // 如果找不到,且不空
-        $this->router['action'] = lcfirst(static::camelCase(array_pop($left))) . $method;
+        if (empty($_FILES) && !in_array($method, ['POST', 'GET'])) {
+            if (false != ($rawData = file_get_contents('php://input'))) {
+                if (false != mb_parse_str($rawData, $data)) {
+                    $_REQUEST = $data;
+                }
+            }
+        }
+        $this->router['action'] = $method . static::camelCase(array_pop($left));
         if (empty($left)) return;
         $this->router['controller'] = static::camelCase(array_pop($left)) . 'Controller';
         if (empty($left)) return;
@@ -102,6 +107,8 @@ class Application extends Container
         return str_replace('-', '', ucwords($string, '-'));
     }
 
+
+
     /**
      * 通过 [[setRouter]] 方法, 保证 controller 和 action 都是正确的
      * @access
@@ -119,7 +126,7 @@ class Application extends Container
             exit();
         }
         $this->controller = new $controller();
-//        var_dump($this->router['action']);exit();
+        $this->controller->beforeAction();
         if (!method_exists($this->controller, $this->router['action'])) {
             $msg = 'HTTP/1.1 400 BAD REQUEST(invalid action' . print_r($this->router) . ')';
             header($msg, true, 400);

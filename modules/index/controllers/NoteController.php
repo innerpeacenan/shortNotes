@@ -2,7 +2,10 @@
 namespace n\modules\index\controllers;
 
 use n\models\Notes;
+use nxn\db\Query;
 use nxn\web\Ajax;
+use nxn\web\AuthController;
+
 use PDO;
 
 /**
@@ -13,19 +16,29 @@ use PDO;
  * time:08:24:16
  * Description: description
  */
-class NoteController
+class NoteController extends AuthController
 {
-    public $db;
-
 
     /**
-     * AjaxController constructor.
+     * @access
+     * @return void
+     * Created by: xiaoning nan
+     * Last Modify: xiaoning nan
+     * Description:
+     *
+     * request params:
+     * name |meaning
+     * ---|---
+     * item_id | notes.item_id or item.id
      */
-
-    public function __construct()
+    public function getItemNotes()
     {
-        $dbconfig = \N::$app->conf['db'];
-        $this->db = \N::createObject($dbconfig);
+        $result = Notes::notesByItem($_REQUEST['item_id']);
+        if ($_REQUEST) {
+            Ajax::json(true, $result, 'success');
+        } else {
+            Ajax::json(0);
+        }
     }
 
     /**
@@ -36,28 +49,39 @@ class NoteController
      * Description:
      * 暂且修改为彻底删除
      */
-    public function deleteNotePOST()
+    public function deleteNote()
     {
-        /**
-         * @var PDO $db
-         */
-        $note = (new Notes())->load($_REQUEST['id']);
-        if(null === $note){
-           Ajax::json(false,[],'can not find related note wiht id:'.$_REQUEST['id']) ;
+        $note = Notes::load($_REQUEST['id']);
+        if (null === $note) {
+            Ajax::json(false, [], 'can not find related note wiht id:' . $_REQUEST['id']);
         }
-        $deleted =  $note->delete();
+        $deleted = $note->delete();
         return Ajax::json($deleted);
     }
 
 
-    public function saveNotePOST()
+    /**
+     * @access
+     * @return void
+     * Created by: xiaoning nan
+     * Last Modify: xiaoning nan
+     * Description:
+     *
+     * request params:
+     * name |meaning
+     * ---|---
+     * id: notes.id, 如果没有值, 则执行插入操作
+     * item_id: notes.item_id, namely items.id
+     * content: notes.content
+     */
+    public function postNote()
     {
         $message = "";
-        $note = (new Notes());
+        $note = new Notes();
         $note->setAttributes($_REQUEST);
         $status = $note->save(false);
         $id = $note->id;
-        Ajax::json($status, ['id'=>$id], $message);
+        Ajax::json($status, ['id' => $id], $message);
     }
 
     /**
@@ -65,17 +89,15 @@ class NoteController
      * @return void
      * Created by: xiaoning nan
      * Last Modify: xiaoning nan
-     * You cannot serialize or unserialize PDO instances ?? 怎么回事?
      */
-    public function moveNotePOST()
+    public function putMoveNote()
     {
-        // mv note(52) item(8)
-        $note = (new Notes())->load($_REQUEST['id']);
+        $note = Notes::load($_REQUEST['id']);
         if ($note === null) {
             Ajax::json(false);
             return;
         }
-        $note-> scenario = 'update';
+        $note->scenario = 'update';
         $note->setAttributes($_REQUEST);
         l(['type_of_item_id' => $note->item_id]);;
         $status = $note->update(false);

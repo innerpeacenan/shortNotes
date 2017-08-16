@@ -2,6 +2,7 @@
 namespace n\models;
 
 use \nxn\db\ActiveRecord;
+use nxn\db\Query;
 
 /**
  * Class Notes
@@ -26,14 +27,16 @@ class Notes extends ActiveRecord
         return 'notes';
     }
 
-    public function getColumns()
+    public static function notesByItem($item_id)
     {
-        return static::$_columns;
+        $sql = 'SELECT * FROM `notes` WHERE `item_id` = :item_id ORDER BY `c_time` DESC';
+        $params = [':item_id' => (int)$item_id];
+        return Query::all($sql, $params);
     }
 
-    public static function getPrimaryKey()
+    public static function deleteNotes($item_id)
     {
-        return static::$_primaryKey;
+        return Query::execute('DELETE FROM notes WHERE item_id = :item_id', [':item_id' => $item_id]);
     }
 
 }

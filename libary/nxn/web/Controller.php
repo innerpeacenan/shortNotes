@@ -7,8 +7,6 @@
  */
 namespace nxn\web;
 
-use TheSeer\Autoload\PathComparator;
-
 class Controller
 {
     public function renderView($viewName, array $data)
@@ -36,5 +34,10 @@ class Controller
                 return "";
                 break;
         }
+    }
+
+    public function beforeAction()
+    {
+
     }
 }

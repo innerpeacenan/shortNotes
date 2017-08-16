@@ -2,9 +2,14 @@
 namespace n\modules\index\controllers;
 
 use n\models\Items;
+use nxn\debug\VarDumper;
+use nxn\StringHelper;
 use nxn\web\Ajax;
+use nxn\web\AuthController;
 use PDO;
 use nxn\db\Query;
+use yii\base\Exception;
+use yii\db\IntegrityException;
 
 /**
  * Class AjaxController
@@ -14,7 +19,7 @@ use nxn\db\Query;
  * Time: xx:xx
  * Description: description
  */
-class ItemController
+class ItemController extends AuthController
 {
     public $db;
 
@@ -27,117 +32,60 @@ class ItemController
         $this->db = \N::createObject('db');
     }
 
-//---------------------------------Items-------------------------------------
-    public function getItemsPOST()
+    public function getItems()
     {
         $fid = isset($_REQUEST['fid']) ? intval($_REQUEST['fid']) : 0;
-        $sql = 'select * from `items` where `fid` = :fid AND status = "enable" ORDER BY `rank` DESC';
-        $param = [':fid' => $fid];
-        $result = Query::all($sql, $param);
-        foreach ($result as $i => $row) {
-            // 给前台checkbox 用的
-            $result[$i]['status'] = ($row['status'] === 'enable') ? false : true;
-        }
+        $result = Items::getItems($fid);
         Ajax::json(true, $result, "success");
     }
 
-    public function deleteItemPOST()
+    /**
+     * @access
+     * @return void
+     * Created by: xiaoning nan
+     * Last Modify: xiaoning nan
+     * Description:
+     * 保存事项
+     * @todo 无线积分类，将这一部分内容放到 model 之中
+     * @todo 先实现功能，再考虑功能健全性,先信任前端，在考虑后端, 一切以用户为中心,后端围绕用户作全方位的验证
+     * request params:
+     * [ 'id' => 'item id', 'name' => 'item name', 'fid' => 'parent id' ]
+     */
+    public function putItems()
     {
-        $message = "";
-        $status = true;
-        /**
-         * @var PDO $db
-         * db 未定义,所以直接抛出了异常
-         */
-        $db = $this->db;
-        $db->beginTransaction();
-        try {
-            $st = $db->prepare('delete from notes where item_id = :item_id');
-            $st->bindValue(':item_id', intval($_REQUEST['id']), PDO::PARAM_INT);
-            $st->execute();
-            /**
-             * 之前 $st 写成了 $t,造成绑定的语句并没有执行
-             */
-            $st = $db->prepare('delete from items where id = :id');
-            $st->bindValue(':id', intval($_REQUEST['id']), PDO::PARAM_INT);
-            $st->execute();
-            $db->commit();
-        } catch (\PDOException $e) {
-// An exception has occured, which means that one of our database queries failed.
-// Print out the error message.
-            $status = false;
-            $message = $e->getMessage();
-            // row back transaction
-            $db->rollBack();
-        }
-        header('Content-Type:application/json; charset:utf8');
-        $json = json_encode(['status' => $status, 'message' => $message]);
-        echo $json;
-        exit();
-    }
-
-    public function saveItemPOST()
-    {
-        $fid = isset($_REQUEST['fid']) ? intval($_REQUEST['fid']) : 0;
-        $id = "";
-        $message = "";
-        /**
-         * @var PDO $db
-         */
-        $db = $this->db;
-        /**
-         * @todo fuck this is source of bug to put pareInt($_REQUEST['name']) here
-         */
-        if ($_REQUEST['id']) {
-
-            $st = $db->prepare('update items set name = :name WHERE id = :id');
-            $st->bindValue(':name', $_REQUEST['name'], PDO::PARAM_STR);
-            $st->bindValue(':id', intval($_REQUEST['id']), PDO::PARAM_INT);
-            $status = $st->execute();
+        $_REQUEST['fid'] = $_REQUEST['fid'] ?? 0;
+        $item = new Items();
+        $item->setAttributes($_REQUEST);
+        $status = $item->save(false);
+        if ($status) {
+            Ajax::json($status, ['id' => $item->id]);
         } else {
-            //插入,更新树结构
-//            pid 找左右边界线
-            $st = $db->prepare("select max(`id`) from `items` WHERE `user_id` = :userId");
-            $st->bindValue(':userId', 1, PDO::PARAM_INT);
-            $st->execute();
-            $rank = (int)$st->fetch(PDO::FETCH_COLUMN) * 10;
-            $st = $db->prepare("select * from items WHERE id = :pid");
-            $st->bindValue(':pid', $fid, PDO::PARAM_INT);
-            $st->execute();
-            $fathor = $st->fetch(PDO::FETCH_ASSOC);
-            $st = $db->prepare("select max(`t_right`) from items WHERE fid = :pid");
-            $st->bindValue(':pid', $fid, PDO::PARAM_INT);
-            $st->execute();
-            $max_child_right = $st->fetch(PDO::FETCH_COLUMN);
-            // 跟新所有上层父节点,给新插入的字节点腾出空间
-            $st = $db->prepare('update items set  `t_right` = `t_right` + 2   WHERE `t_right` >= :fatherRight');
-            $st->bindValue(':fatherRight', intval($fathor['t_right']), PDO::PARAM_INT);
-            $st->execute();
-            // 如果有字节点
-            $st = $db->prepare('insert into  items (`fid`,`depth`,`t_left`,`t_right`,`user_id`,`name`,`rank`,`u_time`,`status`) VALUES (:fid,:depth,:left,:right,:userId,:name,:rank,now(),"enable")');
-            $st->bindValue(':fid', intval($fathor['id']), PDO::PARAM_INT);
-            $st->bindValue(':depth', intval($fathor['depth'] + 1), PDO::PARAM_INT);
-            $st->bindValue(':userId', 1, PDO::PARAM_INT);
-            $st->bindValue(':name', $_REQUEST['name'], PDO::PARAM_STR);
-            $st->bindValue(':rank', $rank, PDO::PARAM_STR);
-            if (isset($max_child_right)) {
-                // 跟新所有上层父节点,给新插入的字节点腾出空间
-                $st->bindValue(':left', intval($max_child_right + 1), PDO::PARAM_INT);
-                $st->bindValue(':right', intval($max_child_right + 2), PDO::PARAM_INT);
-            } else {
-                // 跟新所有上层父节点,给新插入的字节点腾出空间
-                $st->bindValue(':left', intval($fathor['t_right'] + 1), PDO::PARAM_INT);
-                $st->bindValue(':right', intval($fathor['t_right'] + 2), PDO::PARAM_INT);
-            }
-            $status = $st->execute();
-            if ($status) {
-                $id = $db->lastInsertId();
-            } else {
-                $message = $db->errorInfo();
-            }
+            Ajax::json($status, ['id' => $item->id]);
         }
-        Ajax::json($status, ['id'=>$id], $message);
     }
+
+
+    /**
+     * @access
+     * @return void
+     * Created by: xiaoning nan
+     * Last Modify: xiaoning nan
+     *
+     * Description:
+     *
+     * request params:
+     * name |meaning
+     * ---|---
+     * id | items.id
+     *
+     *
+     */
+    public function deleteItem()
+    {
+        $status = Items::deleteItem($_REQUEST['id']);
+        Ajax::json($status);
+    }
+
 
     /**
      * @access
@@ -159,51 +107,56 @@ class ItemController
      *
      *
      */
-    public function rankPOST()
+    public function putRank()
     {
-        $message = "";
-        /**
-         * @var PDO $db
-         */
-        $db = $this->db;
-        $st = $db->prepare('select `rank` from `items` WHERE `id` = :dragTo AND user_id = 1');
-        $st->bindValue(':dragTo', intval($_REQUEST['dragTo']), PDO::PARAM_INT);
-        $st->execute();
-        $toRank = (int)$st->fetch(PDO::FETCH_COLUMN);
-        // 防止排序好号码为 0
-        $rank = $toRank > 0 ? $toRank - 1 : 0;
-        $st = $db->prepare('update `items` set `rank` = :rank WHERE user_id = 1 AND id = :dragFrom');
-        $st->bindValue(':dragFrom', intval($_REQUEST['dragFrom']), PDO::PARAM_INT);
-        $st->bindValue(':rank', $rank, PDO::PARAM_INT);
-        $status = $st->execute();
-        Ajax::json($status, $rank, $message);
+        $rank = Items::rank($_REQUEST['dragFrom'], $_REQUEST['dragTo']);
+        $status = false === $rank ? 0 : 1;
+        Ajax::json($status, ['rank' => $rank]);
     }
 
-    public function getItemNotesPOST()
+    /**
+     * @access
+     * @return void
+     * Created by: xiaoning nan
+     * Last Modify: xiaoning nan
+     * Description:
+     * 切换 item 的状态
+     * request params:
+     * name |meaning
+     * ---|---
+     *
+     *
+     *
+     */
+    public function putItemDraft()
     {
-        $sql = 'select * from `notes` where `item_id` = :item_id ORDER BY `c_time` DESC';
-        $params = [':item_id' => intval($_REQUEST['item_id'])];
-        $result = Query::all($sql, $params);
-        Ajax::json(true, $result, 'success');
+        $item = Items::load($_REQUEST['id']);
+        $updated = $item->toggleStatus();
+        Ajax::json($updated, ['status' => $item->status]);
     }
 
-    public function itemDraftPOST()
+    /**
+     * @access
+     * @return  void
+     * Created by: xiaoning nan
+     * Last Modify: xiaoning nan
+     *
+     * Description:
+     *
+     * request params:
+     * name |meaning
+     * ---|---
+     * id | items.id,父级 item 的 id 值
+     *
+     */
+    public function getParentDir()
     {
-        /**
-         * @var PDO $db
-         */
-        $db = $this->db;
-        $st = $db->prepare('update `items` set `status` = "draft" WHERE id = :id');
-        $st->bindValue(':id', intval($_REQUEST['id']), PDO::PARAM_INT);
-        $updated = $st->execute();
-        Ajax::json($updated);
-    }
-
-    public function parentDirGET(){
-        $item = (new Items())->load($_REQUEST['id']);
-        if(!$item) {
-            return Ajax::json(0);
+        $item = Items::load($_REQUEST['id']);
+        if (!$item) {
+            Ajax::json(0);
+        } else {
+            //  Trying to get property of non-object
+            Ajax::json(1, ['dir' => $item->fid]);
         }
-        Ajax::json(1,['dir'=>$item->fid]);
     }
 }

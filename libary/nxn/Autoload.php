@@ -32,9 +32,7 @@ class Autoload
         if (isset(static::$classMap[$className])) {
             $classFile = static::$classMap[$className];
         } elseif (($pos = strpos($className, '\\')) !== false) {
-//            length = index + 1;
             $name = substr($className, 0, $pos);//note that  the second param is length
-
             if (isset(self::$classMap[$name])) {
                 $restPart = substr($className, $pos);
                 $classFile = self::$classMap[$name] . str_replace('\\', '/', $restPart) . '.php';
@@ -47,10 +45,8 @@ class Autoload
             include($classFile);
             return true;
         } else {
-//            return false;
             throw new \Exception("Unable to find file: '$classFile' to autoload class: '$className'' ");
         }
-        // Failed opening '/home/wwwroot/www.note.com/public/../modules//controllers/Controller.php' for inclusion
 
     }
 

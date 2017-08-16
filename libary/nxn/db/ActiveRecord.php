@@ -148,10 +148,11 @@ class ActiveRecord
      */
     public function setAttributes(array $columns)
     {
-        // 先检查 scenario,确定 map, 然后赋值
-        // 还要检查 column存不存在,不存在直接过滤掉
         foreach ($columns as $name => $value) {
-//      这样可以保证 AR 赋予了正确的类型
+            // 如主键已近存在，则直接过滤
+            if (in_array($name, $this->_primaryKey) and array_key_exists($name, $this->_attributes)) {
+                continue;
+            }
             $this->$name = $value;
         }
     }
@@ -320,6 +321,7 @@ class ActiveRecord
         $kv = [];
 //按照 columns插入,保证除了自增主键外,其他各个键都有值插入
         if (empty($this->_attributes)) return 0;
+        $this->beforeInsert();
         foreach ($this->_columns as $name => $def) {
             //如果值为null,检查是否允许未null,如果允许,跳过.不允许,检查是否有默认值,如果有默认值,则赋予默认值,否则,直接返回
             if (in_array($name, $this->_primaryKey) || true === $this->_columns[$name]['Null']) {
@@ -334,7 +336,7 @@ class ActiveRecord
                 $kv[self::quoteName($name)] = $this->safeString($val);
             } else {
                 if (N_DEBUG) {
-                    throw new \Exception($tableName . '.' . $name . 'must have value when insert!');
+                    throw new \Exception($tableName . '.' . $name . ' must have value when insert!');
                 }
                 return 0;
             }
@@ -356,6 +358,10 @@ class ActiveRecord
             $this->db->rollBack();
             throw $e;
         }
+    }
+
+    protected function beforeInsert (){
+
     }
 
     protected function doInsert($sql)
@@ -390,7 +396,7 @@ class ActiveRecord
             if (!$valid) return false;
         }
         if (empty($this->_attributes)) return 0;
-        if (empty($this->_attributes[$this->_primaryKey[0]])) {
+        if (empty($this->_attributes[reset($this->_primaryKey)])) {
             $status = $this->insert(false);
         } else {
             $status = $this->update(false);
