@@ -29,14 +29,14 @@
 </header>
 <div class="clearfix"></div>
 <nav>
-    <div><a class="col-sm-4 AppHeader-navItem">首页</a></div>
-    <a class="col-sm-4 AppHeader-navItem ">命令行</a>
-    <a class="col-sm-4 AppHeader-navItem">用户</a>
+    <div><a class="col-xs-4 AppHeader-navItem">首页</a></div>
+    <a class="col-xs-4 AppHeader-navItem ">命令行</a>
+    <a class="col-xs-4 AppHeader-navItem">用户</a>
 </nav>
 
 <div class="clearfix"></div>
 <div id="ffz_app">
-    <div class="col-lg-4" id="j_items">
+    <div class="col-xs-12 col-lg-4" id="j_items">
         <div class="panel panel-primary">
             <div class="panel-heading">
                 <span class="glyphicon glyphicon-list"></span>事项列表
@@ -60,7 +60,8 @@
                         @dragstart="drag(item)"
                         @dragover.prevent @drop="drop(item)">
                         <div class="checkbox">
-                            <input type="checkbox" v-on:click.stop="toggleStatus(item,index)" v-model="item.isChecked" :disabled="item.status == 1"/>
+                            <input type="checkbox" v-on:click.stop="toggleStatus(item,index)" v-model="item.isChecked"
+                                   :disabled="item.status == 1"/>
                             <label for="checkbox">
                                 <a style="display: inline-block" v-on:click.stop="subDir(item)"><span>{{item.id}}</span></a>
                                 <span v-show="!item.seen">{{item.name}}</span>
@@ -82,11 +83,12 @@
         </div>
     </div>
     <div id="c_notes" class="panel-heading">
-        <ul id="j_notes" class="col-lg-8">
-            <li v-for="(note,index) in notes" :id="'note_' + note.id">
-                <span>{{note.id}}</span>
-                <span class="hidden-xs">{{note.c_time}}</span>
-                <span>
+        <div id="j_notes" class="col-xs-12 col-lg-8">
+            <ul >
+                <li v-for="(note,index) in notes" :id="'note_' + note.id">
+                    <span>{{note.id}}</span>
+                    <span class="hidden-xs">{{note.c_time}}</span>
+                    <span>
                     <select v-model="note.item_id" @change="mv(note,index)">
                         <template v-if="note.item_id == item.id">
                         <option v-for="item in items" :value="item.id" selected>{{item.name}}</option>
@@ -96,36 +98,40 @@
                         </template>
                 </select>
                 </span>
-                <div class="pull-right action-buttons">
+                    <div class="pull-right action-buttons">
                     <span v-on:click.stop="add()">
                         <a class="glyphicon glyphicon-plus-sign" title="添加笔记">
                         </a>
                     </span>
-                    &nbsp;
-                    <span v-on:click.stop="edit(note, $event)">
+                        &nbsp;
+                        <span v-on:click.stop="edit(note, $event)">
                         <a class="glyphicon glyphicon-edit" title="编辑笔记">
                         </a>
                     </span>
-                    &nbsp;
-                    <span v-on:click.stop="save(note)">
+                        &nbsp;
+                        <span v-on:click.stop="save(note)">
                         <a class="glyphicon glyphicon-saved" title="保存笔记">
                         </a>
                     </span>
-                    &nbsp;&nbsp;
-                    <span v-on:click.stop="" v-on:dblclick="del(index)">
+                        &nbsp;&nbsp;
+                        <span v-on:click.stop="" v-on:dblclick="del(index)">
                         <a class="glyphicon glyphicon-trash" title="删除笔记"></a>
                     </span>
-                </div>
-                <div>
-                    <textarea class="col-xs-12" ref="note" v-if="note.seen" :value="note.content"
-                              v-on:keyup.esc="save(note, $event)"
+                    </div>
+                    <div>
+                    <textarea class="col-xs-12" v-if="note.seen" v-model="note.modifiedContent"
+                              v-on:keyup.esc="save(note)"
                               v-on:keyup.enter="h($event)" @focus="h($event, note)" @paste="h($event, note)"
-                              v-focus></textarea>
-                    <div class="textarea" v-if="!note.seen" @dblclick.stop="edit(note)"
-                         v-html="note.md" v-highlightjs></div>
-                </div>
-            </li>
-        </ul>
+                              v-focus>
+                    </textarea>
+                        <div class="textarea" v-if="!note.seen" @dblclick.stop="edit(note)"
+                             v-html="note.md" v-highlightjs></div>
+                    </div>
+                </li>
+            </ul>
+            <div class="text-center more" v-on:click.stop="more()" v-show="showMore">更多</div>
+        </div>
+
     </div>
 </div>
 

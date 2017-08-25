@@ -19,16 +19,6 @@ use nxn\db\Query;
  */
 class ItemController extends AuthController
 {
-    public $db;
-
-    /**
-     * AjaxController constructor.
-     */
-
-    public function __construct()
-    {
-        $this->db = \N::createObject('db');
-    }
 
     public function getItems()
     {

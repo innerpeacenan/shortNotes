@@ -29,7 +29,7 @@ class Application extends Container
     ];
 
     /**
-     * @var null| \nxn\web\Controller | \nxn\web\AuthController  $controller is a string before instantiate
+     * @var null| \nxn\web\Controller | \nxn\web\AuthController $controller is a string before instantiate
      */
     public $controller;
 
@@ -108,7 +108,6 @@ class Application extends Container
     }
 
 
-
     /**
      * 通过 [[setRouter]] 方法, 保证 controller 和 action 都是正确的
      * @access
@@ -142,8 +141,60 @@ class Application extends Container
     }
 
 
-    public function getDb()
+    /**
+     * @access
+     * @return mixed
+     * Created by: xiaoning nan
+     * Last Modify: xiaoning nan
+     *
+     *
+     *
+     * Description:
+     *
+     * 连接前先打乱数据库配置粗数数组,保障连接的随机性
+     *
+     * request params:
+     *
+     *
+     */
+    public function getMasterDb()
     {
-        return \N::createObject('db');
+        if (null === $this->getSingleton('master')) {
+            $pool = $this->conf['db']['master'];
+            shuffle($pool);
+            $config = reset($pool);
+            $config['params'][] = $this->conf['db']['shareParam'];
+            $master = \N::createObject($config);
+            $this->setSingletons('master', $master);
+        }
+        return $this->getSingleton('master');
     }
+
+
+    /**
+     * @access
+     * @return mixed
+     *
+     * Description:
+     *
+     *
+     *
+     */
+    public function getSlaveDb()
+    {
+        if (null === $this->getSingleton('slave')) {
+            if (!isset($this->conf['db']['slave'])) {
+                return $this->getMasterDb();
+            }
+            $pool = $this->conf['db']['slave'];
+            shuffle($pool);
+            $config = reset($pool);
+            $config['params'][] = $this->conf['db']['shareParam'];
+            $slave = \N::createObject($config);
+            $this->setSingletons('slave', $slave);
+        }
+        return $this->getSingleton('slave');
+    }
+
+
 }

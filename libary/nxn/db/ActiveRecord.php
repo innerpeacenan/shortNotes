@@ -99,7 +99,7 @@ class ActiveRecord
 
     public function __construct()
     {   // 确定db
-        $this->db = \N::$app->db;// 模型
+        $this->db = \N::$app->getMasterDb();// 模型
         $this->tableSchema();
     }
 

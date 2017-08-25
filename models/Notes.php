@@ -27,10 +27,12 @@ class Notes extends ActiveRecord
         return 'notes';
     }
 
-    public static function notesByItem($item_id)
+    public static function notesByItem($item_id, $opt = [])
     {
-        $sql = 'SELECT * FROM `notes` WHERE `item_id` = :item_id ORDER BY `c_time` DESC';
-        $params = [':item_id' => (int)$item_id];
+        if (!isset($opt['offset'])) $opt['offset'] = 0;
+        if (!isset($opt['limit'])) $opt['limit'] = 10;
+        $sql = 'SELECT * FROM `notes` WHERE `item_id` = :item_id ORDER BY `c_time` DESC LIMIT :limit OFFSET :offset';
+        $params = [':item_id' => (int)$item_id, ':offset' => (int)$opt['offset'], ':limit' => (int)$opt['limit']];
         return Query::all($sql, $params);
     }
 

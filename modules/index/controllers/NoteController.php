@@ -2,7 +2,6 @@
 namespace n\modules\index\controllers;
 
 use n\models\Notes;
-use nxn\db\Query;
 use nxn\web\Ajax;
 use nxn\web\AuthController;
 
@@ -30,10 +29,12 @@ class NoteController extends AuthController
      * name |meaning
      * ---|---
      * item_id | notes.item_id or item.id
+     * limit | 每页显示几条
+     * gage | 页数
      */
     public function getItemNotes()
     {
-        $result = Notes::notesByItem($_REQUEST['item_id']);
+        $result = Notes::notesByItem($_REQUEST['item_id'], $_REQUEST);
         if ($_REQUEST) {
             Ajax::json(true, $result, 'success');
         } else {

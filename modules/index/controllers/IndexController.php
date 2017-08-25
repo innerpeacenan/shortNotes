@@ -13,7 +13,6 @@ class IndexController extends AuthController
 {
     public function indexGET()
     {
-        ///home/wwwroot/www.note.com
         require(N_APPLICATION . '/modules/index/views/index.php');
     }
 }

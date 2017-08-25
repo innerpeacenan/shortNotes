@@ -1,5 +1,4 @@
 <?php
-//assert_options() expects parameter 1 to be integer, string given
 function ve($var)
 {
     header('Content-type: text/html; charset=utf-8');
