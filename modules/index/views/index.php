@@ -117,10 +117,11 @@
                     </span>
                 </div>
                 <div>
-                    <textarea class="col-xs-12" ref="note" v-if="note.seen" :value="note.content"
-                              v-on:keyup.esc="save(note, $event)"
+                    <textarea class="col-xs-12"  v-if="note.seen" v-model="note.modifiedContent"
+                              v-on:keyup.esc="save(note)"
                               v-on:keyup.enter="h($event)" @focus="h($event, note)" @paste="h($event, note)"
-                              v-focus></textarea>
+                              v-focus>
+                    </textarea>
                     <div class="textarea" v-if="!note.seen" @dblclick.stop="edit(note)"
                          v-html="note.md" v-highlightjs></div>
                 </div>

@@ -16,7 +16,7 @@ $(function () {
     $(".countdown").text(Math.floor((new Date() - new Date(2016, 5, 2)) / (24 * 60 * 60 * 1000)));
     Vue.directive('focus', {
         inserted: function (el) {
-            el.focus();
+            el.focus()
         }
     });
     Vue.directive('highlightjs', {
@@ -41,7 +41,7 @@ $(function () {
         },
         methods: {
             newNotes: function () {
-                return {id: 0, item_id: this.item.id, content: "", c_time: now(), seen: true};
+                return {id: 0, item_id: this.item.id, content: "", c_time: now(), seen: true, modifiedContent: ""};
             },
             getNotes: function (item) {
                 var my = this;
@@ -75,7 +75,8 @@ $(function () {
                 return true;
             },
             edit: function (note) {
-                note.seen = true;
+                note.modifiedContent = note.content
+                note.seen = true
             },
             /**
              * auto-height
@@ -95,17 +96,11 @@ $(function () {
             },
             save: function (note) {
                 // 单击保存的时候，$event 为辅么未 undefine 呢？
-                if (this.$refs['note'] === undefined) {
-                    l('检查vue 2中添加的特殊属性 ref 是否发生变更');
-                    return
-                }
-                var value = this.$refs['note'][0].value;
                 if (!note.item_id) {
-                    l('note' + note.id + '.item_id is 0');
                     return
                 }
                 // 将原来的及时更新改为非及时，以提高性能
-                note.content = value;
+                note.content = note.modifiedContent;
                 $.ajax({
                     type: 'POST',
                     url: URL_Manager.savenote,
