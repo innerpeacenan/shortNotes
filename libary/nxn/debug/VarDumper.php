@@ -34,6 +34,12 @@ class VarDumper
      */
     public static function dumpInternal($var, $level)
     {
+        $indentSymbol = '&nbsp;&nbsp;&nbsp;&nbsp;';
+        $endOfLine = '<br/>';
+        if (php_sapi_name() === 'cli') {
+            $indentSymbol = '    ';
+            $endOfLine = PHP_EOL;
+        }
         switch (gettype($var)) {
             case 'boolean':
                 self::$output .= $var ? 'true' : 'false';
@@ -62,8 +68,8 @@ class VarDumper
                 if (empty($var)) {
                     self::$output .= '[]';
                 }
-                self::$output .= '[' . PHP_EOL;
-                $spaces = str_repeat('    ', 2 * $level);
+                self::$output .= '[' . $endOfLine;
+                $spaces = str_repeat($indentSymbol, 2 * $level);
                 // 新起的一行在上一行的基础上,在增加四个空格
                 $keys = array_keys($var);
                 foreach ($keys as $key) {
@@ -72,7 +78,7 @@ class VarDumper
                     self::dumpInternal($key, 0);
                     self::$output .= ' => ';
                     self::dumpInternal($var[$key], $level + 1);
-                    self::$output .= ',' . PHP_EOL;
+                    self::$output .= ',' . $endOfLine;
                 }
                 self::$output .= $spaces . ']';
                 break;

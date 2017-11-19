@@ -9,6 +9,7 @@ namespace n\modules\index\controllers;
 
 use n\models\Users;
 use nxn\web\Controller;
+use nxn\web\SessionManager;
 
 class LoginController extends Controller
 {
@@ -47,9 +48,9 @@ class LoginController extends Controller
         if ($sessionName !== session_name()) {
             session_name($sessionName);
         }
+
         if ($user = Users::userByName($_REQUEST['name']) and $_REQUEST['passwd'] == $user['password']) {
-            // bug:Cannot regenerate session id - session is not active
-            session_start();
+            new SessionManager();
             session_regenerate_id();
             $_SESSION['user_id'] = $user['id'];
             session_set_cookie_params(7 * 24 * 3600, '/', gethostname(), false, true);

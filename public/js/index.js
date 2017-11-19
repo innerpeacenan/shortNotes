@@ -14,6 +14,7 @@ $(function () {
      * 月份从0开始计算，这一点与php和mysql一致
      */
     $(".countdown").text(Math.floor((new Date() - new Date(2016, 5, 2)) / (24 * 60 * 60 * 1000)));
+
     Vue.directive('focus', {
         inserted: function (el) {
             el.focus()
@@ -37,7 +38,22 @@ $(function () {
         el: '#j_notes',
         data: {
             notes: [],
-            items: []
+            items: [],
+            // current item
+            item: '',
+        },
+        computed: {
+            // a computed getter
+            showMore: function () {
+                // `this` points to the vm instance
+                // 当 limit 参数被设置未0的时候. 表征没有新的内容可以其请求了
+                if (this.item) {
+                    return this.item.limit
+                } else {
+                    // 页面刚加载进来的时候,不显示
+                    return 0
+                }
+            }
         },
         methods: {
             newNotes: function () {
@@ -46,17 +62,28 @@ $(function () {
             getNotes: function (item) {
                 var my = this;
                 my.item = item;
-                my.items = ffz_items.items;
+                var oldLimit = my.item.limit
+                my.item.limit += my.item.offset;
+                my.item.offset = 0
+                my.items = ffz_items.items
+                this.doGetNotes(item, type = 'new')
+                // 说明之前就没有新数据了
+                if (0 === oldLimit) this.item.limit = 0
+            },
+            doGetNotes: function (item, type) {
+                var my = this
                 $.ajax({
                     type: "GET",
                     url: URL_Manager.getnotes,
-                    data: {item_id: item.id},
+                    data: {item_id: item.id, offset: item.offset, limit: item.limit},
                     success: function (result) {
                         var data = result.data;
-                        if (Array.isArray(data) && data.length === 0) {
+                        if (Array.isArray(data) && data.length < my.item.limit) {
+                            my.item.limit = 0
+                        }
+                        if (data.length === 0) {
                             if (!my.item.id) return false;
-                            //如果没有，则添加一个默认的，具体带编辑
-                            data = [my.newNotes()];
+                            data = 'append' === type ? [] : [my.newNotes()]
                         } else {
                             data = data.map(function (note) {
                                 note.md = marked(note.content, {sanitize: true});
@@ -64,9 +91,16 @@ $(function () {
                                 return note;
                             });
                         }
-                        my.notes = data;
+                        my.notes = 'append' == type ? my.notes.concat(data) : data
+                        my.item.offset = my.notes.length
                     }
                 });
+            },
+            more: function () {
+                // 保障 offset 整型,避免若类型的坑
+                this.item.limit = 10
+                this.item.offset = this.notes.length
+                this.doGetNotes(this.item, type = 'append')
             },
             add: function () {
                 if (!this.item.id) return false;
@@ -95,12 +129,15 @@ $(function () {
                 }
             },
             save: function (note) {
+                var my = this
                 // 单击保存的时候，$event 为辅么未 undefine 呢？
                 if (!note.item_id) {
+                    // l('note' + note.id + '.item_id is 0');
                     return
                 }
                 // 将原来的及时更新改为非及时，以提高性能
                 note.content = note.modifiedContent;
+                // l(note.modifiedContent)
                 $.ajax({
                     type: 'POST',
                     url: URL_Manager.savenote,
@@ -116,6 +153,7 @@ $(function () {
                         }
                         // 不管有没有实际更新数据,都自动保存数据
                         note.seen = false
+                        my.item.offset = my.notes.length
                     }
                 })
             },
@@ -129,7 +167,10 @@ $(function () {
                         itemId: note.item_id
                     },
                     success: function (result) {
-                        if (result.status) my.notes.splice(index, 1);
+                        if (result.status) {
+                            my.notes.splice(index, 1);
+                            my.item.offset = my.notes.length
+                        }
                     }
                 })
             },
@@ -146,7 +187,10 @@ $(function () {
                         id: this.notes[index].id
                     },
                     success: function (result) {
-                        if (result.status) my.notes.splice(index, 1);
+                        if (result.status) {
+                            my.notes.splice(index, 1);
+                            my.item.offset = my.notes.length
+                        }
                     }
                 })
             }
@@ -159,12 +203,23 @@ $(function () {
 
         data: {SHOW_GLOBAL: 1, ENABLE: 2, DRAFT: 3, fid: '', currentItem: '', items: []},
         created: function () {
-            this.fid = getParam('fid');
+            this.fid = getParam('fid')
             this.getItems()
         },
         methods: {
             newItem: function () {
-                return {id: 0, fid: this.fid, name: " ", rank: 0, status: this.ENABLE, isChecked: 0, seen: true}
+                return {
+                    id: 0,
+                    fid: this.fid,
+                    name: " ",
+                    rank: 0,
+                    status: this.ENABLE,
+                    isChecked: 0,
+                    seen: true,
+                    offset: 0,
+                    limit: 2,
+                    // limit: 10,
+                }
             },
             sort: function () {
                 this.items.sort(function (a, b) {
@@ -223,6 +278,10 @@ $(function () {
                         } else {
                             data = data.map(function (one) {
                                 one.seen = false;
+                                // 初始化 page 参数
+                                one.offset = 0;
+                                // @todo 尽量不要应编码
+                                one.limit = 10
                                 // 全局显示的和启用的都勾选，这样更加美观
                                 if (one.status == my.ENABLE || my.SHOW_GLOBAL) {
                                     one.isChecked = 0

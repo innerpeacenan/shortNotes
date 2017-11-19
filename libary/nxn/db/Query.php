@@ -15,11 +15,10 @@ class Query
 
     /**
      * @return \PDO
-     * @todo 后期可以修改，以支持读写分离
      */
     public static function getMasterDb()
     {
-        return \N::$app->get('db');
+        return \N::$app->getMasterDb();
     }
 
     /**
@@ -27,7 +26,7 @@ class Query
      */
     public static function getSlaveDb()
     {
-        return \N::$app->get('db');
+        return \N::$app->getSlaveDb();
     }
 
     public static function bindParams($sql, $params)

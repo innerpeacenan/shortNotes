@@ -181,4 +181,11 @@ blockquote {
     -webkit-margin-after: 0em;
     -webkit-margin-start: 0px;
     -webkit-margin-end: 0px;
+.more {
+    color: #fff;
+    background-color: #337ab7;
+    /*top ritht bottom left*/
+    padding: 3px 0 3px 0;
+    margin: 5px 0 5px 30px;
+    border-color: #2e6da4;
 }
