@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/css/bootstrap.css">
     <link rel="stylesheet" href="/css/index.css">
-    <link href="http://cdn.bootcss.com/highlight.js/8.0/styles/monokai_sublime.min.css" rel="stylesheet">
+    <link href="/css/md.css" rel="stylesheet">
     <script src="http://cdn.bootcss.com/highlight.js/8.0/highlight.min.js"></script>
     <script src="/js/md.js"></script>
     <script src="/js/jquery-2.0.2.js"></script>
