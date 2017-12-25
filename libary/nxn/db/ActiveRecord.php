@@ -195,14 +195,17 @@ class ActiveRecord
             $this->_columns[$name]['Comment'] = $column['Comment'];
             if ('PRI' === $column['Key']) $this->_primaryKey[] = $name;
             if ('auto_increment' === $column['Extra']) $this->_autoIncrement = $name;
-            if (preg_match('/^(\w+)(?:\(([^\)]+)\))?/', $column['Type'], $match)) {
-                $sqlColumnType = $match[1];
+            // int(10) unsigned
+            $result = preg_match('/^\w+/', $column['Type'], $match);
+            if ($result) {
+                $sqlColumnType = $match[0];
                 if (isset(static::$_typeCast[$sqlColumnType])) {
-                    // @todo 这么明显的一个 bug,单元测试为什么没有测试到？
                     $this->_columns[$name]['Type'] = static::$_typeCast[$sqlColumnType];
                 } else {
                     throw new \Exception('mysql type:' . $sqlColumnType . ' is not included in type map yet!');
                 }
+            } else {
+                throw new \Exception('正则匹配错误,type is:' . $columns['Type']);
             }
         }
         return true;
@@ -234,6 +237,10 @@ class ActiveRecord
             return null;
         };
         foreach ($ar->_primaryKey as $column) {
+            if (!isset($ar->_columns[$column]['Type'])) {
+                var_export($ar);
+                die();
+            }
             $valType = $ar->_columns[$column]['Type'];
             $val = $primary[$column];
             $validType = settype($var, $valType);
@@ -360,7 +367,8 @@ class ActiveRecord
         }
     }
 
-    protected function beforeInsert (){
+    protected function beforeInsert()
+    {
 
     }
 

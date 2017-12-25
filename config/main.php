@@ -11,7 +11,7 @@ return [
             [
                 'class' => 'PDO',
                 'params' => [
-                    'mysql:host=192.168.31.205;dbname=notes_11',
+                    'mysql:host=localhost;dbname=notes',
                     'root',
                     1111111,
                 ]
@@ -21,7 +21,7 @@ return [
             [
                 'class' => 'PDO',
                 'params' => [
-                    'mysql:host=192.168.31.126;dbname=notes_11',
+                    'mysql:host=localhost;dbname=notes',
                     'root',
                     1111111,
                 ],
