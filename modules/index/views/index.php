@@ -23,7 +23,7 @@
 <header>
     <div id="header" class="row text-center">
         <div class="col-lg-12">
-            <h3><span>make life easier</span>(第<span class="countdown"></span>天)</h3>
+            <h3><span>make life different every week</span>(第<span class="countdown"></span>周)</h3>
         </div>
     </div>
 </header>

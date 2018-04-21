@@ -11,9 +11,9 @@ function getParam(name, url) {
 $(function () {
     /**
      * 加载头部信息
-     * 月份从0开始计算，这一点与php和mysql一致
+     * 月份从0开始计算，这一点与php和mysql一致, new Date(2018,1,21) is 2018-02-21
      */
-    $(".countdown").text(Math.floor((new Date() - new Date(2016, 5, 2)) / (24 * 60 * 60 * 1000)));
+    $(".countdown").text(Math.floor((new Date() - new Date(2018, 1, 21)) / (24 * 60 * 60 * 7 * 1000)));
 
     Vue.directive('focus', {
         inserted: function (el) {
