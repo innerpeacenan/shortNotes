@@ -27,3 +27,6 @@ phpunit.phar
 /phpunit.xml
 
 tests/_output/*
+
+# envirement variable are declared in .env
+.env

@@ -230,17 +230,13 @@ class ActiveRecord
             $primary = [$columnName => $primary];
         }
         if (!is_array($primary)) {
-            if (N_DEBUG) {
+            if (getenv(N_DEBUG)) {
                 throw new \Exception("the first parameter pass to " . __METHOD__ .
                     ' need to be string, integer or array in hash format');
             }
             return null;
         };
         foreach ($ar->_primaryKey as $column) {
-            if (!isset($ar->_columns[$column]['Type'])) {
-                var_export($ar);
-                die();
-            }
             $valType = $ar->_columns[$column]['Type'];
             $val = $primary[$column];
             $validType = settype($var, $valType);
@@ -342,7 +338,7 @@ class ActiveRecord
                 $this->_attributes[$name] = $val;
                 $kv[self::quoteName($name)] = $this->safeString($val);
             } else {
-                if (N_DEBUG) {
+                if (getenv(N_DEBUG)) {
                     throw new \Exception($tableName . '.' . $name . ' must have value when insert!');
                 }
                 return 0;

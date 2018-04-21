@@ -7,14 +7,6 @@
  */
 namespace nxn;
 
-/**
- * Class autoload
- * @package nxn
- * User: xiaoning nan
- * Date: 2017-05-{13}
- * Time: xx:xx
- * Description: description
- */
 defined('N_BASE') or define('N_BASE', __DIR__);
 
 class Autoload
@@ -39,6 +31,8 @@ class Autoload
             } else {
                 $classFile = N_APPLICATION . '/' . str_replace('\\', '/', $className) . '.php';
             }
+        }else{
+           throw new \Exception("class $className does not exist!");
         }
 
         if (isset($classFile) && is_file($classFile)) {

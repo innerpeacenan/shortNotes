@@ -28,4 +28,13 @@ return [
             ]
         ]
     ],
+    'session' => [
+        'driver' => getenv('SESSION_DRIVER'),
+        'name' => 'makeLifeEasier',
+    ],
+
+    'redis' => [
+        'ip' => '127.0.0.1',
+        'port' => '6379',
+    ]
 ];

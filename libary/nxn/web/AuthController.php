@@ -18,11 +18,7 @@ namespace nxn\web;
 class AuthController extends Controller
 {
     public function beforeAction()
-    {// 这里实现登录控制的功能
-        // client ip address
-//        $_SERVER['REMOTE_ADDR'];
-        // server addr
-//        $_SERVER['SERVER_ADDR'];
+    {
         // 这只session_name
         $sessionName = 'makeLifeEasier';
         if ($sessionName !== session_name()) {
@@ -30,8 +26,8 @@ class AuthController extends Controller
         }
         $ok = new SessionManager();
         if (!$ok) throw new \Exception('session manageer error');
+
         // 检测cookie 对应的字段，没有，跳转到登录页
-        // 没有 cookie,没有 session
         if (isset($_COOKIE[$sessionName], $_SESSION['user_id']) && $_COOKIE[$sessionName] == session_id()) {
             // 正常登录 pass
         } else {

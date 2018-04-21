@@ -44,13 +44,12 @@ class LoginController extends Controller
     {
         $this->validate();
         // generate auto_generated_session
-        $sessionName = 'makeLifeEasier';
-        if ($sessionName !== session_name()) {
-            session_name($sessionName);
+        $sessionManger = new SessionManager();
+        if ($sessionManger->name !== session_name()) {
+            session_name($sessionManger->name);
         }
 
-        if ($user = Users::userByName($_REQUEST['name']) and $_REQUEST['passwd'] == $user['password']) {
-            new SessionManager();
+        if($user = Users::userByName($_REQUEST['name']) and $_REQUEST['passwd'] == $user['password']) {
             session_regenerate_id();
             $_SESSION['user_id'] = $user['id'];
             session_set_cookie_params(7 * 24 * 3600, '/', gethostname(), false, true);
