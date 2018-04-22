@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
  * Class ApplicationTest
  * @runInSeparateProcess
  */
-class ApplicationTest extends TestCase
+class NTest extends TestCase
 {
 
     public function setUp()

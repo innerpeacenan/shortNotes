@@ -38,6 +38,7 @@ class Common extends Test
         $hero = array('no1' => '蝙蝠侠', 'no2' => '超人');
         $hero2 = $hero;
         $hero2['no1'] = '蜘蛛侠';
+	// 第一个数组并未跟着改动
         $this->assertEquals('蝙蝠侠', $hero['no1']);
         $hero2 = &$hero;
         $hero2['no1'] = '蜘蛛侠';
@@ -107,10 +108,7 @@ class Common extends Test
                 STDERR,
                 'This version of PHPUnit requires PHP 5.6; using the latest version of PHP is highly recommend'
             );
-
-            die(1);
         }
-//        str_replace();
     }
 
     /**
@@ -133,8 +131,8 @@ class Common extends Test
     public function testStreamResolveIncludePath()
     {
         $fullPath = stream_resolve_include_path(__FILE__);
-        $this->assertEquals('__DIR_/Common.php', $fullPath);
+	$this->assertEquals(__DIR__ . '/Common.php', $fullPath);
     }
-
-
 }
+
+

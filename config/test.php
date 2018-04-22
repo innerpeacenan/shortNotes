@@ -1,19 +1,40 @@
 <?php
 return [
-//    PHPUnit_Framework_Exception: PHP Fatal error:  Uncaught PDOException: You cannot serialize or unserialize PDO instances in -:336
-// 当以多进程的方式跨库操作的时候,会报上面的错误
     'db' => [
-        'class' => 'PDO',
-        'params' => [
-            'mysql:host=localhost;dbname=notes_test',
-            'root',
-            1111111,
+        // POD 构造函数的最后一个参数从这里传入
+        'shareParam' => [
+            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_PERSISTENT => true
+        ],
+        'master' => [
             [
-                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
-                PDO::ATTR_PERSISTENT => true,
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                'class' => 'PDO',
+                'params' => [
+                    'mysql:host=localhost;dbname=notes_test',
+                    'root',
+                    1111111,
+                ]
+            ],
+        ],
+        'slave' => [
+            [
+                'class' => 'PDO',
+                'params' => [
+                    'mysql:host=localhost;dbname=notes_test',
+                    'root',
+                    1111111,
+                ],
             ]
         ]
     ],
+    'session' => [
+        'driver' => 'file',
+        'name' => 'makeLifeEasier',
+    ],
+    'redis' => [
+        'ip' => '127.0.0.1',
+        'port' => '6379',
+    ]
 ];
+

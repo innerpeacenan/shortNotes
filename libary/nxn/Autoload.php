@@ -17,7 +17,11 @@ class Autoload
      * An associative array where the key is a namespace prefix (prefix end with slash '/') and
      * the value is the  base directories for classes in that namespace
      */
-    public static $classMap = ['nxn' => N_BASE, 'n' => N_APPLICATION];
+	public static $classMap = [
+		'nxn' => N_BASE, 
+		'n' => N_APPLICATION,
+		'tests' => N_APPLICATION . '/tests',
+	];
 
     public static function autoload($className)
     {
@@ -32,14 +36,15 @@ class Autoload
                 $classFile = N_APPLICATION . '/' . str_replace('\\', '/', $className) . '.php';
             }
         }else{
-           throw new \Exception("class $className does not exist!");
+            // auto load should do nothing more than its responsibility
+           //throw new \Exception("class $className does not exist!");
         }
 
         if (isset($classFile) && is_file($classFile)) {
             include($classFile);
             return true;
         } else {
-            throw new \Exception("Unable to find file: '$classFile' to autoload class: '$className'' ");
+            //throw new \Exception("Unable to find file: '$classFile' to autoload class: '$className'' ");
         }
 
     }

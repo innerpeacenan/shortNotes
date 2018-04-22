@@ -26,7 +26,7 @@ class DbTest extends \PHPUnit_Extensions_Database_TestCase
     public function getDataSet()
     {
 //        return $this->createMySQLXMLDataSet()
-        return $this->createFlatXMLDataSet('data/dataset.xml');
+        return $this->createFlatXMLDataSet(N_APPLICATION . 'tests/data/dataset.xml');
     }
 
     protected function setUp()

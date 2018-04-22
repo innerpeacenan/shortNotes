@@ -52,7 +52,7 @@ abstract class ArrayDataSets extends \PHPUnit_Extensions_Database_TestCase
      */
     public function getInvisableProperty($obj, $property)
     {
-        $r = new  \ReflectionObject($obj);
+        $r = new \ReflectionObject($obj);
         $p = $r->getProperty($property);
         $p->setAccessible(true); // <--- you set the property to public before you read the value
         $reult = $p->getValue($obj);

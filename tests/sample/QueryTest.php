@@ -52,20 +52,35 @@ class QueryTest extends ArrayDataSets
         $this->pdo->query("ALTER TABLE `items` AUTO_INCREMENT = 6;");
         $config = [
             'db' => [
-                'class' => 'PDO',
-                'params' => [
-                    'mysql:host=localhost;dbname=notes_test',
-                    'root',
-                    1111111,
+                // POD 构造函数的最后一个参数从这里传入
+                'shareParam' => [
+                    PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_PERSISTENT => true
+                ],
+                'master' => [
                     [
-                        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
-                        PDO::ATTR_PERSISTENT => true,
-                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                        'class' => 'PDO',
+                        'params' => [
+                            'mysql:host=localhost;dbname=notes',
+                            'root',
+                            1111111,
+                        ]
+                    ],
+                ],
+                'slave' => [
+                    [
+                        'class' => 'PDO',
+                        'params' => [
+                            'mysql:host=localhost;dbname=notes',
+                            'root',
+                            1111111,
+                        ],
                     ]
                 ]
             ],
         ];
-        \N::$app = new Application($config);
+	\N::$app = new Application($config);
     }
 
     public function tearDown()
