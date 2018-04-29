@@ -97,7 +97,7 @@ class ItemController extends AuthController
      */
     public function putRank()
     {
-        $rank = Items::rank($_REQUEST['dragFrom'], $_REQUEST['dragTo']);
+        $rank = Items::rank($_REQUEST['dragFrom'], $_REQUEST['dragTo'], $_REQUEST['rank']);
         $status = false === $rank ? 0 : 1;
         Ajax::json($status, ['rank' => $rank]);
     }

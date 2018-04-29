@@ -23,7 +23,7 @@ class LoginController extends Controller
      */
     public function getIn()
     {
-        require(N_APPLICATION . '/modules/index/views/login.php');
+        require(N_APPLICATION . '/app/modules/index/views/login.php');
     }
 
     /**

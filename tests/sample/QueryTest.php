@@ -6,7 +6,7 @@
  * Time: 8:37 PM
  */
 namespace tests;
-
+use n\models\Items;
 use nxn\web\Application;
 use \PDO;
 
@@ -48,6 +48,7 @@ class QueryTest extends ArrayDataSets
     {
         // 得先运行父类方法,以便准备好运行的基镜(texture)
         parent::setUp();
+        var_export(Items::$map);
         // 设置该表的字增主键从6开始
         $this->pdo->query("ALTER TABLE `items` AUTO_INCREMENT = 6;");
         $config = [

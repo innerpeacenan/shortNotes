@@ -1,0 +1,24 @@
+{
+    "name": "php-play",
+    "description": "用于编写一个简易的php框架,用于学习目的",
+    "keywords":["php-play"],
+    "license":"MIT",
+    "type":"project",
+    "require":{},
+    "autoload":{
+        "psr-4": {
+            "nxn\\": "libary/nxn/",
+            "n\\": "app/",
+            "tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "post-root-package-install":[
+            "echo 'done'"
+        ]
+    }
+
+}
+
+
+

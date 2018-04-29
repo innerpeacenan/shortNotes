@@ -1,12 +1,12 @@
 
 .hljs {
     display: block;
-    padding: .5em;
-    background: #23241f
+    background: #f5f5f5;
 }
 
 .hljs, .hljs-tag, .css .hljs-rules, .css .hljs-value, .css .hljs-function .hljs-preprocessor, .hljs-pragma {
-    color: #f8f8f2
+    /*默认字体设置为黑色*/
+    color:black;
 }
 
 .hljs-strongemphasis, .hljs-strong, .hljs-emphasis {
@@ -42,7 +42,8 @@
 }
 
 .hljs-variable, .hljs-params, .hljs-class .hljs-title {
-    color: #f8f8f2
+    /*将所有白色字体同意替换,因为北京是白色的*/
+    color: #75715e
 }
 
 .hljs-string, .css .hljs-id, .hljs-subst, .haskell .hljs-type, .ruby .hljs-class .hljs-parent, .hljs-built_in, .sql .hljs-aggregate, .django .hljs-template_tag, .django .hljs-variable, .smalltalk .hljs-class, .django .hljs-filter .hljs-argument, .smalltalk .hljs-localvars, .smalltalk .hljs-array, .hljs-attr_selector, .hljs-pseudo, .hljs-addition, .hljs-stream, .hljs-envvar, .apache .hljs-tag, .apache .hljs-cbracket, .tex .hljs-command, .hljs-prompt, .hljs-link_label, .hljs-link_url {

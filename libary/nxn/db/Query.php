@@ -63,6 +63,7 @@ class Query
     public static function scalar(string $sql, array $params = [])
     {
         $sql = self::bindParams($sql, $params);
+        //@TODO add here here where used log
         $st = static::getSlaveDb()->query($sql);
         if (false === $st) return false;
         return $row = $st->fetch(\PDO::FETCH_COLUMN);

@@ -1,7 +1,7 @@
 <?php
 namespace n\models;
 
-use \nxn\db\ActiveRecord;
+use nxn\db\ActiveRecord;
 use nxn\db\Query;
 
 /**

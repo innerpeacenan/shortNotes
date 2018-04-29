@@ -6,8 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/css/bootstrap.css">
     <link rel="stylesheet" href="/css/index.css">
-    <link href="/css/md.css" rel="stylesheet">
-    <script src="http://cdn.bootcss.com/highlight.js/8.0/highlight.min.js"></script>
+<!--    <link href="/css/md.css" rel="stylesheet">-->
+
+<!--    <script src="http://cdn.bootcss.com/highlight.js/8.0/highlight.min.js"></script>-->
+    <script src="/highlight/highlight.pack.js"></script>
+    <link href="/highlight/styles/github.css" rel="stylesheet">
     <script src="/js/md.js"></script>
     <script src="/js/jquery-2.0.2.js"></script>
     <script src="/js/common.js"></script>
@@ -21,18 +24,11 @@
 </style>
 
 <header>
-    <div id="header" class="row text-center">
-        <div class="col-lg-12">
-            <h3><span>make life different every week</span>(第<span class="countdown"></span>周)</h3>
-        </div>
-    </div>
+    <nav>
+        <div><a class="col-xs-6 AppHeader-navItem">首页</a></div>
+        <a class="col-xs-6 AppHeader-navItem">用户</a>
+    </nav>
 </header>
-<div class="clearfix"></div>
-<nav>
-    <div><a class="col-xs-4 AppHeader-navItem">首页</a></div>
-    <a class="col-xs-4 AppHeader-navItem ">命令行</a>
-    <a class="col-xs-4 AppHeader-navItem">用户</a>
-</nav>
 
 <div class="clearfix"></div>
 <div id="ffz_app">
@@ -89,7 +85,7 @@
                     <span>{{note.id}}</span>
                     <span class="hidden-xs">{{note.c_time}}</span>
                     <span>
-                    <select v-model="note.item_id" @change="mv(note,index)">
+                    <select  class="items" v-model="note.item_id" @change="mv(note,index)">
                         <template v-if="note.item_id == item.id">
                         <option v-for="item in items" :value="item.id" selected>{{item.name}}</option>
                         </template>

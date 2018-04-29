@@ -227,11 +227,12 @@ $(function () {
                     if (parseInt(a.status) < parseInt(b.status)) {
                         // status asc
                         return -1
-                    } else if (a.status == b.status) {
-                        if (parseInt(a.rank) < parseInt(b.rank)) {
+                    } else if (parseInt(a.status) == parseInt(b.status)) {
+                        // 降序排列
+                        if (parseFloat(a.rank) < parseFloat(b.rank)) {
                             // order desc
                             return 1
-                        } else if (a.rank == b.rank) {
+                        } else if (parseFloat(a.rank) == parseFloat(b.rank)) {
                             return 0
                         } else {
                             return -1
@@ -339,12 +340,39 @@ $(function () {
             },
             drop: function (item) {
                 var my = this;
+                var dragFrom = my.currentItem;
+                var dragTo = item;
+                // compare index, not rank
+                var rankval;
+                var toIndex = my.items.indexOf(item);
+                // 默认排序是降序的,因此判断是从下往上拖动了
+                if (parseFloat(dragFrom.rank) < parseFloat(dragTo.rank)) {
+                    toIndex = my.items.indexOf(item);
+                    // 最终要将元素移动到 prevIndex 和 toIndex 之间
+                    if (toIndex - 1 < 0) {
+                        console.log(1);
+                        rankVal = parseFloat(my.items[toIndex].rank) - 1 / 3;
+                    } else {
+                        console.log(2, my.items[toIndex].id + ":" + my.items[toIndex].rank, my.items[toIndex - 1].id + ":" + parseFloat(my.items[toIndex - 1].rank) );
+                        rankVal = (parseFloat(my.items[toIndex].rank) + parseFloat(my.items[toIndex - 1].rank)) / 2;
+                    }
+                } else if (parseFloat(dragFrom.rank) > parseFloat(dragTo.rank)) {// 55->8
+                    if (toIndex + 1 >= my.items.length) {
+                        rankVal = parseFloat(my.items[toIndex].rank) - 1 / 3;
+                        console.log(3);
+                    } else {
+                        console.log(4);
+                        var rankVal = (parseFloat(my.items[toIndex].rank) + parseFloat(my.items[toIndex + 1].rank)) / 2;
+                    }
+                }
+                console.log(dragFrom, dragTo, rankVal);
                 $.ajax({
                     type: 'PUT',
                     url: URL_Manager.rank,
                     data: {
-                        dragTo: item.id,
-                        dragFrom: my.currentItem.id
+                        "dragFrom": dragFrom.id,
+                        "dragTo": dragTo.id,
+                        "rank": rankVal
                     },
                     success: function (result) {
                         if (!result.status) return;

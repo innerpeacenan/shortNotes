@@ -21,19 +21,9 @@ header {
     border-radius: 4px;
 }
 
-/* 导航栏 */
-nav {
-    background-color: #337ab7;
-    position: fixed;
-    min-width: 100%;
-    z-index: 10;
-    top: 56px;
-    margin-bottom: 30px;
-    border-radius: 4px;
-}
 
 #ffz_app {
-    margin-top: 120px;
+    margin-top: 3em;
 }
 
 /* 页脚 */
@@ -53,6 +43,13 @@ li {
     list-style-type: none;
 }
 
+
+/*笔记的下拉跨*/
+select.items {
+    border: 1px solid #cc;
+    background-color: rgb(255, 255, 255, 1);
+}
+ 
 .textarea {
     width: 100%;
     min-width: 100%;
@@ -61,13 +58,14 @@ li {
     padding: 9px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    background-color: #f5f5f5;
+    background-color: rgba(255, 255, 255, 1);
     font-size: 13px;
     line-height: 1.42857143;
     color: #333;
     white-space: pre-wrap;
     word-wrap: break-word;
 }
+
 
 .trash {
     color: rgb(209, 91, 71);
@@ -81,6 +79,7 @@ li {
     padding: 0;
 }
 
+/*分页*/
 .panel-footer .pagination {
     margin: 0;
 }
@@ -136,6 +135,11 @@ li {
     color: yellow;
 }
 
+/*去除 bootstrap 默认的前三级标题margin属性*/
+h1, .h1, h2, .h2, h3, .h3 {
+    margin-top: 0;
+    margin-bottom: 0;
+}
 
 h3 {
     font-size: 20px
@@ -159,14 +163,17 @@ blockquote {
     background-color:#f1f1f1
 }
 
+/*想要去除浏览器默认的缩进*/
+ul,li{padding:0;margin:0;}
 .textarea li {
     display: list-item;
     text-align: -webkit-match-parent;
     padding: 0 0 0 1em;
     margin: 0 0 0em 0em;
+    /*配合左侧padding缩进一个字体大小,用于显示图片的小圆点,并设置只显示一次*/
     background-image: url(http://www.runoob.com/wp-content/themes/runoob/assets/img/bullet.png);
     background-repeat: no-repeat;
-    background-position: left .5em;
+    background-position: left 0em;
 }
 
 

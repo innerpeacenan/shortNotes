@@ -4,8 +4,7 @@ namespace n\models;
 use nxn\db\ActiveRecord;
 use nxn\db\Query;
 
-class Items extends ActiveRecord
-{
+class Items extends ActiveRecord {
     /**
      * 表示全局可见，及在任何一个目录下都可以看到
      */
@@ -49,7 +48,7 @@ class Items extends ActiveRecord
 
     public static function getItems($fid)
     {
-        $sql = 'SELECT * FROM `items` WHERE (`status` = :show_global OR `fid` = :fid ) AND `user_id` = :user_id ORDER BY `status` ASC , `rank` DESC';
+        $sql = 'SELECT * FROM `items` WHERE (`status` = :show_global OR `fid` = :fid ) AND `user_id` = :user_id ORDER BY `status` ASC, `rank` DESC';
         $param = [':show_global' => self::SHOW_GLOBAL, ':fid' => $fid, ':user_id' => $_SESSION['user_id']];
         return Query::all($sql, $param);
     }
@@ -91,7 +90,7 @@ class Items extends ActiveRecord
      * Description:
      *
      */
-    public static function rank($from, $to)
+    public static function rank($from, $to, $rank)
     {
         $sql = 'SELECT `rank` FROM `items` WHERE `id` = :id AND user_id = :user_id';
         $params = [':id' => (int)$to, ':user_id' => (int)$_SESSION['user_id']];
@@ -102,21 +101,16 @@ class Items extends ActiveRecord
 
         $params[':id'] = $from;
         $fromRank = Query::scalar($sql, $params);
-        if (!$fromRank) {
-            throw new \Exception('item:' . $from . 'does not exists!');
+        // 有时候rank 的值就是0
+        if ((!$fromRank) && (!is_numeric($fromRank))) {
+            throw new \Exception('item id:' . $from . ' does not exists!');
         }
-        if ((int)$fromRank > (int)$toRank) {
-            // from.rank = to.rank - 1
-            $rank = $toRank > 0 ? $toRank - 1 : 0;
-        } else {
-            // from.rank = to.rank + 1
-            $rank = $toRank > 0 ? $toRank + 1 : 0;
-        }
+
         // 防止排序好号码为 0
-        $params = [':rank' => $rank, ':user_id' => (int)$_SESSION['user_id'], ':dragFrom' => (int)$_REQUEST['dragFrom']];
+        $params = [':rank' => (float)$rank, ':user_id' => (int)$_SESSION['user_id'], ':dragFrom' => (int)$_REQUEST['dragFrom']];
         $status = Query::execute('UPDATE `items` SET `rank` = :rank WHERE user_id = :user_id AND id = :dragFrom', $params);
         if ($status) {
-            return $rank;
+            return (int)$rank;
         } else {
             return false;
         }
@@ -130,3 +124,7 @@ class Items extends ActiveRecord
        $this->rank = $rank;
    }
 }
+
+// from to
+//427 -> 441
+// 441 > 427 427
