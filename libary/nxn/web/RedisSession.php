@@ -11,6 +11,8 @@ class RedisSession implements SessionDriverInterface {
         $this->ip = $redisConf['ip'];
         $this->port = $redisConf['port'];
         $this->redis = new \Redis();
+        // expire_time 设置, 之前因此出发过一个bug
+        $this->sessionExpireTime = 7 * 24 * 3600;
         $this->redis->connect($this->ip, $this->port);
     }
 
