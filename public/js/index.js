@@ -351,7 +351,8 @@ $(function () {
                     // 最终要将元素移动到 prevIndex 和 toIndex 之间
                     if (toIndex - 1 < 0) {
                         console.log(1);
-                        rankVal = parseFloat(my.items[toIndex].rank) - 1 / 3;
+                        // fix bug about rank error
+                        rankVal = parseFloat(my.items[toIndex].rank) + 1 / 3;
                     } else {
                         console.log(2, my.items[toIndex].id + ":" + my.items[toIndex].rank, my.items[toIndex - 1].id + ":" + parseFloat(my.items[toIndex - 1].rank) );
                         rankVal = (parseFloat(my.items[toIndex].rank) + parseFloat(my.items[toIndex - 1].rank)) / 2;

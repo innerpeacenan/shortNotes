@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="/css/bootstrap.css">
     <link rel="stylesheet" href="/css/index.css">
 <!--    <link href="/css/md.css" rel="stylesheet">-->
-
 <!--    <script src="http://cdn.bootcss.com/highlight.js/8.0/highlight.min.js"></script>-->
     <script src="/highlight/highlight.pack.js"></script>
     <link href="/highlight/styles/github.css" rel="stylesheet">

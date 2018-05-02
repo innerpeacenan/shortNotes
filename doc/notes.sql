@@ -4,7 +4,8 @@ CREATE TABLE `items` (
   `fid` int(10) unsigned NOT NULL COMMENT '父节点id',
   `user_id` int(11) unsigned NOT NULL COMMENT '用户id',
   `name` char(20) NOT NULL,
-  `rank` int(11) unsigned NOT NULL COMMENT '排序号(从应用程序实现默认相邻间隔10)',
+--  修改了排序号的数据类型为 mysql
+  `rank` float NOT NULL COMMENT '排序号',
   `c_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `u_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '更新时间,需要在修改basic_info后,或者更新了与之对应的note后,更新该字段',
   `status` tinyint(1) unsigned NOT NULL DEFAULT '2' COMMENT '{1:"show_global", 2:"enabled", 3:“draft"}',
