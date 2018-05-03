@@ -3,12 +3,9 @@ namespace n\modules\index\controllers;
 
 use n\models\Items;
 use nxn\debug\VarDumper;
-use nxn\StringHelper;
 use nxn\web\Ajax;
 use n\modules\account\controllers\AuthController;
-use PDO;
-use nxn\db\Query;
-
+use Log;
 /**
  * Class AjaxController
  * @package n\modules\index
@@ -24,6 +21,7 @@ class ItemController extends AuthController
     {
         $fid = isset($_REQUEST['fid']) ? intval($_REQUEST['fid']) : 0;
         $result = Items::getItems($fid);
+        Log::info(__METHOD__);
         Ajax::json(true, $result, "success");
     }
 

@@ -47,3 +47,7 @@ function t(string $k)
         return null;
     }
 }
+
+
+class_alias('nxn\log\BaseLogger', 'Log');
+register_shutdown_function(['Log', 'writeFile']);

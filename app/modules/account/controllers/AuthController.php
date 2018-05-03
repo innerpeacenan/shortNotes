@@ -13,7 +13,7 @@ use nxn\web\SessionManager;
  * Class AuthController
  * @package libary\nxn\web
  * User: xiaoning nan
- * Date: 2017-08-{13}
+ * Date: 2017-08-13
  * Time: xx:xx
  * Description: description
  */
