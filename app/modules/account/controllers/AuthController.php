@@ -5,8 +5,9 @@
  * Date: 8/13/17
  * Time: 9:12 PM
  */
-namespace nxn\web;
+namespace n\modules\account\controller;
 
+use nxn\web\Controller;
 /**
  * Class AuthController
  * @package libary\nxn\web
@@ -32,9 +33,8 @@ class AuthController extends Controller
             // 正常登录 pass
         } else {
             // HTTP_HOST such as： 'www.note.git'
-            // bug: status 不能返回 200, 否则页面有停留在了最初访问的页面了
             $_SESSION['HTTP_REFERER'] = $_SERVER['REQUEST_URI'];
-            header("Location: http://{$_SERVER['HTTP_HOST']}/login/in");
+            header("Location: http://{$_SERVER['HTTP_HOST']}/web/page/account/login.html");
         }
     }
 }

@@ -7,7 +7,7 @@
  */
 namespace n\modules\index\controllers;
 
-use nxn\web\AuthController;
+use n\modules\account\controller\AuthController;
 
 class IndexController extends AuthController
 {

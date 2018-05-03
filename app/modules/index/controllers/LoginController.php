@@ -41,7 +41,7 @@ class LoginController extends Controller
             session_regenerate_id();
             $_SESSION['user_id'] = $user['id'];
             session_set_cookie_params(7 * 24 * 3600, '/', gethostname(), false, true);
-            if (isset($_SESSION['HTTP_REFERER']) and $_SESSION['HTTP_REFERER'] !== '/login/in') {
+            if (isset($_SESSION['HTTP_REFERER']) and $_SESSION['HTTP_REFERER'] !== '/web/page/account/login.html') {
                 $redirect = "http://{$_SERVER['HTTP_HOST']}{$_SESSION['HTTP_REFERER']}";
             } else {
                 $redirect = "http://{$_SERVER['HTTP_HOST']}";
