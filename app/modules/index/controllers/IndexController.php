@@ -11,8 +11,4 @@ use nxn\web\AuthController;
 
 class IndexController extends AuthController
 {
-    public function indexGET()
-    {
-        require(N_APPLICATION . '/app/modules/index/views/index.php');
-    }
 }

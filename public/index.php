@@ -20,7 +20,4 @@ require(__DIR__ .'/../vendor/autoload.php');
 
 require(__DIR__ . '/../libary/nxn/N.php');
 
-// 旧的自动加载类作废
-//require(__DIR__ . '/../libary/nxn/Autoload.php');
-
 (new nxn\web\Application($ini))->run();

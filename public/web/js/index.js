@@ -45,7 +45,6 @@ $(function () {
         computed: {
             // a computed getter
             showMore: function () {
-                // `this` points to the vm instance
                 // 当 limit 参数被设置未0的时候. 表征没有新的内容可以其请求了
                 if (this.item) {
                     return this.item.limit

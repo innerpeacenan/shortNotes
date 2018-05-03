@@ -8,24 +8,12 @@
 namespace n\modules\index\controllers;
 
 use n\models\Users;
+use nxn\web\Ajax;
 use nxn\web\Controller;
 use nxn\web\SessionManager;
 
 class LoginController extends Controller
 {
-    /**
-     * @access
-     * @return void
-     * Description:
-     * 测试通过,header() 方法对页面重新定向
-     * 删除 cookie 测试通过
-     *
-     */
-    public function getIn()
-    {
-        require(N_APPLICATION . '/app/modules/index/views/login.php');
-    }
-
     /**
      * @access
      * @return void
@@ -43,7 +31,7 @@ class LoginController extends Controller
     public function postIn()
     {
         $this->validate();
-        // generate auto_generated_session
+
         $sessionManger = new SessionManager();
         if ($sessionManger->name !== session_name()) {
             session_name($sessionManger->name);
@@ -54,18 +42,19 @@ class LoginController extends Controller
             $_SESSION['user_id'] = $user['id'];
             session_set_cookie_params(7 * 24 * 3600, '/', gethostname(), false, true);
             if (isset($_SESSION['HTTP_REFERER']) and $_SESSION['HTTP_REFERER'] !== '/login/in') {
-                header("Location: http://{$_SERVER['HTTP_HOST']}{$_SESSION['HTTP_REFERER']}");
+                $redirect = "http://{$_SERVER['HTTP_HOST']}{$_SESSION['HTTP_REFERER']}";
             } else {
-                header("Location: http://{$_SERVER['HTTP_HOST']}");
+                $redirect = "http://{$_SERVER['HTTP_HOST']}";
             }
+            Ajax::json(1, ['redirect_to' => $redirect]);
         } else {
+            $err = [];
             if (empty($user)) {
-                $_REQUEST['error']['name'] = "user name is not correct";
+                $err['name'] = "用户名不正确";
             } else if ($_REQUEST['passwd'] != $user['password']) {
-                $_REQUEST['error']['passwd'] = 'password not correct';
+                $err['passwd'] = '密码不正确';
             }
-            // 否则，登录失败，重新登录
-            $this->getIn();
+            Ajax::json(0, ['errorMsg' => json_encode($err)]);
         }
     }
 

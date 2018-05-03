@@ -4,18 +4,18 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/css/bootstrap.css">
-    <link rel="stylesheet" href="/css/index.css">
-<!--    <link href="/css/md.css" rel="stylesheet">-->
-<!--    <script src="http://cdn.bootcss.com/highlight.js/8.0/highlight.min.js"></script>-->
-    <script src="/highlight/highlight.pack.js"></script>
-    <link href="/highlight/styles/github.css" rel="stylesheet">
-    <script src="/js/md.js"></script>
-    <script src="/js/jquery-2.0.2.js"></script>
-    <script src="/js/common.js"></script>
-    <script src="/js/bootstrap.js"></script>
-    <script src="/js/vue-2-3.js"></script>
-    <script src="/js/index.js"></script>
+    <link rel="stylesheet" href="/web/css/bootstrap.css">
+    <link rel="stylesheet" href="/web/css/index.css">
+    <!--    <link href="/css/md.css" rel="stylesheet">-->
+    <script src="/web/highlight/highlight.pack.js"></script>
+    <link href="/web/highlight/styles/github.css" rel="stylesheet">
+    <script src="/web/js/jquery-2.0.2.js"></script>
+    <script src="/web/js/bootstrap.js"></script>
+    <script src="/web/js/md.js"></script>
+    <script src="/web/js/vue-2-3.js"></script>
+    <script src="/web/js/common.js"></script>
+    <script src="/web/js/config/api.js"></script>
+    <script src="/web/js/index.js"></script>
 </head>
 <body>
 <style>
@@ -112,7 +112,7 @@
                         <span v-on:click.stop="" v-on:dblclick="del(index)">
                         <a class="glyphicon glyphicon-trash" title="删除笔记"></a>
                     </span>
-                   </div>
+                    </div>
                     <div>
                     <textarea class="col-xs-12" v-if="note.seen" v-model="note.modifiedContent"
                               v-on:keyup.esc="save(note)"
@@ -143,34 +143,7 @@
 <!------------------------------------------------js------------------------------------------------------------------------- --->
 
 <script>
-    /**
-     * URL 统一管理
-     * @todo 里边的部分地址需要剔除
-     */
-    URL_Manager = {
-        item: "/item/item",
-        items: '/item/items',
-        parentDir: '/item/parent-dir',
-        savefriend: '/item/save-item',
-        rank: '/item/rank',
-        //itemDraft
-        itemDraft: "/item/item-draft",
-        getnotes: '/note/item-notes',
-        movenote: '/note/move-note',
-        savenote: "/note/note",
-        deletenote: "/note/note",
-    };
 
-    /**
-     * 核心,不允许修改这些自有属性
-     */
-    for (prop in URL_Manager) {
-        if (URL_Manager.hasOwnProperty(prop)) {
-            Object.defineProperty(URL_Manager, prop, {
-                writable: false
-            })
-        }
-    }
 
 </script>
 

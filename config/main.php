@@ -11,9 +11,9 @@ return [
             [
                 'class' => 'PDO',
                 'params' => [
-                    'mysql:host=localhost;dbname=notes',
-                    'root',
-                    1111111,
+                    'mysql:host=' . getenv('DB_MASTER_HOST').';port=' . getenv('DB_MASTER_PORT') . ';dbname=' . getenv('DB_MASTER_NAME'),
+                    getenv('DB_MASTER_USER'),
+                    getenv('DB_MASTER_PASS'),
                 ]
             ],
         ],
@@ -21,20 +21,20 @@ return [
             [
                 'class' => 'PDO',
                 'params' => [
-                    'mysql:host=localhost;dbname=notes',
-                    'root',
-                    1111111,
-                ],
-            ]
+                    'mysql:host=' . getenv('DB_MASTER_HOST').';port=' . getenv('DB_MASTER_PORT') . ';dbname=' . getenv('DB_MASTER_NAME'),
+                    getenv('DB_MASTER_USER'),
+                    getenv('DB_MASTER_PASS'),
+                ]
+            ],
         ]
     ],
     'session' => [
         'driver' => getenv('SESSION_DRIVER'),
-        'name' => 'makeLifeEasier',
+        'name' => getenv('SESSION_VALUE'),
     ],
 
     'redis' => [
-        'ip' => '127.0.0.1',
-        'port' => '6379',
+        'ip' => getenv('REDIS_HOST'),
+        'port' => getenv('REDIS_PORT'),
     ]
 ];
