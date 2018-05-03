@@ -5,9 +5,10 @@
  * Date: 8/13/17
  * Time: 9:12 PM
  */
-namespace n\modules\account\controller;
+namespace n\modules\account\controllers;
 
 use nxn\web\Controller;
+use nxn\web\SessionManager;
 /**
  * Class AuthController
  * @package libary\nxn\web

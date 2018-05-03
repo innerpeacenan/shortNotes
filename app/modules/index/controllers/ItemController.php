@@ -5,7 +5,7 @@ use n\models\Items;
 use nxn\debug\VarDumper;
 use nxn\StringHelper;
 use nxn\web\Ajax;
-use n\modules\account\controller\AuthController;
+use n\modules\account\controllers\AuthController;
 use PDO;
 use nxn\db\Query;
 

@@ -3,7 +3,7 @@ namespace n\modules\index\controllers;
 
 use n\models\Notes;
 use nxn\web\Ajax;
-use n\modules\account\controller\AuthController;
+use n\modules\account\controllers\AuthController;
 
 use PDO;
 
