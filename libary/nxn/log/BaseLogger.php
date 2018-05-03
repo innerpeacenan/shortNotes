@@ -24,11 +24,6 @@ class BaseLogger
         fclose(self::$file);
     }
 
-    public function setFile($file = null)
-    {
-
-    }
-
     public function getDateTime()
     {
         return date('YmdHis');
