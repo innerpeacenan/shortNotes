@@ -7,6 +7,7 @@
  */
 namespace n\modules\account\controllers;
 
+use nxn\web\Ajax;
 use nxn\web\Controller;
 use nxn\web\SessionManager;
 /**
@@ -35,7 +36,7 @@ class AuthController extends Controller
         } else {
             // HTTP_HOST such as： 'www.note.git'
             $_SESSION['HTTP_REFERER'] = $_SERVER['REQUEST_URI'];
-            header("Location: http://{$_SERVER['HTTP_HOST']}/web/page/account/login.html");
+            Ajax::json([0, 'redirect_to' => "http://{$_SERVER['HTTP_HOST']}/web/page/account/login.html"]);
         }
     }
 }

@@ -92,6 +92,11 @@ $(function () {
                         }
                         my.notes = 'append' == type ? my.notes.concat(data) : data
                         my.item.offset = my.notes.length
+                    },
+                    error: function (result) {
+                        if(result.data.redirect_to){
+                            window.location.href  = result.data.redirect_to
+                        }
                     }
                 });
             },

@@ -50,4 +50,3 @@ function t(string $k)
 
 
 class_alias('nxn\log\BaseLogger', 'Log');
-register_shutdown_function(['Log', 'writeFile']);

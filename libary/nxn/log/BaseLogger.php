@@ -15,12 +15,16 @@ class BaseLogger
     public static function writeFile()
     {
         $file = N_APPLICATION . '/storage/logs/base' . date('Ymd') . '.log';
+
         if (is_null(self::$file)) {
             self::$file = fopen($file, 'a+');
+            register_shutdown_function(['nxn\log\BaseLogger', 'writeFile']);
         }
-        foreach (self::$contents as $result){
+
+        foreach (self::$contents as $result) {
             fwrite(self::$file, $result . PHP_EOL);
         }
+
         fclose(self::$file);
     }
 
@@ -59,7 +63,6 @@ class BaseLogger
     public function write($message)
     {
         $this->message = $message;
-        $this->setFile();
         $message = self::$format;
         $arrFormat = explode('{', $message);
         $replace = [];
