@@ -15,13 +15,42 @@
 use middleware to display json before page
 
 
+对 items.status 字段做如下调整:
+10 启用
+
+20 暂停
+
+30 归档
 
 
 
 
+增加一个字段, visibleRange
+10 仅在当前目录下可见
+
+20 全局可见
 
 
+alter table items change column `status` `status` tinyint(3) not null default 10 comment '事项状态';
 
+alter table items add column `visible_range` tinyint(3) not null default 10 comment '显示范围';
+
+--- 修复旧数据
+update  items set `visible_range` = 20 where `status` = 1;
+
+update items set `status` = 10  where status in (1, 2);
+
+update items set `status` = 30  where status = 3;
+
+
+代码规范:
+属性名称,数据库的字段名称,数组的键统一采用下划线
+方法名称和变量名称以及类名统一采用驼峰法
+
+
+从前端开始调整:
+(1) 默认的字段模式
+(2) constant 含义更新
 
 
 

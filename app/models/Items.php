@@ -8,7 +8,7 @@ class Items extends ActiveRecord {
     /**
      * 表示全局可见，及在任何一个目录下都可以看到
      */
-    const SHOW_GLOBAL = 1;
+    const SHOW_GLOBAL = 20;
 
     /**
      *  启用
@@ -46,10 +46,31 @@ class Items extends ActiveRecord {
         return $this->_primaryKey;
     }
 
-    public static function getItems($fid)
+    /**
+     * getItems.
+     * @access
+     * @param $fid
+     * @return array
+     * Created by: xiaoning nan
+     * Last Modify: xiaoning nan
+     * Date: xxxx-xx-xx
+     * Time: xx:xx
+     * Description:
+     *
+     */
+    public static function getItems($fid, $status = [])
     {
-        $sql = 'SELECT * FROM `items` WHERE (`status` = :show_global OR `fid` = :fid ) AND `user_id` = :user_id ORDER BY `status` ASC, `rank` DESC';
-        $param = [':show_global' => self::SHOW_GLOBAL, ':fid' => $fid, ':user_id' => $_SESSION['user_id']];
+        $userId = $_SESSION['user_id'];
+        $statusPart = '';
+        if($status){
+            if(count($status) === 1){
+                $statusPart = ' AND `status` = :status ';
+            }else{
+                $statusPart = ' AND `status` in (:status) ';
+            }
+        }
+        $sql = 'SELECT * FROM `items` WHERE `user_id` = :user_id ' . $statusPart.  ' AND (`visible_range` = :show_global OR `fid` = :fid )  ORDER BY `visible_range` DESC, `rank` DESC';
+        $param = [':show_global' => self::SHOW_GLOBAL, ':fid' => $fid, ':user_id' => $userId, ':status' => join(',', $status)];
         return Query::all($sql, $param);
     }
 
@@ -88,7 +109,7 @@ class Items extends ActiveRecord {
      * Created by: xiaoning nan
      * Last Modify: xiaoning nan
      * Description:
-     *
+     * @todo 这种单条的操作应该用 activeRecord更加合适
      */
     public static function rank($from, $to, $rank)
     {
@@ -110,18 +131,28 @@ class Items extends ActiveRecord {
         $params = [':rank' => (float)$rank, ':user_id' => (int)$_SESSION['user_id'], ':dragFrom' => (int)$_REQUEST['dragFrom']];
         $status = Query::execute('UPDATE `items` SET `rank` = :rank WHERE user_id = :user_id AND id = :dragFrom', $params);
         if ($status) {
-            return (int)$rank;
+            return $rank;
         } else {
             return false;
         }
     }
 
+    /**
+     * beforeInsert.
+     * @access
+     * @return void
+     * Created by: xiaoning nan
+     * Last Modify: xiaoning nan
+     * Date: 20180506
+     * Time: xx:xx
+     * Description:
+     */
    public function beforeInsert()
    {
        $this->user_id = $_SESSION['user_id'];
-       $prevId = Query::scalar('select id from items ORDER BY id DESC');
-       $rank = 10 * ($prevId + 1);
-       $this->rank = $rank;
+       $sql = "select rank from items where user_id = :user_id ORDER BY rank DESC";
+       $maxRank = Query::scalar($sql, [':user_id' => $this->user_id]);
+       $this->rank = $maxRank + 2;
    }
 }
 

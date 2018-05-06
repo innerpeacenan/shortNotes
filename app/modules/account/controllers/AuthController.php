@@ -28,7 +28,7 @@ class AuthController extends Controller
             session_name($sessionName);
         }
         $ok = new SessionManager();
-        if (!$ok) throw new \Exception('session manageer error');
+        if (!$ok) throw new \Exception('session manageer error',500);
 
         // 检测cookie 对应的字段，没有，跳转到登录页
         if (isset($_COOKIE[$sessionName], $_SESSION['user_id']) && $_COOKIE[$sessionName] == session_id()) {
@@ -36,7 +36,7 @@ class AuthController extends Controller
         } else {
             // HTTP_HOST such as： 'www.note.git'
             $_SESSION['HTTP_REFERER'] = $_SERVER['REQUEST_URI'];
-            Ajax::json([0, 'redirect_to' => "http://{$_SERVER['HTTP_HOST']}/web/page/account/login.html"]);
+            throw new \Exception('permission deny!', 403);
         }
     }
 }

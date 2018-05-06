@@ -1,13 +1,3 @@
-function getParam(name, url) {
-    if (!url) url = window.location.href;
-    name = name.replace(/[\[\]]/g, "\\$&");
-    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-        results = regex.exec(url);
-    if (!results) return null;
-    if (!results[2]) return '';
-    return decodeURIComponent(results[2].replace(/\+/g, " "));
-}
-
 $(function () {
     /**
      * 加载头部信息
@@ -94,8 +84,8 @@ $(function () {
                         my.item.offset = my.notes.length
                     },
                     error: function (result) {
-                        if(result.data.redirect_to){
-                            window.location.href  = result.data.redirect_to
+                        if (result.data.redirect_to) {
+                            window.location.href = result.data.redirect_to
                         }
                     }
                 });
@@ -134,7 +124,7 @@ $(function () {
             },
             save: function (note) {
                 var my = this
-                // 单击保存的时候，$event 为辅么未 undefine 呢？
+                // 单击保存的时候，$event 为什么是 undefine 呢？
                 if (!note.item_id) {
                     // l('note' + note.id + '.item_id is 0');
                     return
@@ -358,7 +348,7 @@ $(function () {
                         // fix bug about rank error
                         rankVal = parseFloat(my.items[toIndex].rank) + 1 / 3;
                     } else {
-                        console.log(2, my.items[toIndex].id + ":" + my.items[toIndex].rank, my.items[toIndex - 1].id + ":" + parseFloat(my.items[toIndex - 1].rank) );
+                        console.log(2, my.items[toIndex].id + ":" + my.items[toIndex].rank, my.items[toIndex - 1].id + ":" + parseFloat(my.items[toIndex - 1].rank));
                         rankVal = (parseFloat(my.items[toIndex].rank) + parseFloat(my.items[toIndex - 1].rank)) / 2;
                     }
                 } else if (parseFloat(dragFrom.rank) > parseFloat(dragTo.rank)) {// 55->8
@@ -385,7 +375,6 @@ $(function () {
                         my.sort()
                     }
                 });
-
             },
             toggleStatus: function (item, index) {
                 var my = this;

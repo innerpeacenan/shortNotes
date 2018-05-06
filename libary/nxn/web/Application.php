@@ -137,7 +137,23 @@ class Application extends Container
 
     public function run()
     {
-        return $this->runAction();
+        try{
+            return $this->runAction();
+        }catch (\Exception $e){
+            $msg = $e->getMessage();
+            $code = $e->getCode();
+            $header = [];
+            Ajax::json($code, [], $msg, 403);
+        }catch (\Throwable $err){
+            $msg =  $err->getMessage();
+            $code = $err->getCode();
+            if(empty($code)){
+                $code = 500;
+            }
+            Log::error($err->getTraceAsString());
+            Ajax::json($code, [], $msg, 500);
+        }
+
     }
 
 

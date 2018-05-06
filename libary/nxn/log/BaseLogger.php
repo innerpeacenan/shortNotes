@@ -18,7 +18,6 @@ class BaseLogger
 
         if (is_null(self::$file)) {
             self::$file = fopen($file, 'a+');
-            register_shutdown_function(['nxn\log\BaseLogger', 'writeFile']);
         }
 
         foreach (self::$contents as $result) {

@@ -21,11 +21,12 @@ class Ajax
      * @access
      * @return string
      */
-    public static function json($status, $data = [], $message = '')
+    public static function json($status, $data = [], $message = '', $responseCode = 200, $header = [])
     {
         $row = ['status' => $status, 'data' => $data, 'msg' => $message];
         // 返回JSON数据格式到客户端 包含状态信息
         if (!headers_sent()) {
+            http_response_code ($responseCode);
             header('Content-Type:application/json; charset=utf-8');
 //   傻了,我说之前怎么没有输出,都没有 echo ,怎么会有输出呢?哈哈
             if (!getenv('N_TEST')){

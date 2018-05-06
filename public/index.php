@@ -17,6 +17,9 @@ defined('N_APPLICATION') or define('N_APPLICATION', __DIR__ . '/..');
 $ini = require(__DIR__ . '/../config/main.php');
 
 require(__DIR__ .'/../vendor/autoload.php');
+
+
+
 require(__DIR__ . '/../config/helper.php');
 require(__DIR__ . '/../libary/nxn/N.php');
 

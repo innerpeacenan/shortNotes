@@ -46,7 +46,7 @@ class LoginController extends Controller
             } else {
                 $redirect = "http://{$_SERVER['HTTP_HOST']}";
             }
-            Ajax::json(1, ['redirect_to' => $redirect]);
+            Ajax::json(1, ['redirect_to' => $redirect], '进入主页',302);
         } else {
             $err = [];
             if (empty($user)) {

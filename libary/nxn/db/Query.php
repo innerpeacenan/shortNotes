@@ -7,6 +7,8 @@
  */
 namespace nxn\db;
 
+
+use Log;
 /**
  * Description: description
  */
@@ -31,6 +33,12 @@ class Query
 
     public static function bindParams($sql, $params)
     {
+        if(isset($counter)){
+            $counter++;
+        }else{
+            static $counter = 1;
+        }
+
         if ($params) {
             // quote params first
             foreach ($params as $name => $param) {
@@ -38,6 +46,7 @@ class Query
             }
             $sql = strtr($sql, $params);
         }
+        Log::info('sql '. $counter . ' with bind params, sql is:' . $sql);
         return $sql;
     }
 

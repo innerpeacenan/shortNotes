@@ -1,4 +1,5 @@
 <?php
+
 namespace n\modules\index\controllers;
 
 use n\models\Items;
@@ -6,6 +7,7 @@ use nxn\debug\VarDumper;
 use nxn\web\Ajax;
 use n\modules\account\controllers\AuthController;
 use Log;
+
 /**
  * Class AjaxController
  * @package n\modules\index
@@ -17,11 +19,22 @@ use Log;
 class ItemController extends AuthController
 {
 
+    const STATUS_ENALBE = 10;
+    const STATUS_STAGING = 20;
+    const STATUS_DRAFT = 30;
+
+    // 可见范围,全局可见
+    const show_global = 20;
+    // 可见范围, 只在父目录下可见
+    const show_inside_parent = 10;
+
     public function getItems()
     {
-        $fid = isset($_REQUEST['fid']) ? intval($_REQUEST['fid']) : 0;
-        $result = Items::getItems($fid);
-        Log::info(__METHOD__);
+        $fid = empty($_REQUEST['fid']) ? 0 : intval($_REQUEST['fid']);
+        Log::info(json_encode($_REQUEST, 256));
+        $status = $_REQUEST['status'];
+        $status = empty($status) ? [self::STATUS_ENALBE] : (is_string($status) ? [$status] : $status);
+        $result = Items::getItems($fid, $status);
         Ajax::json(true, $result, "success");
     }
 
@@ -37,17 +50,13 @@ class ItemController extends AuthController
      * request params:
      * [ 'id' => 'item id', 'name' => 'item name', 'fid' => 'parent id' ]
      */
-    public function putItems()
+    public function putItem()
     {
         $_REQUEST['fid'] = $_REQUEST['fid'] ?? 0;
         $item = new Items();
         $item->setAttributes($_REQUEST);
         $status = $item->save(false);
-        if ($status) {
-            Ajax::json($status, ['id' => $item->id]);
-        } else {
-            Ajax::json($status, ['id' => $item->id]);
-        }
+        Ajax::json($status, ['id' => $item->id]);
     }
 
 

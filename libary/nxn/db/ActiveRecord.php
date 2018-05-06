@@ -85,6 +85,7 @@ class ActiveRecord
     protected $_validator;
     /**
      * @var array
+     *  mysql type vs php type
      */
     protected static $_typeCast = [
         'int' => 'integer',
@@ -94,7 +95,8 @@ class ActiveRecord
         'text' => 'string',
         'timestamp' => 'string',
         'enum' => 'string',
-        'decimal' => 'double'
+        'decimal' => 'double',
+        'float' => 'float',
     ];
 
     public function __construct()
