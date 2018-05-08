@@ -23,7 +23,7 @@ class AuthController extends Controller
     public function beforeAction()
     {
         // 这只session_name
-        $sessionName = 'makeLifeEasier';
+        $sessionName = getenv('SESSION_VALUE');
         if ($sessionName !== session_name()) {
             session_name($sessionName);
         }

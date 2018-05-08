@@ -320,6 +320,4 @@ class VarDumper
 
         return '/^' . $string . '$/s';
     }
-
-// @todo version compare 函数 http://php.net/manual/en/function.version-compare.php
 }

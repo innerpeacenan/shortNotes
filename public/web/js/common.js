@@ -64,3 +64,11 @@ function readCookie(name) {
 function eraseCookie(name) {
     createCookie(name, "", -1);
 }
+
+
+$(document)
+    .bind("ajaxError", function (event, jqXHR, ajaxSettings, thrownError) {
+        if (403 == jqXHR.status) {
+            window.location.href = '/web/page/account/login.html';
+        }
+    })

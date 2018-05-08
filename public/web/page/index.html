@@ -31,25 +31,20 @@
 
 <div class="clearfix"></div>
 
-<div id="ffz_app">
-    <items-panel></items-panel>
-    <notes-panel></notes-panel>
+<div id="ffz_app" title="一个简易的todolist">
+    <div v-bind:class="seen_items == 1 ? 'col-lg-4' : 'hide'">
+        <items-panel></items-panel>
+    </div>
+
+    <div title="同时按下<CtrL>和<ENTER>,可隐藏或显示左侧导航栏" v-bind:class="seen_items == 1 ? 'col-lg-8' : 'col-lg-12'" tabindex="0"  v-on:keyup.ctrl.enter="toggleItemsTab()">
+        <notes-panel></notes-panel>
+    </div>
 </div>
 
 
 
 
 <script type="application/javascript">
-        $(document)
-            .bind("ajaxError", function(event, jqXHR, ajaxSettings, thrownError){
-//            console.log('status', jqXHR.status, 'thrownError:' , thrownError);
-            if(403 == jqXHR.status){
-                window.location.href = '/web/page/account/login.html';
-            }
-        })
-
-
-
     // 统一的全局状态管理
     var VGLOBAL = new Vue();
 
@@ -179,6 +174,8 @@
                             });
                         }
                         my.items = data;
+                        // 你监听还没不监听,我就是要通知,就是这么任性
+                        VGLOBAL.$emit('items-change', my.items);
                     },
                     error: function (data) {
                         console.log(data)
@@ -231,7 +228,6 @@
                             item.id = result.data.id;
                         }
                         item.seen = !item.seen;
-                        VGLOBAL.$emit('items-change', my.items);
                     }
                 })
             },
@@ -363,7 +359,7 @@
             }
         },
         template: `
-<div class="col-xs-12 col-lg-4" id="j_items">
+<div>
     <div class="panel panel-primary">
         <div class="panel-heading">
             <span class="glyphicon glyphicon-list"></span>事项列表
@@ -453,6 +449,11 @@
                 my.item = item;
                 my.items = items;
                 my.doGetNotes(item)
+            });
+
+            VGLOBAL.$on('items-change', function (items) {
+                console.log('item-change', 'my.item', my.item)
+                my.items = items;
             });
 
             // 如果当前的笔记显示的是要删除的item的，则清空相关所有笔记
@@ -631,13 +632,13 @@
 
         template: `
 <div class="panel-heading">
-    <div  class="col-xs-12 col-lg-8">
+    <div>
         <ul>
-            <li v-for="(note,index) in notes" :id="'note_' + note.id">
+            <li v-for="(note,index) in notes" title="笔记唯一编号" :id="'note_' + note.id">
                 <span>{{note.id}}</span>
-                <span class="hidden-xs">{{note.c_time}}</span>
+                <span class="hidden-xs" title="创建时间">{{note.c_time}}</span>
                 <span>
-                <select class="items" v-model="note.item_id" @change="mv(note,index)">
+                <select title="选择其他目录,则自动将笔记移动到其他目录下了" class="items" v-model="note.item_id" @change="mv(note,index)">
                     <template v-if="note.item_id == item.id">
                     <option v-for="item in items" :value="item.id" selected>{{item.name}}</option>
                     </template>
@@ -685,8 +686,14 @@
 
 new Vue({
     el: '#ffz_app',
-    data: {},
+    data: {
+        seen_items : 1,
+    },
     methods: {
+        toggleItemsTab : function () {
+            console.log('toggleItemsTab trigger')
+            this.seen_items = this.seen_items == 1 ? 0 : 1 ;
+        }
         // 子组件变化通知到父组件, 父组件变化在通知到另外一个子组件
     },
     components: {

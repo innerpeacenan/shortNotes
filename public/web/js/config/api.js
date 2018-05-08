@@ -17,7 +17,7 @@ var URL_Manager = {
 };
 
 /**
- * 核心,不允许修改这些自有属性
+ * 不允许修改这些自有属性
  */
 for (prop in URL_Manager) {
     if (URL_Manager.hasOwnProperty(prop)) {
