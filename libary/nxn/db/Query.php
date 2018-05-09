@@ -5,10 +5,12 @@
  * Date: 2/17/17
  * Time: 9:28 PM
  */
+
 namespace nxn\db;
 
 
 use Log;
+
 /**
  * Description: description
  */
@@ -33,9 +35,9 @@ class Query
 
     public static function bindParams($sql, $params)
     {
-        if(isset($counter)){
+        if (isset($counter)) {
             $counter++;
-        }else{
+        } else {
             static $counter = 1;
         }
 
@@ -46,7 +48,7 @@ class Query
             }
             $sql = strtr($sql, $params);
         }
-        Log::info('sql '. $counter . ' with bind params, sql is:' . $sql);
+        Log::info('sql ' . $counter . ' with bind params, sql is:' . $sql);
         return $sql;
     }
 
@@ -69,13 +71,24 @@ class Query
      * @param array $params
      * @return bool|mixed
      */
-    public static function scalar(string $sql, array $params = [])
+    public static function column(string $sql, array $params = [])
     {
         $sql = self::bindParams($sql, $params);
         //@TODO add here here where used log
         $st = static::getSlaveDb()->query($sql);
         if (false === $st) return false;
-        return $row = $st->fetch(\PDO::FETCH_COLUMN);
+        $row = $st->fetch(\PDO::FETCH_COLUMN);
+        \Log::info(__METHOD__ . ':' . json_encode($row, JSON_UNESCAPED_UNICODE));
+        return $row;
+    }
+
+    public static function scalar(string $sql, array $params = [])
+    {
+        $row = self::column($sql, $params = []);
+        if (empty($row)) {
+            return false;
+        }
+        return reset($row);
     }
 
     /**
@@ -98,7 +111,16 @@ class Query
     }
 
 
+    public static function KeyPair(string $sql, array $params = [])
+    {
+        $sql = self::bindParams($sql, $params);
+        $st = static::getSlaveDb()->query($sql);
+        if (false === $st) return [];
+        return $st->fetchAll(\PDO::FETCH_ASSOC | \PDO::FETCH_KEY_PAIR);
+    }
+
     /**
+     * @deprecated
      * for example: if the sql is: `select id ,name from user`,the the reult will be
      * [ 'id1' => 'name1', 'id2' => 'name2]]
      * @param string $sql

@@ -4,7 +4,7 @@ namespace nxn\log;
 
 class BaseLogger
 {
-    public static $format = '{DateTime} callplace:{CallPlace} message:{Message}';
+    public static $format = ' {DateTime} {DrrorType} callplace:{CallPlace} message:{Message}';
 
     public $message = '';
 
@@ -37,6 +37,11 @@ class BaseLogger
         return $this->message;
     }
 
+    public function getErrorType($errorType)
+    {
+        return str_replace(' ', '', $errorType);
+    }
+
     /**
      * 获取调用地点
      * @return string
@@ -59,7 +64,7 @@ class BaseLogger
         return $file . ':' . $line;
     }
 
-    public function write($message)
+    public function write($message, $errorType)
     {
         $this->message = $message;
         $message = self::$format;
@@ -82,6 +87,6 @@ class BaseLogger
     public static function __callstatic($method, $parameters)
     {
         $instance = new static();
-        $instance->write(reset($parameters));
+        $instance->write(reset($parameters), $method);
     }
 }

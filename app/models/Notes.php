@@ -1,4 +1,5 @@
 <?php
+
 namespace n\models;
 
 use nxn\db\ActiveRecord;
@@ -39,6 +40,21 @@ class Notes extends ActiveRecord
     public static function deleteNotes($item_id)
     {
         return Query::execute('DELETE FROM notes WHERE item_id = :item_id', [':item_id' => $item_id]);
+    }
+
+    public static function checkNoteBelongsToUser($noteId, $userId)
+    {
+        $params = [':note_id' => $noteId, ':use_id' => $userId];
+        $sql = 'select `item_id` from notes where note_id = :note_id limit 1';
+        $itemId = Query::scalar($sql, $params);
+        if (empty($itemId)) {
+            throw new \Exception('该笔记对应事项已经被删除', 402);
+        }
+        \Log::info('item_id' . $itemId);
+        $sql = 'select `user_id` from `items where id = :id `';
+        $params = [':id' => $itemId];
+        $actualUserId = Query::scalar($sql, $params);
+        return (int)$actualUserId === (int)$userId;
     }
 
 }

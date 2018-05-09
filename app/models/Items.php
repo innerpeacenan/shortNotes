@@ -155,7 +155,3 @@ class Items extends ActiveRecord {
        $this->rank = $maxRank + 2;
    }
 }
-
-// from to
-//427 -> 441
-// 441 > 427 427
