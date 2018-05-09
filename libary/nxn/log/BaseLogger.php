@@ -4,7 +4,7 @@ namespace nxn\log;
 
 class BaseLogger
 {
-    public static $format = ' {DateTime} {DrrorType} callplace:{CallPlace} message:{Message}';
+    public static $format = ' {DateTime} {ErrorType} callplace:{CallPlace} message:{Message}';
 
     public $message = '';
 
@@ -37,6 +37,19 @@ class BaseLogger
         return $this->message;
     }
 
+    public function setMessage($message)
+    {
+        if (is_scalar($message)) {
+            $this->message = (string)$message;
+        } elseif (is_object($message) && method_exists($message, '__tostring')) {
+            $this->message = $message->__tostirng();
+        } elseif (is_resource($message)) {
+            $this->message = '';
+        } else {
+            $this->message = json_encode($message, JSON_UNESCAPED_UNICODE);
+        }
+    }
+
     public function getErrorType($errorType)
     {
         return str_replace(' ', '', $errorType);
@@ -66,7 +79,7 @@ class BaseLogger
 
     public function write($message, $errorType)
     {
-        $this->message = $message;
+        $this->setMessage($message);
         $message = self::$format;
         $arrFormat = explode('{', $message);
         $replace = [];
@@ -77,7 +90,11 @@ class BaseLogger
             $split = substr($split, 0, strpos($split, '}'));
             $method = 'get' . ucfirst($split);
             if (method_exists($this, $method)) {
-                $replace['{' . $split . '}'] = $this->{$method}();
+                if ($method === 'getErrorType') {
+                    $replace['{' . $split . '}'] = $this->getErrorType($errorType);
+                } else {
+                    $replace['{' . $split . '}'] = $this->{$method}();
+                }
             }
         }
         $result = strtr($message, $replace);
