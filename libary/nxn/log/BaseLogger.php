@@ -52,7 +52,7 @@ class BaseLogger
 
     public function getErrorType($errorType)
     {
-        return str_replace(' ', '', $errorType);
+        return $errorType;
     }
 
     /**
