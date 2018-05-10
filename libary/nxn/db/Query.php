@@ -60,6 +60,7 @@ class Query
     public static function one(string $sql, array $params = [])
     {
         $sql = self::bindParams($sql, $params);
+
         $st = static::getSlaveDb()->query($sql);
         if (false === $st) return [];
         return $row = $st->fetch(\PDO::FETCH_ASSOC);
@@ -71,7 +72,7 @@ class Query
      * @param array $params
      * @return bool|mixed
      */
-    public static function column(string $sql, array $params = [])
+    public static function scalar(string $sql, array $params = [])
     {
         $sql = self::bindParams($sql, $params);
         //@TODO add here here where used log
@@ -82,14 +83,6 @@ class Query
         return $row;
     }
 
-    public static function scalar(string $sql, array $params = [])
-    {
-        $row = self::column($sql, $params = []);
-        if (empty($row)) {
-            return false;
-        }
-        return reset($row);
-    }
 
     /**
      * @param string $sql the sql statement being excuted

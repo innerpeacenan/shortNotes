@@ -12,7 +12,7 @@ use nxn\db\Query;
  * Description: description
  * tag 一旦创建,只能设置无效,不能删除,这是为了保证关系数据的完整新
  */
-class Tag extends ActiveRecord
+class Tags extends ActiveRecord
 {
     const SATUS_ENABLE = 10;
     const STATUS_DISABLE = 20;
@@ -31,22 +31,29 @@ class Tag extends ActiveRecord
 
     public static function addNoteTag($noteId, $tagId, $userId)
     {
-        $params = [':note_id' => $noteId, ':tag_id' => $tagId, ':use_id' => $userId];
+        $params = [':note_id' => $noteId, ':tag_id' => $tagId, ':user_id' => $userId];
+
         // 检查tag 是否属于user,
-        $sql = 'select * from `tag_user_rel` WHere `tag_id` = :tag_id AND `user_id` = :user_id';
+        $sql = 'select * from `tag_user_rel` WHere `tag_id` = :tag_id AND `user_id` = :user_id limit 1';
         if (!Query::one($sql, $params)) {
             throw  new \Exception('该tag不属于该用户', '402');
         }
+
+
         // 检查 notes_id 是否属于该用户
-        if (Notes::checkNoteBelongsToUser($noteId, $userId)) {
+        if (!Notes::checkNoteBelongsToUser($noteId, $userId)) {
             throw new \Exception('该笔记不属于该用户', 402);
         };
-        // 检查tag是否已经添加过
-        $sql = 'select * from `notes_tag_rel` where `note_id` = : note_id and `tag_id` = :tag_id ';
+
+        // 检查tag是否已经添加过  array ( ':note_id' => '291', ':tag_id' => 1, ':user_id' => '1', )
+        $sql = 'select * from `notes_tag_rel` where `note_id` = :note_id and `tag_id` = :tag_id';
+
         if (Query::one($sql, $params)) {
             // 添加过就直接返回
+
             return 1;
         }
+
         $sql = 'insert into `notes_tag_rel` (`note_id`, `tag_id`) VALUES (:note_id, :tag_id)';
         $result = Query::execute($sql, $params);
         return $result;

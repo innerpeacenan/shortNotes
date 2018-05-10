@@ -33,16 +33,15 @@ class Notes extends ActiveRecord
         if (!isset($opt['offset'])) $opt['offset'] = 0;
         if (!isset($opt['limit'])) $opt['limit'] = 10;
         // 这里暂时过滤加成的标签
-        $tagfilter = [Tag::$defaultTags['done']];
+        $tagfilter = [Tags::$defaultTags['done']];
         //@todo check if items belongs to user
         $sql = 'SELECT * FROM `notes` WHERE `item_id` = :item_id ORDER BY `c_time` DESC LIMIT :limit OFFSET :offset';
         $params = [':item_id' => (int)$item_id, ':offset' => (int)$opt['offset'], ':limit' => (int)$opt['limit']];
         $notes = Query::all($sql, $params);
         // 先保证功能能用起来
-        return $notes;
         foreach ($notes as $key => &$v) {
             $params = [':note_id' => $v['id']];
-            $sql = 'select r.`id`, t.`name` from `notes_tag_rel` as r INNER join `tag` as t on r.tag_id = t.id WHERE r.`note_id` = :note_id';
+            $sql = 'select r.`id`, t.`name` from `notes_tag_rel` as r INNER join `tags` as t on r.tag_id = t.id WHERE r.`note_id` = :note_id';
             $tags = Query::all($sql, $params);
             \Log::tags($tags);
             $v['tags'] = $tags;
@@ -62,14 +61,15 @@ class Notes extends ActiveRecord
 
     public static function checkNoteBelongsToUser($noteId, $userId)
     {
-        $params = [':note_id' => $noteId, ':use_id' => $userId];
-        $sql = 'select `item_id` from notes where note_id = :note_id limit 1';
+        $params = [':note_id' => $noteId, ':user_id' => $userId];
+        $sql = 'select `item_id` from notes where id = :note_id limit 1';
+
         $itemId = Query::scalar($sql, $params);
         if (empty($itemId)) {
             throw new \Exception('该笔记对应事项已经被删除', 402);
         }
         \Log::info('item_id' . $itemId);
-        $sql = 'select `user_id` from `items where id = :id `';
+        $sql = 'select `user_id` from `items` where `id` = :id';
         $params = [':id' => $itemId];
         $actualUserId = Query::scalar($sql, $params);
         return (int)$actualUserId === (int)$userId;

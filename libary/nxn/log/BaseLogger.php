@@ -4,7 +4,8 @@ namespace nxn\log;
 
 class BaseLogger
 {
-    public static $format = ' {DateTime} {ErrorType} callplace:{CallPlace} message:{Message}';
+    public static $format = ' {DateTime} errorType:{ErrorType} callplace:{CallPlace} message:{Message}';
+    private static $request;
 
     public $message = '';
 
@@ -12,19 +13,37 @@ class BaseLogger
 
     protected static $file;
 
+
     public static function writeFile()
     {
-        $file = N_APPLICATION . '/storage/logs/base' . date('Ymd') . '.log';
-
-        if (is_null(self::$file)) {
+        if (!empty(self::$contents)) {
+            $dir = N_APPLICATION . '/storage/logs/base/';
+            if (!is_dir($dir)) {
+                throw new \Exception('directory:[' . $dir .
+                    '] should exists and writeble, it can not be created automatically!', 500);
+            }
+            $file = $dir . date('Ymd') . '.log';
             self::$file = fopen($file, 'a+');
+            foreach (self::$contents as $result) {
+                fwrite(self::$file, $result . PHP_EOL);
+            }
+            fclose(self::$file);
         }
 
-        foreach (self::$contents as $result) {
-            fwrite(self::$file, $result . PHP_EOL);
+        if (!empty(self::$request)) {
+            $dir = N_APPLICATION . '/storage/logs/request/';
+            if (!is_dir($dir)) {
+                throw new \Exception('directory:[' . $dir .
+                    '] should exists and writeble, it can not be created automatically!', 500);
+            }
+            $file = $dir . date('Ymd') . '.log';
+            self::$file = fopen($file, 'a+');
+            foreach (self::$request as $result) {
+                fwrite(self::$file, $result . PHP_EOL);
+            }
+            fclose(self::$file);
         }
 
-        fclose(self::$file);
     }
 
     public function getDateTime()
@@ -64,17 +83,24 @@ class BaseLogger
         $stack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 8);
         $file = '';
         $line = '';
+        $class = '';
         foreach ($stack as $key => $trace) {
             if ($trace['file'] === __FILE__) {
                 continue;
             }
+            if (strpos($trace['file'], 'nxn/db/Query.php')) {
+                continue;
+            }
             $file = isset($trace['file']) ? $trace['file'] : $file;
             $line = isset($trace['line']) ? $trace['line'] : $line;
-            if (isset($trace['class']) && strpos($trace['class'], 'Yunniao') === false) {
+
+            if (isset($trace['class']) && strpos($trace['class'], 'nxn\db\Query') == false) {
+                $class = $trace['class'];
                 break;
             }
+
         }
-        return $file . ':' . $line;
+        return $file . ':' . $line . ':' . $class;
     }
 
     public function write($message, $errorType)
@@ -98,7 +124,12 @@ class BaseLogger
             }
         }
         $result = strtr($message, $replace);
-        self::$contents[] = $result;
+        if (strtolower($errorType) == 'request') {
+            self::$request[] = $result;
+        } else {
+            self::$contents[] = $result;
+        }
+
     }
 
     public static function __callstatic($method, $parameters)

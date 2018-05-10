@@ -132,6 +132,7 @@ class Application extends Container
             echo '400 bad request,invalide action name' . json_encode($this->router['action'],256);
             exit();
         }        // 解析 action 的类名称
+        \Log::request('path:[' . $_SERVER['REQUEST_URI'] . '],params:[' . json_encode($_REQUEST, JSON_UNESCAPED_UNICODE) . ']');
         return call_user_func([$this->controller, $this->router['action']]);
     }
 
@@ -150,7 +151,7 @@ class Application extends Container
             if(empty($code)){
                 $code = 500;
             }
-            Log::error($err->getTraceAsString());
+            \Log::error($err->getTraceAsString());
             Ajax::json($code, [], $msg, $code);
         }
 

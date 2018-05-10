@@ -73,6 +73,7 @@ CREATE TABLE `tags` (
   ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
+insert into `tags` (id,name,tag_status) VALUES (1,'todo', '20'),(2,'done', '20');
 
 CREATE TABLE `notes_tag_rel` (
   `id`      BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -96,3 +97,7 @@ CREATE TABLE `tag_user_rel` (
 )
   ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
+
+
+INSERT into `tag_user_rel` (tag_id, user_id) VALUES (1, 1), (2, 1);
+

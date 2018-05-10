@@ -626,7 +626,8 @@
                 VGLOBAL.$emit('item-update-limit-and-offset', this.item);
                 this.doGetNotes(this.item, type = 'append')
             },
-            done: function (note){
+            done: function (note, index){
+                var my = this;
                 $.ajax({
                     type: 'PUT',
                     url: URL_Manager.noteDone,
@@ -652,7 +653,7 @@
                 <span>{{note.id}}</span>
                 <span class="hidden-xs" title="创建时间">{{note.c_time}}</span>
                 <span>
-                    <select title="选择其他目录,则自动将笔记移动到其他目录下了" class="items" v-model="note.item_id" @change="mv(note,index)">
+                    <select title="选择其他目录,则自动将笔记移动到其他目录下了" class="items" v-model="note.item_id" @change="mv(note,index)" >
                         <template v-if="note.item_id == item.id">
                             <option v-for="item in items" :value="item.id" selected>{{item.name}}</option>
                             </template>
@@ -662,8 +663,8 @@
                     </select>
                 </span>
                 <div class="pull-right action-buttons">
-                <span v-on:click.stop="done(note)">
-                    <input type="checkbox"  title="标记完成"/>
+                <span v-on:click.stop="done(note, index)">
+                    <input type="checkbox"  title="标记完成" v-model="note.isChecked" />
                 </span>
                 <span v-on:click.stop="add()">
                     <a class="glyphicon glyphicon-plus-sign" title="添加笔记">
@@ -705,6 +706,16 @@
         el: '#ffz_app',
         data: {
             seen_items: 1,
+        },
+        computed: {
+            // 不设置该值, 会造成 checkbox 保留上次被操作的状态,这不是我想要的
+            isChecked: function () {
+                if(this.seen) {
+                    return 0;
+                }else{
+                    return 1;
+                }
+            }
         },
         methods: {
             toggleItemsTab: function () {
