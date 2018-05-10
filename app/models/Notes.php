@@ -32,9 +32,25 @@ class Notes extends ActiveRecord
     {
         if (!isset($opt['offset'])) $opt['offset'] = 0;
         if (!isset($opt['limit'])) $opt['limit'] = 10;
-        $sql = 'SELECT * FROM `notes` WHERE `item_id` = :item_id ORDER BY `c_time` DESC LIMIT :limit OFFSET :offset';
+        // 这里暂时过滤加成的标签
+        $tagfilter = [Tag::$defaultTags['done']];
+        //@todo check if items belongs to user
+        $sql = 'SELECT * FROM `notes WHERE `item_id` = :item_id ORDER BY `c_time` DESC LIMIT :limit OFFSET :offset';
         $params = [':item_id' => (int)$item_id, ':offset' => (int)$opt['offset'], ':limit' => (int)$opt['limit']];
-        return Query::all($sql, $params);
+        $notes = Query::all($sql, $params);
+        foreach ($notes as $key => &$v) {
+            $params = [':note_id' => ];
+            $sql = 'select r.`id`, t.`name` from `notes_tag_rel` as r INNER join `tag` as t on r.tag_id = t.id WHERE r.`note_id` = :note_id';
+            $tags = Query::all($sql, $params);
+            \Log::tags($tags);
+            $v['tags'] = $tags;
+            foreach ($v['tags'] as $tag) {
+                if (in_array($tag['id'], $tagfilter)) {
+                    unset($v);
+                }
+            }
+        }
+        return array_values($notes);
     }
 
     public static function deleteNotes($item_id)

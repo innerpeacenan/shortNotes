@@ -16,19 +16,20 @@ class Tag extends ActiveRecord
 {
     const SATUS_ENABLE = 10;
     const STATUS_DISABLE = 20;
-    private static $defaultTags = [
+
+    public static $defaultTags = [
         'todo' => 1,
         'done' => 2
     ];
 
-    public function getTags($userId)
+    public static function getTags($userId)
     {
         $tagSql = 'select id,name from tags where user_id = :user_id';
         $results = Query::all($tagSql, $userId);
         return $results;
     }
 
-    public function addNoteTag($noteId, $tagId, $userId)
+    public static function addNoteTag($noteId, $tagId, $userId)
     {
         $params = [':note_id' => $noteId, ':tag_id' => $tagId, ':use_id' => $userId];
         // 检查tag 是否属于user,
@@ -51,7 +52,7 @@ class Tag extends ActiveRecord
         return $result;
     }
 
-    public function removeNoteTag($noteId, $tagId, $userId)
+    public static function removeNoteTag($noteId, $tagId, $userId)
     {
         // 检查note是否处于该用户
         if (Notes::checkNoteBelongsToUser($noteId, $userId)) {
@@ -64,7 +65,7 @@ class Tag extends ActiveRecord
         return $result;
     }
 
-    public function disableTag($tagId, $userId)
+    public static function disableTag($tagId, $userId)
     {
         $params = [':tag_id' => $tagId, ':use_id' => $userId];
         // 检查tag 是否属于user,
@@ -77,7 +78,7 @@ class Tag extends ActiveRecord
         return Query::execute($sql, $params);
     }
 
-    public function toggleTodoAndDone($noteId, $userId, $tagId)
+    public static function toggleTodoAndDone($noteId, $userId, $tagId)
     {
         if (!in_array($tagId, self::$defaultTags)) {
             throw new \Exception('tag_id should be either todo or done!, shoule in:'

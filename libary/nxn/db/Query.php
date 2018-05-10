@@ -111,7 +111,7 @@ class Query
     }
 
 
-    public static function KeyPair(string $sql, array $params = [])
+    public static function keyPair(string $sql, array $params = [])
     {
         $sql = self::bindParams($sql, $params);
         $st = static::getSlaveDb()->query($sql);

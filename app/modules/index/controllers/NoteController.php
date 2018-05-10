@@ -2,6 +2,7 @@
 namespace n\modules\index\controllers;
 
 use n\models\Notes;
+use n\models\Tag;
 use nxn\web\Ajax;
 use n\modules\account\controllers\AuthController;
 
@@ -103,6 +104,14 @@ class NoteController extends AuthController
         l(['type_of_item_id' => $note->item_id]);;
         $status = $note->update(false);
         l(['status' => $status]);
+        Ajax::json($status);
+    }
+
+    public function putNoteDown(){
+        $noteId = $_REQUEST['note_id'];
+        $tagId = 1;
+        $userId = $_SESSION['user_id'];
+        $status = tag::addNoteTag($noteId, $tagId, $userId);
         Ajax::json($status);
     }
 }

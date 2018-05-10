@@ -36,12 +36,11 @@
         <items-panel></items-panel>
     </div>
 
-    <div title="同时按下<CtrL>和<ENTER>,可隐藏或显示左侧导航栏" v-bind:class="seen_items == 1 ? 'col-lg-8' : 'col-lg-12'" tabindex="0"  v-on:keyup.ctrl.enter="toggleItemsTab()">
+    <div title="同时按下<CtrL>和<ENTER>,可隐藏或显示左侧导航栏" v-bind:class="seen_items == 1 ? 'col-lg-8' : 'col-lg-12'" tabindex="0"
+         v-on:keyup.ctrl.enter="toggleItemsTab()">
         <notes-panel></notes-panel>
     </div>
 </div>
-
-
 
 
 <script type="application/javascript">
@@ -72,40 +71,40 @@
         data: function () {
             // 这些是什么含义? 没有注释啊
             return {
-                settings :{
-                    perpage:10 //设置首次加载个数
+                settings: {
+                    perpage: 10 //设置首次加载个数
 
                 },
                 // 项目用到的常量都放到这里
-                constant:{
-                     visible_range : {
+                constant: {
+                    visible_range: {
                         show_global: {
                             code: 20,
-                            desc:"全局显示"
+                            desc: "全局显示"
                         },
-                        show_inside_parent:{
-                            code:10,
-                            desc:"只在父items下可见"
+                        show_inside_parent: {
+                            code: 10,
+                            desc: "只在父items下可见"
                         }
                     },
-                    status:{
+                    status: {
                         enable: {
-                            code:10,
-                            desc:"启用"
+                            code: 10,
+                            desc: "启用"
                         },
                         staging: {
-                            code:20,
-                            desc:"暂存"
+                            code: 20,
+                            desc: "暂存"
                         },
                         draft: {
                             code: 30,
-                            desc:"归档"
+                            desc: "归档"
                         }
                     }
                 },
-                runtimeState:{
+                runtimeState: {
                     fid: '',
-                    drag_from:{}, // 拖动的item
+                    drag_from: {}, // 拖动的item
                     drag_to: {},  // 要拖动到的item
                 },
                 currentItem: '',
@@ -114,21 +113,21 @@
             }
         },
         prop: [],
-            // 组件初始化的钩子, 不能放到普通的 methods 中去
+        // 组件初始化的钩子, 不能放到普通的 methods 中去
         created: function () {
             this.runtimeState.fid = getParam('fid');
             this.getItems();
-            if(typeof VGLOBAL == 'undefined'){
+            if (typeof VGLOBAL == 'undefined') {
                 return;
             }
             // 监听重置分页选项事件
-            VGLOBAL.$on('item-reset-limit-and-offset', function (item){
+            VGLOBAL.$on('item-reset-limit-and-offset', function (item) {
                 // 保障 offset 整型,避免弱类型的坑
                 this.item.limit = this.settings.perpage;
                 this.item.offset = this.notes.length
             });
         },
-        methods:{
+        methods: {
             // 新建一个数据model
             newItem: function () {
                 return {
@@ -240,7 +239,7 @@
                     url: URL_Manager.item,
                     data: {id: my.items[index].id},
                     success: function (result) {
-                        if (!result.status){
+                        if (!result.status) {
                             console.log('delete error', index, result)
                             return;
                         }
@@ -259,7 +258,7 @@
                 var my = this;
                 var dragFrom = my.runtimeState.drag_from;
                 var dragTo = my.runtimeState.drag_to = item;
-                console.log('drop',dragFrom,dragTo, 'end' )
+                console.log('drop', dragFrom, dragTo, 'end')
                 var rankVal = 0;
                 var toIndex = my.items.indexOf(item);
                 if (parseInt(dragFrom.visible_range != dragTo.visible_range)) {
@@ -306,7 +305,7 @@
                         if (!result.status) {
                             console.log('rank error', result)
                             return;
-                        }else{
+                        } else {
                             dragFrom.rank = result.data.rank;
                         }
                         my.sort()
@@ -318,7 +317,7 @@
                     // 返回值大于0 表示需要调整顺序
                     if (parseInt(a.visible_range) > parseInt(b.visible_range)) {
                         return -1;
-                    }else if(a.visible_range < b.visible_range){
+                    } else if (a.visible_range < b.visible_range) {
                         return 1;
                     } else {
                         // 降序排列
@@ -348,7 +347,7 @@
                         id: item.id
                     },
                     success: function (result) {
-                        if(!result.status){
+                        if (!result.status) {
                             console.log('items send to draft failed!', item)
                             return;
                         }
@@ -390,7 +389,7 @@
 
                             <span v-show="!item.seen">{{item.name}}</span>
                             <input v-model="item.name" v-on:click.stop="" v-show="item.seen"
-                                   v-on:keyup.esc="save(item)">
+                                   v-on:keyup.esc="save(item)"/>
                         </label>
                     </div>
                     <div class="pull-right action-buttons">
@@ -413,7 +412,6 @@
     });
 
 
-
     var notesPanel = Vue.component('notes-panel', {
         'prop': [],
         data: function () {
@@ -426,7 +424,7 @@
                 // 记录当前的item
                 item: {},
                 // 记录当前的items,页面下拉选择框需要用到
-                items:[]
+                items: []
             }
         },
         computed: {
@@ -441,7 +439,7 @@
                 }
             }
         },
-        created: function(){
+        created: function () {
             var my = this;
             // 接受来自全局变量的 item items
             VGLOBAL.$on('should-get-notes', function (item, items) {
@@ -458,18 +456,18 @@
 
             // 如果当前的笔记显示的是要删除的item的，则清空相关所有笔记
             VGLOBAL.$on('item-delete', function (item) {
-                console.log('item-delete','item',item, 'my.item', my.item)
-                if(item === my.item){
-                   my.notes = [];
+                console.log('item-delete', 'item', item, 'my.item', my.item)
+                if (item === my.item) {
+                    my.notes = [];
                 }
             });
         },
         methods: {
             newNote: function () {
-                if(typeof this.item == 'undefined') {
+                if (typeof this.item == 'undefined') {
                     window.console.log.error('this.items is undefined')
                     var itemId = 0;
-                }else {
+                } else {
                     var itemId = this.item.id;
                 }
                 return {
@@ -483,7 +481,7 @@
             },
             doGetNotes: function (item, type) {
                 var my = this
-                if(typeof item == "undefined"){
+                if (typeof item == "undefined") {
                     console.log('item is undefined', item)
                     return;
                 }
@@ -504,7 +502,7 @@
                         }
 
                         if (data.length === 0) {
-                            if (!item.id){
+                            if (!item.id) {
                                 return false;
                             }
                             // 设置是否为追加模式,如果是发展为模式,返回控列表,否则返回新的一条记录
@@ -523,7 +521,7 @@
                 });
             },
             add: function () {
-                if ((typeof this.item == 'undefined') || (!this.item.id)){
+                if ((typeof this.item == 'undefined') || (!this.item.id)) {
                     return false;
                 }
                 var note = this.newNote();
@@ -555,7 +553,7 @@
                 var my = this
                 // 单击保存的时候，$event 为什么是 undefine 呢？
                 if (!note.item_id) {
-                    console.log('note is:' , note)
+                    console.log('note is:', note)
                     return
                 }
                 // 将原来的及时更新改为非及时，以提高性能
@@ -622,12 +620,27 @@
             },
             //获取更多数据
             more: function () {
-                if(!this.item){
+                if (!this.item) {
                     return;
                 }
                 VGLOBAL.$emit('item-update-limit-and-offset', this.item);
                 this.doGetNotes(this.item, type = 'append')
             },
+            done: function (note){
+                $.ajax({
+                    type: 'PUT',
+                    url: URL_Manager.noteDone,
+                    data: {
+                        note_id: note.id,
+                    },
+                    success: function (result) {
+                        if (result.status) {
+                            my.notes.splice(index, 1);
+                            my.item.offset = my.notes.length
+                        }
+                    }
+                })
+            }
         },
 
         template: `
@@ -638,16 +651,19 @@
                 <span>{{note.id}}</span>
                 <span class="hidden-xs" title="创建时间">{{note.c_time}}</span>
                 <span>
-                <select title="选择其他目录,则自动将笔记移动到其他目录下了" class="items" v-model="note.item_id" @change="mv(note,index)">
-                    <template v-if="note.item_id == item.id">
-                    <option v-for="item in items" :value="item.id" selected>{{item.name}}</option>
-                    </template>
-                    <template v-else>
-                    <option v-for="item in items" :value="item.id">{{item.name}}</option>
-                    </template>
-            </select>
-            </span>
+                    <select title="选择其他目录,则自动将笔记移动到其他目录下了" class="items" v-model="note.item_id" @change="mv(note,index)">
+                        <template v-if="note.item_id == item.id">
+                            <option v-for="item in items" :value="item.id" selected>{{item.name}}</option>
+                            </template>
+                            <template v-else>
+                            <option v-for="item in items" :value="item.id">{{item.name}}</option>
+                        </template>
+                    </select>
+                </span>
                 <div class="pull-right action-buttons">
+                <span v-on:click.stop="done(note)">
+                    <input type="checkbox"  title="标记完成"/>
+                </span>
                 <span v-on:click.stop="add()">
                     <a class="glyphicon glyphicon-plus-sign" title="添加笔记">
                     </a>
@@ -684,23 +700,23 @@
 `,
     });
 
-new Vue({
-    el: '#ffz_app',
-    data: {
-        seen_items : 1,
-    },
-    methods: {
-        toggleItemsTab : function () {
-            console.log('toggleItemsTab trigger')
-            this.seen_items = this.seen_items == 1 ? 0 : 1 ;
+    new Vue({
+        el: '#ffz_app',
+        data: {
+            seen_items: 1,
+        },
+        methods: {
+            toggleItemsTab: function () {
+                console.log('toggleItemsTab trigger')
+                this.seen_items = this.seen_items == 1 ? 0 : 1;
+            }
+            // 子组件变化通知到父组件, 父组件变化在通知到另外一个子组件
+        },
+        components: {
+            'items-panel': itemsPanel,
+            'notes-panel': notesPanel,
         }
-        // 子组件变化通知到父组件, 父组件变化在通知到另外一个子组件
-    },
-    components: {
-        'items-panel': itemsPanel,
-        'notes-panel': notesPanel,
-    }
-});
+    });
 </script>
 
 
