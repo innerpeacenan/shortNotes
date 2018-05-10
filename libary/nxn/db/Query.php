@@ -35,11 +35,9 @@ class Query
 
     public static function bindParams($sql, $params)
     {
-        if (isset($counter)) {
-            $counter++;
-        } else {
-            static $counter = 1;
-        }
+        // static 变量的初始化语句只运行一次
+        static $counter = 0;
+        $counter++;
 
         if ($params) {
             // quote params first
@@ -48,7 +46,7 @@ class Query
             }
             $sql = strtr($sql, $params);
         }
-        Log::sql('sql ' . $counter . ' with bind params, sql is:[' . $sql . ']');
+        Log::sql('[' . $sql . ']');
         return $sql;
     }
 

@@ -5,7 +5,8 @@ namespace nxn\log;
 class BaseLogger
 {
     public static $format = ' {DateTime} errorType:{ErrorType} callplace:{CallPlace} message:{Message}';
-    private static $request;
+    private static $request = [];
+    private static $sql = [];
 
     public $message = '';
 
@@ -16,6 +17,34 @@ class BaseLogger
 
     public static function writeFile()
     {
+        if (!empty(self::$request)) {
+            $dir = N_APPLICATION . '/storage/logs/request/';
+            if (!is_dir($dir)) {
+                throw new \Exception('directory:[' . $dir .
+                    '] should exists and writeble, it can not be created automatically!', 500);
+            }
+            $file = $dir . date('Ymd') . '.log';
+            self::$file = fopen($file, 'a+');
+            foreach (self::$request as $result) {
+                fwrite(self::$file, $result . PHP_EOL);
+            }
+            fclose(self::$file);
+        }
+
+        if (!empty(self::$sql)) {
+            $dir = N_APPLICATION . '/storage/logs/sql/';
+            if (!is_dir($dir)) {
+                throw new \Exception('directory:[' . $dir .
+                    '] should exists and writeble, it can not be created automatically!', 500);
+            }
+            $file = $dir . date('Ymd') . '.log';
+            self::$file = fopen($file, 'a+');
+            foreach (self::$sql as $result) {
+                fwrite(self::$file, $result . PHP_EOL);
+            }
+            fclose(self::$file);
+        }
+
         if (!empty(self::$contents)) {
             $dir = N_APPLICATION . '/storage/logs/base/';
             if (!is_dir($dir)) {
@@ -30,19 +59,6 @@ class BaseLogger
             fclose(self::$file);
         }
 
-        if (!empty(self::$request)) {
-            $dir = N_APPLICATION . '/storage/logs/request/';
-            if (!is_dir($dir)) {
-                throw new \Exception('directory:[' . $dir .
-                    '] should exists and writeble, it can not be created automatically!', 500);
-            }
-            $file = $dir . date('Ymd') . '.log';
-            self::$file = fopen($file, 'a+');
-            foreach (self::$request as $result) {
-                fwrite(self::$file, $result . PHP_EOL);
-            }
-            fclose(self::$file);
-        }
 
     }
 
@@ -97,7 +113,7 @@ class BaseLogger
                     continue;
                 }
             }
-            if(empty($file)){
+            if (empty($file)) {
                 $file = isset($trace['file']) ? $trace['file'] : $file;
                 $line = isset($trace['line']) ? $trace['line'] : $line;
             }
@@ -128,6 +144,9 @@ class BaseLogger
         $result = strtr($message, $replace);
         if (strtolower($errorType) == 'request') {
             self::$request[] = $result;
+        } // sql log
+        elseif (strtolower($errorType) == 'sql') {
+            self::$sql[] = $result;
         } else {
             self::$contents[] = $result;
         }
