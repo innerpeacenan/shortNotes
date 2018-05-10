@@ -636,6 +636,7 @@
                     success: function (result) {
                         if (result.status) {
                             my.notes.splice(index, 1);
+                            // 目前移除掉完成的
                             my.item.offset = my.notes.length
                         }
                     }

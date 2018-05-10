@@ -14,7 +14,7 @@ var URL_Manager = {
     movenote: '/note/move-note',
     savenote: "/note/note",
     deletenote: "/note/note",
-    noteDone: "/note/done",
+    noteDone: "/note/note-done",
 };
 
 /**

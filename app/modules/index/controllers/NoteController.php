@@ -107,7 +107,9 @@ class NoteController extends AuthController
         Ajax::json($status);
     }
 
-    public function putNoteDown(){
+    public function putNoteDone(){
+        // 先测试连通性
+        Ajax::json(1);
         $noteId = $_REQUEST['note_id'];
         $tagId = 1;
         $userId = $_SESSION['user_id'];

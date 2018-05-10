@@ -127,9 +127,9 @@ class Application extends Container
         $this->controller = new $controller();
         $this->controller->beforeAction();
         if (!method_exists($this->controller, $this->router['action'])) {
-            $msg = 'HTTP/1.1 400 BAD REQUEST(invalid action' . print_r($this->router) . ')';
+            $msg = 'HTTP/1.1 400 BAD REQUEST(invalid action' . json_encode($this->router, 256) . ')';
             header($msg, true, 400);
-            echo '400 bad request,invalide action name' . var_export($this->router['action']);
+            echo '400 bad request,invalide action name' . json_encode($this->router['action'],256);
             exit();
         }        // 解析 action 的类名称
         return call_user_func([$this->controller, $this->router['action']]);
@@ -143,7 +143,7 @@ class Application extends Container
             $msg = $e->getMessage();
             $code = $e->getCode();
             $header = [];
-            Ajax::json($code, [], $msg, 403);
+            Ajax::json($code, [], $msg, $code);
         }catch (\Throwable $err){
             $msg =  $err->getMessage();
             $code = $err->getCode();
@@ -151,7 +151,7 @@ class Application extends Container
                 $code = 500;
             }
             Log::error($err->getTraceAsString());
-            Ajax::json($code, [], $msg, 500);
+            Ajax::json($code, [], $msg, $code);
         }
 
     }

@@ -35,11 +35,13 @@ class Notes extends ActiveRecord
         // 这里暂时过滤加成的标签
         $tagfilter = [Tag::$defaultTags['done']];
         //@todo check if items belongs to user
-        $sql = 'SELECT * FROM `notes WHERE `item_id` = :item_id ORDER BY `c_time` DESC LIMIT :limit OFFSET :offset';
+        $sql = 'SELECT * FROM `notes` WHERE `item_id` = :item_id ORDER BY `c_time` DESC LIMIT :limit OFFSET :offset';
         $params = [':item_id' => (int)$item_id, ':offset' => (int)$opt['offset'], ':limit' => (int)$opt['limit']];
         $notes = Query::all($sql, $params);
+        // 先保证功能能用起来
+        return $notes;
         foreach ($notes as $key => &$v) {
-            $params = [':note_id' => ];
+            $params = [':note_id' => $v['id']];
             $sql = 'select r.`id`, t.`name` from `notes_tag_rel` as r INNER join `tag` as t on r.tag_id = t.id WHERE r.`note_id` = :note_id';
             $tags = Query::all($sql, $params);
             \Log::tags($tags);
