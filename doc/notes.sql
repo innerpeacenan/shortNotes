@@ -60,7 +60,7 @@ CREATE TABLE `users` (
   DEFAULT CHARSET = utf8;
 
 
-### 
+###
 ### 以下几张表目前数据库里边还没有
 ### 在创建用户的时候,即为该用户创建两个特殊tag, todo 和 done, 并将状态设置我 disable, 这样页面筛查标签的时候才不会显示出来
 
