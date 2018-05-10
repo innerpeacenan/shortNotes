@@ -59,8 +59,10 @@ CREATE TABLE `users` (
   AUTO_INCREMENT = 2
   DEFAULT CHARSET = utf8;
 
+
+### 
 ### 以下几张表目前数据库里边还没有
-### @todo 在创建用户的时候,即为该用户创建两个特殊tag, todo 和 done, 并将状态设置我 disable, 这样页面筛查标签的时候才不会显示出来
+### 在创建用户的时候,即为该用户创建两个特殊tag, todo 和 done, 并将状态设置我 disable, 这样页面筛查标签的时候才不会显示出来
 
 CREATE TABLE `tags` (
   `id`         BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -73,7 +75,7 @@ CREATE TABLE `tags` (
   ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
-insert into `tags` (id,name,tag_status) VALUES (1,'todo', '20'),(2,'done', '20');
+
 
 CREATE TABLE `notes_tag_rel` (
   `id`      BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -99,5 +101,16 @@ CREATE TABLE `tag_user_rel` (
   DEFAULT CHARSET = utf8;
 
 
-INSERT into `tag_user_rel` (tag_id, user_id) VALUES (1, 1), (2, 1);
+# 调整 items 表的结构
+alter table items change column `status` `status` tinyint(4) not null default 10 comment '事项状态';
 
+alter table items add column `visible_range` tinyint(4) not null default 10 comment '显示范围';
+
+update  items set `visible_range` = 20 where `status` = 1;
+UPDATE items set `status` = 10  WHERE `status` in (1, 2);
+UPDATE items set `status` = 20  WHERE `status` = 3;
+
+#  插入默认tag
+insert into `tags` (id,name,tag_status) VALUES (1,'todo', '20'),(2,'done', '20');
+# 先给前三个用户默认生成对应tag
+INSERT into `tag_user_rel` (tag_id, user_id) VALUES (1, 1), (2, 1),(1, 2), (2, 2),(1, 3), (2, 3);
