@@ -5,6 +5,7 @@
  * Date: 5/14/17
  * Time: 8:29 PM
  */
+
 namespace nxn\web;
 
 /**
@@ -26,10 +27,10 @@ class Ajax
         $row = ['status' => $status, 'data' => $data, 'msg' => $message];
         // 返回JSON数据格式到客户端 包含状态信息
         if (!headers_sent()) {
-            http_response_code ($responseCode);
+            http_response_code($responseCode);
             header('Content-Type:application/json; charset=utf-8');
 //   傻了,我说之前怎么没有输出,都没有 echo ,怎么会有输出呢?哈哈
-            if (!getenv('N_TEST')){
+            if (!getenv('N_TEST')) {
                 echo json_encode($row);
                 exit();
             }

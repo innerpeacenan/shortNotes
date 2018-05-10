@@ -35,7 +35,9 @@ class NoteController extends AuthController
      */
     public function getItemNotes()
     {
-        $result = Notes::notesByItem($_REQUEST['item_id'], $_REQUEST);
+        $userId = $_SESSION['user_id'];
+        $itemId = $_REQUEST['item_id'];
+        $result = Notes::notesByItem($userId, $itemId, $_REQUEST, [] );
         if ($_REQUEST) {
             Ajax::json(true, $result, 'success');
         } else {
@@ -109,9 +111,11 @@ class NoteController extends AuthController
 
     public function putNoteDone(){
         $noteId = $_REQUEST['note_id'];
-        $tagId = 1;
+        // 增加结束标签
+        $tagId = Tags::$defaultTags['done'];
         $userId = $_SESSION['user_id'];
-        $status = tags::addNoteTag($noteId, $tagId, $userId);
+        // 之前此处有bug,结果浪费了很多时间
+        $status = tags::toggleTodoAndDone($noteId, $userId, $tagId);
         Ajax::json($status);
     }
 }

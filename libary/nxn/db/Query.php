@@ -48,7 +48,7 @@ class Query
             }
             $sql = strtr($sql, $params);
         }
-        Log::info('sql ' . $counter . ' with bind params, sql is:' . $sql);
+        Log::sql('sql ' . $counter . ' with bind params, sql is:[' . $sql . ']');
         return $sql;
     }
 
@@ -230,6 +230,12 @@ class Query
     public static function safeString($value)
     {
         switch (gettype($value)) {
+            // such as id in (1, 2, 4) 用于支持子查询
+            case 'array':
+                foreach ($value as $k => $v) {
+                    $value[$k] = self::safeString($v);
+                }
+                return join(',', $value);
             case 'string':
                 return self::getSlaveDb()->quote($value);
             case 'boolean':
@@ -239,8 +245,22 @@ class Query
                 return (string)$value;
             case 'NULL':
                 return 'NULL';
+            case 'object':
+                if (method_exists($value, 'toArray')) {
+                    $value = $value->toArray();
+                    foreach ($value as $k => $v) {
+                        $value[$k] = self::safeString($v);
+                    }
+                    return join(',', $value);
+                } elseif (method_exists($value, '__tostirng')) {
+                    return self::getSlaveDb()->quote($value);
+                } else {
+                    \Log::columnValueCouldNotBeNonArrayableOrNonStringifyObject($value);
+                    throw new \Exception('column value could not be reference type!', 500);
+                }
             default:
-                throw new \Exception('column value could not be reference type!');
+                \Log::columnValueCouldNotBeResource($value);
+                throw new \Exception('column value could not be reference type!', 500);
         }
     }
 }

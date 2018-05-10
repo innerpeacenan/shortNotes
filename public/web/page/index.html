@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:v-on="http://www.w3.org/1999/xhtml">
+<html>
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -37,7 +37,7 @@
     </div>
 
     <div title="同时按下<CtrL>和<ENTER>,可隐藏或显示左侧导航栏" v-bind:class="seen_items == 1 ? 'col-lg-8' : 'col-lg-12'" tabindex="0"
-         v-on:keyup.ctrl.enter="toggleItemsTab()">
+         @keyup.ctrl.enter="toggleItemsTab()">
         <notes-panel></notes-panel>
     </div>
 </div>
@@ -355,6 +355,22 @@
                         VGLOBAL.$emit('item-delete', item)
                     }
                 })
+            },
+            toggleVisibleRange: function (item) {
+                var my = this;
+                $.ajax({
+                    type: 'PUT',
+                    url: URL_Manager.itemToggleVisibleRange,
+                    data: {
+                        id: item.id,
+                    },
+                    success: function (result) {
+                        console.log(result);
+                        if (result.status) {
+                            item.visible_range = result.data.visible_range;
+                        }
+                    }
+                })
             }
         },
         template: `
@@ -362,7 +378,7 @@
     <div class="panel panel-primary">
         <div class="panel-heading">
             <span class="glyphicon glyphicon-list"></span>事项列表
-            <span v-on:click.stop="parentDir">上一级目录</span>
+            <span @click.stop="parentDir">上一级目录</span>
             <div class="pull-right action-buttons">
                 <div class="btn-group pull-right">
                     <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
@@ -378,28 +394,28 @@
         </div>
         <div class="panel-body">
             <ul class="list-group" v-for="(item,index) in items">
-                <li class="list-group-item" v-on:click.stop="getNotes(item)" draggable='true'
+                <li class="list-group-item" @click.stop="getNotes(item)" draggable='true'
                     @dragstart="drag(item)"
                     @dragover.prevent @drop="drop(item)">
                     <div class="checkbox">
-                        <input type="checkbox" v-on:click.stop="toggleStatus(item,index)" v-model="item.isChecked"
+                        <input type="checkbox" @click.stop="toggleStatus(item,index)" v-model="item.isChecked"
                                :disabled="item.status == 1"/>
                         <label for="checkbox">
-                            <a style="display: inline-block" v-on:click.stop="subDir(item)" title="事项或目录ID,单击可进入目录"><span>{{item.id}}</span></a>
+                            <a style="display: inline-block" @click.stop="subDir(item)" title="事项或目录ID,单击可进入目录"><span>{{item.id}}</span></a>
 
                             <span v-show="!item.seen">{{item.name}}</span>
-                            <input v-model="item.name" v-on:click.stop="" v-show="item.seen"
-                                   v-on:keyup.esc="save(item)"/>
+                            <input v-model="item.name" @click.stop="" v-show="item.seen"
+                                   @keyup.esc="save(item)"/>
                         </label>
                     </div>
                     <div class="pull-right action-buttons">
                         <a  title = "蓝色代表全局可见,灰色代表仅当前目录下可见"
                         v-bind:class="item.visible_range == 20 ? 'glyphicon glyphicon-globe' : 'glyphicon glyphicon-globe gray'"
-                        ></a>
-                        <a v-on:click.stop="add()"><span class="glyphicon glyphicon-plus-sign" title="添加新事项"></span></a>
-                        <a v-on:click.stop="edit(item)"><span class="glyphicon glyphicon-pencil"
+                         @dblclick.stop="toggleVisibleRange(item)"></a>
+                        <a @click.stop="add()"><span class="glyphicon glyphicon-plus-sign" title="添加新事项"></span></a>
+                        <a @click.stop="edit(item)"><span class="glyphicon glyphicon-pencil"
                                                               title="编辑事项"></span></a>
-                        <a v-on:click.stop="save(item)"><span class="glyphicon glyphicon-saved" title="保存事项"></span></a>
+                        <a @click.stop="save(item)"><span class="glyphicon glyphicon-saved" title="保存事项"></span></a>
                         <a @click.stop="" @dblclick.stop="del(index)"><span class="glyphicon glyphicon-trash"
                                                                             title="删除事项"></span></a>
                     </div>
@@ -626,7 +642,7 @@
                 VGLOBAL.$emit('item-update-limit-and-offset', this.item);
                 this.doGetNotes(this.item, type = 'append')
             },
-            done: function (note, index){
+            done: function (note, index) {
                 var my = this;
                 $.ajax({
                     type: 'PUT',
@@ -642,7 +658,7 @@
                         }
                     }
                 })
-            }
+            },
         },
 
         template: `
@@ -663,32 +679,32 @@
                     </select>
                 </span>
                 <div class="pull-right action-buttons">
-                <span v-on:click.stop="done(note, index)">
+                <span @click.stop="done(note, index)">
                     <input type="checkbox"  title="标记完成" v-model="note.isChecked" />
                 </span>
-                <span v-on:click.stop="add()">
+                <span @click.stop="add()">
                     <a class="glyphicon glyphicon-plus-sign" title="添加笔记">
                     </a>
                 </span>
                     &nbsp;
-                    <span v-on:click.stop="edit(note, $event)">
+                    <span @click.stop="edit(note, $event)">
                     <a class="glyphicon glyphicon-edit" title="编辑笔记">
                     </a>
                 </span>
                     &nbsp;
-                    <span v-on:click.stop="save(note)">
+                    <span @click.stop="save(note)">
                     <a class="glyphicon glyphicon-saved" title="保存笔记">
                     </a>
                 </span>
                     &nbsp;&nbsp;
-                    <span v-on:click.stop="" v-on:dblclick="del(index)">
+                    <span @click.stop="" @dblclick="del(index)">
                     <a class="glyphicon glyphicon-trash" title="删除笔记"></a>
                 </span>
                 </div>
                 <div>
                 <textarea class="col-xs-12" v-if="note.seen" v-model="note.modifiedContent"
-                          v-on:keyup.esc="save(note)"
-                          v-on:keyup.enter="h($event)" @focus="h($event, note)" @paste="h($event, note)"
+                          @keyup.esc="save(note)"
+                          @keyup.enter="h($event)" @focus="h($event, note)" @paste="h($event, note)"
                           v-focus>
                 </textarea>
                     <div class="textarea" v-if="!note.seen" @dblclick.stop="edit(note)"
@@ -696,7 +712,7 @@
                 </div>
             </li>
         </ul>
-        <div class="text-center more" v-on:click.stop="more()" v-show="showMore">更多</div>
+        <div class="text-center more" @click.stop="more()" v-show="showMore">更多</div>
     </div>
 </div>
 `,
@@ -710,9 +726,9 @@
         computed: {
             // 不设置该值, 会造成 checkbox 保留上次被操作的状态,这不是我想要的
             isChecked: function () {
-                if(this.seen) {
+                if (this.seen) {
                     return 0;
-                }else{
+                } else {
                     return 1;
                 }
             }

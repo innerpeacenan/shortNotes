@@ -28,30 +28,35 @@ class Notes extends ActiveRecord
         return 'notes';
     }
 
-    public static function notesByItem($item_id, $opt = [])
+    public static function notesByItem($userId, $item_id, $opt = [], $tagIds = [])
     {
-        if (!isset($opt['offset'])) $opt['offset'] = 0;
-        if (!isset($opt['limit'])) $opt['limit'] = 10;
-        // 这里暂时过滤加成的标签
-        $tagfilter = [Tags::$defaultTags['done']];
-        //@todo check if items belongs to user
-        $sql = 'SELECT * FROM `notes` WHERE `item_id` = :item_id ORDER BY `c_time` DESC LIMIT :limit OFFSET :offset';
-        $params = [':item_id' => (int)$item_id, ':offset' => (int)$opt['offset'], ':limit' => (int)$opt['limit']];
-        $notes = Query::all($sql, $params);
-        // 先保证功能能用起来
-        foreach ($notes as $key => &$v) {
-            $params = [':note_id' => $v['id']];
-            $sql = 'select r.`id`, t.`name` from `notes_tag_rel` as r INNER join `tags` as t on r.tag_id = t.id WHERE r.`note_id` = :note_id';
-            $tags = Query::all($sql, $params);
-            \Log::tags($tags);
-            $v['tags'] = $tags;
-            foreach ($v['tags'] as $tag) {
-                if (in_array($tag['id'], $tagfilter)) {
-                    unset($v);
-                }
-            }
+        if (!isset($opt['offset'])) {
+            $opt['offset'] = 0;
         }
-        return array_values($notes);
+        if (!isset($opt['limit'])) {
+            $opt['limit'] = 10;
+        }
+        $tagfilter = [Tags::$defaultTags['todo']];
+        $tagIds = array_unique(array_merge($tagIds, $tagfilter));
+        $params = [
+            ':id' => (int)$item_id,
+            ':user_id' => (int)$userId,
+            ':tagids' => $tagIds,
+            // limit and offset should be int, this is important
+            ':limit' => (int)$opt['limit'],
+            ':offset' => (int)$opt['offset'],
+        ];
+        // 值选择没有tag的笔记和具有指定的tag的笔记
+        // 没有tag的笔记怎么取呢?
+        $sql = 'SELECT DISTINCT n.*
+FROM `notes` AS n INNER JOIN `items` AS i ON n.`item_id` = i.`id`
+  INNER JOIN `users` AS u ON i.user_id = u.id
+  LEFT JOIN notes_tag_rel AS nt ON n.id = nt.note_id
+WHERE i.id = :id AND i.user_id = :user_id AND ((nt.tag_id IS NULL) OR (nt.tag_id IN (:tagids)))
+ORDER BY n.c_time DESC
+LIMIT :limit OFFSET :offset';
+        $notes = Query::all($sql, $params);
+        return $notes;
     }
 
     public static function deleteNotes($item_id)

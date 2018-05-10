@@ -48,7 +48,7 @@ class BaseLogger
 
     public function getDateTime()
     {
-        return date('YmdHis');
+        return date('Y-m-d H:i:s');
     }
 
     public function getMessage()
@@ -58,15 +58,18 @@ class BaseLogger
 
     public function setMessage($message)
     {
-        if (is_scalar($message)) {
-            $this->message = (string)$message;
+        if (is_bool($message)) {
+            $this->message = $message === true ? 'boolean(true)' : 'boolean(false)';
+        } elseif (is_scalar($message)) { // double, int and string, just convert to string and remove PHP_EOL
+            $this->message = str_replace(PHP_EOL, ' ', (string)$message);
         } elseif (is_object($message) && method_exists($message, '__tostring')) {
-            $this->message = $message->__tostirng();
+            $this->message = str_replace(PHP_EOL, ' ', $message->__tostirng());
         } elseif (is_resource($message)) {
             $this->message = '';
         } else {
             $this->message = json_encode($message, JSON_UNESCAPED_UNICODE);
         }
+
     }
 
     public function getErrorType($errorType)
@@ -84,23 +87,22 @@ class BaseLogger
         $file = '';
         $line = '';
         $class = '';
+        $method = '';
         foreach ($stack as $key => $trace) {
-            if ($trace['file'] === __FILE__) {
-                continue;
+            if (isset($trace['file'])) {
+                if ($trace['file'] === __FILE__) {
+                    continue;
+                }
+                if (strpos($trace['file'], 'nxn/db/Query.php')) {
+                    continue;
+                }
             }
-            if (strpos($trace['file'], 'nxn/db/Query.php')) {
-                continue;
+            if(empty($file)){
+                $file = isset($trace['file']) ? $trace['file'] : $file;
+                $line = isset($trace['line']) ? $trace['line'] : $line;
             }
-            $file = isset($trace['file']) ? $trace['file'] : $file;
-            $line = isset($trace['line']) ? $trace['line'] : $line;
-
-            if (isset($trace['class']) && strpos($trace['class'], 'nxn\db\Query') == false) {
-                $class = $trace['class'];
-                break;
-            }
-
         }
-        return $file . ':' . $line . ':' . $class;
+        return $file . ':' . $line;
     }
 
     public function write($message, $errorType)

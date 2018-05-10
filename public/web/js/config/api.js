@@ -5,6 +5,7 @@ var URL_Manager = {
     login: "/login/in",
     item: "/item/item",
     items: '/item/items',
+    itemToggleVisibleRange: 'item/toggle-visible-range',
     parentDir: '/item/parent-dir',
     savefriend: '/item/save-item',
     rank: '/item/rank',

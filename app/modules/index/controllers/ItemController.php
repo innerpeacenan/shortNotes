@@ -18,23 +18,13 @@ use Log;
  */
 class ItemController extends AuthController
 {
-
-    const STATUS_ENALBE = 10;
-    const STATUS_STAGING = 20;
-    const STATUS_DRAFT = 30;
-
-    // 可见范围,全局可见
-    const show_global = 20;
-    // 可见范围, 只在父目录下可见
-    const show_inside_parent = 10;
-
     public function getItems()
     {
         $fid = empty($_REQUEST['fid']) ? 0 : intval($_REQUEST['fid']);
-        Log::info(json_encode($_REQUEST, 256));
         $status = $_REQUEST['status'];
-        $status = empty($status) ? [self::STATUS_ENALBE] : (is_string($status) ? [$status] : $status);
-        $result = Items::getItems($fid, $status);
+        $status = empty($status) ? [Items::STATUS_ENABLE] : (is_string($status) ? [$status] : $status);
+        $userId = $_SESSION['user_id'];
+        $result = Items::getItems($fid, $userId, $status);
         Ajax::json(true, $result, "success");
     }
 
@@ -45,8 +35,6 @@ class ItemController extends AuthController
      * Last Modify: xiaoning nan
      * Description:
      * 保存事项
-     * @todo 无线积分类，将这一部分内容放到 model 之中
-     * @todo 先实现功能，再考虑功能健全性,先信任前端，在考虑后端, 一切以用户为中心,后端围绕用户作全方位的验证
      * request params:
      * [ 'id' => 'item id', 'name' => 'item name', 'fid' => 'parent id' ]
      */
@@ -77,7 +65,7 @@ class ItemController extends AuthController
      */
     public function deleteItem()
     {
-        $status = Items::deleteItem($_REQUEST['id']);
+        $status = Items::deleteItem($_REQUEST['id'], $_SESSION['user_id']);
         Ajax::json($status);
     }
 
@@ -150,8 +138,14 @@ class ItemController extends AuthController
         if (!$item) {
             Ajax::json(0);
         } else {
-            //  Trying to get property of non-object
             Ajax::json(1, ['dir' => $item->fid]);
         }
+    }
+
+    public function putToggleVisibleRange()
+    {
+        $id = $_REQUEST['id'];
+        $visibleRange = Items::toggleVisibleRange($id, $_SESSION['user_id']);
+        Ajax::json(1, ['visible_range' => $visibleRange]);
     }
 }

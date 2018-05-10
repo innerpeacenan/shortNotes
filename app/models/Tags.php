@@ -91,9 +91,15 @@ class Tags extends ActiveRecord
             throw new \Exception('tag_id should be either todo or done!, shoule in:'
                 . json_encode(self::$defaultTags));
         }
-        $params = [':note_id' => $noteId, ':use_id' => $userId, ':tag_id' => $tagId];
+        if($tagId == self::$defaultTags['done']){
+            $oppositeTag = self::$defaultTags['todo'];
+        }else{
+            $oppositeTag = self::$defaultTags['done'];
+        }
+        $params = [':note_id' => $noteId, ':use_id' => $userId, ':tag_id' => $oppositeTag];
         $sql = 'select `tag_id` from `notes_tag_rel` where `note_id` = :note_id AND `tag_id` = :tag_id';
         $exists = Query::one($sql, $params);
+        $params = [':note_id' => $noteId, ':use_id' => $userId, ':tag_id' => $tagId];
         if (empty($exists)) {
             // insert
             $sql = 'insert into `notes_tag_rel` (`note_id`, `tag_id`) VALUES (:note_id, :tag_id)';

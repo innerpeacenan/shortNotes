@@ -395,7 +395,7 @@ class ActiveRecord
      *
      *
      */
-    public function save(bool $validate)
+    public function save(bool $validate = false)
     {
         if ($validate) {
             $valid = $this->validate();
