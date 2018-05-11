@@ -8,7 +8,9 @@
 namespace nxn;
 
 defined('N_BASE') or define('N_BASE', __DIR__);
-
+/**
+ * @deprecated  已经用 composer 生成的auto_load 文件替换该文件
+ */
 class Autoload
 {
     /**
