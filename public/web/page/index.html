@@ -69,7 +69,6 @@
 
     var itemsPanel = Vue.component('items-panel', {
         data: function () {
-            // 这些是什么含义? 没有注释啊
             return {
                 settings: {
                     perpage: 10 //设置首次加载个数
@@ -139,7 +138,7 @@
                     visible_range: this.constant.visible_range.show_inside_parent.code,
                     // above are extra property
                     isChecked: 0,
-                    seen: true, // make it editable
+                    seen: true, // make it editable, so you could see the textarea
                     // 设置每个items在请求notes的时候设置的分页参数
                     limit: this.settings.perpage,
                     offset: 0,
@@ -173,7 +172,7 @@
                             });
                         }
                         my.items = data;
-                        // 你监听还没不监听,我就是要通知,就是这么任性
+                        // 通知者
                         VGLOBAL.$emit('items-change', my.items);
                     },
                     error: function (data) {
@@ -243,6 +242,9 @@
                             console.log('delete error', index, result)
                             return;
                         }
+                        // 通知笔记组件检查当前所属的事项是否被删除,如果被删除,也应该在页面上移除所有的笔记
+                        // 后台也是真实删除了笔记的,目前没有删除笔记对应的tag,不影响使用
+                        // 所以删除和归档不同,要慎重,与其他按钮单击事件不同,删除必须采用单击事件
                         VGLOBAL.$emit('item-delete', item)
                         my.items.splice(index, 1);
                     }
@@ -403,7 +405,7 @@
                         <label for="checkbox">
                             <a style="display: inline-block" @click.stop="subDir(item)" title="事项或目录ID,单击可进入目录"><span>{{item.id}}</span></a>
 
-                            <span v-show="!item.seen">{{item.name}}</span>
+                            <span v-show="!item.seen" title = "事项名称" >{{item.name}}</span>
                             <input v-model="item.name" @click.stop="" v-show="item.seen"
                                    @keyup.esc="save(item)"/>
                         </label>
@@ -665,8 +667,8 @@
 <div class="panel-heading">
     <div>
         <ul>
-            <li v-for="(note,index) in notes" title="笔记唯一编号" :id="'note_' + note.id">
-                <span>{{note.id}}</span>
+            <li v-for="(note,index) in notes" title="支持对笔记进行编辑,标记完成,删除,动所属木目录和获取下一页等操作" :id="'note_' + note.id">
+                <span title="笔记唯一编号">{{note.id}}</span>
                 <span class="hidden-xs" title="创建时间">{{note.c_time}}</span>
                 <span>
                     <select title="选择其他目录,则自动将笔记移动到其他目录下了" class="items" v-model="note.item_id" @change="mv(note,index)" >
