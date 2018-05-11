@@ -370,6 +370,8 @@
                         console.log(result);
                         if (result.status) {
                             item.visible_range = result.data.visible_range;
+                            // 重新调整顺序
+                            my.sort();
                         }
                     }
                 })
@@ -411,15 +413,15 @@
                         </label>
                     </div>
                     <div class="pull-right action-buttons">
-                        <a  title = "蓝色代表全局可见,灰色代表仅当前目录下可见"
-                        v-bind:class="item.visible_range == 20 ? 'glyphicon glyphicon-globe' : 'glyphicon glyphicon-globe gray'"
-                         @dblclick.stop="toggleVisibleRange(item)"></a>
+                        <a  v-bind:title = "item.visible_range == constant.visible_range.show_global.code ? '全局可见,单击可改变可见范围' : '仅当前目录下可见,双击可改变可见范围'"
+                            v-bind:class="item.visible_range == constant.visible_range.show_global.code ? 'glyphicon glyphicon-globe' : 'glyphicon glyphicon-globe gray'"
+                           @dblclick.stop="toggleVisibleRange(item)"></a>
                         <a @click.stop="add()"><span class="glyphicon glyphicon-plus-sign" title="添加新事项"></span></a>
                         <a @click.stop="edit(item)"><span class="glyphicon glyphicon-pencil"
                                                               title="编辑事项"></span></a>
                         <a @click.stop="save(item)"><span class="glyphicon glyphicon-saved" title="保存事项"></span></a>
                         <a @click.stop="" @dblclick.stop="del(index)"><span class="glyphicon glyphicon-trash"
-                                                                            title="删除事项"></span></a>
+                                                                            title="双击删除事项(请慎重操作)"></span></a>
                     </div>
                 </li>
             </ul>
@@ -601,6 +603,7 @@
             },
             /**
              * delete 是 javascript 的保留字
+             * 删除笔记
              */
             del: function (index) {
                 var my = this;
@@ -656,7 +659,7 @@
                         if (result.status) {
                             my.notes.splice(index, 1);
                             // 目前移除掉完成的
-                            my.item.offset = my.notes.length
+                            my.item.offset = my.notes.length;
                         }
                     }
                 })
@@ -667,7 +670,7 @@
 <div class="panel-heading">
     <div>
         <ul>
-            <li v-for="(note,index) in notes" title="支持对笔记进行编辑,标记完成,删除,动所属木目录和获取下一页等操作" :id="'note_' + note.id">
+            <li v-for="(note,index) in notes"  :id="'note_' + note.id">
                 <span title="笔记唯一编号">{{note.id}}</span>
                 <span class="hidden-xs" title="创建时间">{{note.c_time}}</span>
                 <span>
@@ -700,7 +703,7 @@
                 </span>
                     &nbsp;&nbsp;
                     <span @click.stop="" @dblclick="del(index)">
-                    <a class="glyphicon glyphicon-trash" title="删除笔记"></a>
+                    <a class="glyphicon glyphicon-trash" title="双击删除笔记"></a>
                 </span>
                 </div>
                 <div>

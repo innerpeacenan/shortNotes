@@ -47,7 +47,6 @@ class Notes extends ActiveRecord
             ':offset' => (int)$opt['offset'],
         ];
         // 值选择没有tag的笔记和具有指定的tag的笔记
-        // 没有tag的笔记怎么取呢?
         $sql = 'SELECT DISTINCT n.*
 FROM `notes` AS n INNER JOIN `items` AS i ON n.`item_id` = i.`id`
   INNER JOIN `users` AS u ON i.user_id = u.id
