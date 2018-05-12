@@ -29,9 +29,10 @@ class Ajax
         if (!headers_sent()) {
             http_response_code($responseCode);
             header('Content-Type:application/json; charset=utf-8');
+            header('Content-Encoding: gzip');
 //   傻了,我说之前怎么没有输出,都没有 echo ,怎么会有输出呢?哈哈
             if (!getenv('N_TEST')) {
-                echo json_encode($row);
+                echo gzencode(json_encode($row));
                 exit();
             }
             return "";
