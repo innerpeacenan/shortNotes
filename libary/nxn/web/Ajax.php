@@ -32,7 +32,11 @@ class Ajax
             header('Content-Encoding: gzip');
 //   傻了,我说之前怎么没有输出,都没有 echo ,怎么会有输出呢?哈哈
             if (!getenv('N_TEST')) {
-                echo gzencode(json_encode($row));
+                $content = json_encode($row);
+                $gzip = gzencode();
+                \Log::CompressEffect('before compress length:' . strlen($content) .
+                ',after compress length:' . strlen($gizp) . ',compress Effect:' . strlen($gizp) / strlen($content)); 
+                echo $gizp;
                 exit();
             }
             return "";
