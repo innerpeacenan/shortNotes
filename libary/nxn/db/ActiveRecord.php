@@ -252,6 +252,7 @@ class ActiveRecord
          */
         $db = $ar->db;
         $sql = 'SELECT * FROM ' . $tableName . ' WHERE ' . join(' AND ', $conditon);
+        \Log::sql('[' . $sql . ']');
         $st = $db->query($sql, PDO::FETCH_ASSOC);
         if (!$st) return null;
         $row = $st->fetch(PDO::FETCH_ASSOC);
@@ -372,6 +373,7 @@ class ActiveRecord
 
     protected function doInsert($sql)
     {
+        \Log::sql('[' . $sql . ']');
         $status = $this->db->exec($sql);
         if ($status) {
             $this->_attributes[$this->_autoIncrement] = (int)$this->db->lastInsertId();
@@ -458,6 +460,7 @@ class ActiveRecord
 
     protected function doUpdate($sql)
     {
+        \Log::sql('[' . $sql . ']');
         $affectedNum = $this->db->exec($sql);
         if ($affectedNum) {
             $this->afterUpdate();
@@ -505,6 +508,7 @@ class ActiveRecord
      */
     protected function doDelete($sql)
     {
+        \Log::sql('[' . $sql . ']');
         $affectedNum = $this->db->exec($sql);
         if ($affectedNum) $this->afterDelete();
         return $affectedNum;

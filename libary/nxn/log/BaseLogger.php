@@ -4,7 +4,7 @@ namespace nxn\log;
 
 class BaseLogger
 {
-    public static $format = ' {DateTime} errorType:{ErrorType} callplace:{CallPlace} message:{Message}';
+    public static $format = ' {DateTime} logType:{ErrorType} callplace:{CallPlace} message:{Message}';
     private static $request = [];
     private static $sql = [];
 

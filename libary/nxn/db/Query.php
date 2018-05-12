@@ -73,7 +73,6 @@ class Query
     public static function scalar(string $sql, array $params = [])
     {
         $sql = self::bindParams($sql, $params);
-        //@TODO add here here where used log
         $st = static::getSlaveDb()->query($sql);
         if (false === $st) return false;
         $row = $st->fetch(\PDO::FETCH_COLUMN);
@@ -132,7 +131,6 @@ class Query
         $ret = [];
         foreach ($rows as $i => $row) {
             $first = reset($row);
-            // @todo need to test
             $second = next($row);
             $ret[$first] = $second;
         }

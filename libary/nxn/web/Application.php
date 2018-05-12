@@ -131,8 +131,16 @@ class Application extends Container
             header($msg, true, 400);
             echo '400 bad request,invalide action name' . json_encode($this->router['action'],256);
             exit();
-        }        // 解析 action 的类名称
-        \Log::request('path:[' . $_SERVER['REQUEST_URI'] . '],params:[' . json_encode($_REQUEST, JSON_UNESCAPED_UNICODE) . ']');
+        }
+        list($baseUri, $queryString) = array_pad(explode('?', $_SERVER['REQUEST_URI'], 2), 2, '0');
+        $method = $_SERVER['REQUEST_METHOD'];
+        if(strtolower($method) === 'get'){
+            $params = $queryString;
+        }else{
+            $params = json_encode($_REQUEST, JSON_UNESCAPED_UNICODE);
+        }
+        \Log::request('method<' . $method . 'path<' . $baseUri . '<params<' . $params . '<');
+        // 解析 action 的类名称
         return call_user_func([$this->controller, $this->router['action']]);
     }
 
