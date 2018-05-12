@@ -29,14 +29,13 @@ class Ajax
         if (!headers_sent()) {
             http_response_code($responseCode);
             header('Content-Type:application/json; charset=utf-8');
-            header('Content-Encoding: gzip');
-//   傻了,我说之前怎么没有输出,都没有 echo ,怎么会有输出呢?哈哈
+            header('Content-Encoding: deflate');
             if (!getenv('N_TEST')) {
-                $content = json_encode($row);
-                $gzip = gzencode();
-                \Log::CompressEffect('before compress length:' . strlen($content) .
-                ',after compress length:' . strlen($gizp) . ',compress Effect:' . strlen($gizp) / strlen($content)); 
-                echo $gizp;
+                $gzip = gzdeflate(json_encode($row, 256));
+                \Log::info('before_compress_content_length:' . mb_strlen(json_encode($row, 256), '8bit') . 
+                ',after_gzip_content_length:' . mb_strlen($gzip, '8bit') . 
+                'compress_rate:' . 100 * mb_strlen($gzip, '8bit') / mb_strlen(json_encode($row, 256), '8bit'));
+                echo $gzip;
                 exit();
             }
             return "";
