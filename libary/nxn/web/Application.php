@@ -139,7 +139,7 @@ class Application extends Container
         }else{
             $params = json_encode($_REQUEST, JSON_UNESCAPED_UNICODE);
         }
-        \Log::request('method<' . $method . 'path<' . $baseUri . '<params<' . $params . '<');
+        \Log::request('method[' . $method . ']path[' . $baseUri . ']params[' . $params . ']');
         // 解析 action 的类名称
         return call_user_func([$this->controller, $this->router['action']]);
     }
