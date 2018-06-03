@@ -50,8 +50,6 @@ class Items extends ActiveRecord
      * @return array
      * Created by: xiaoning nan
      * Last Modify: xiaoning nan
-     * Date: xxxx-xx-xx
-     * Time: xx:xx
      * Description:
      *
      */

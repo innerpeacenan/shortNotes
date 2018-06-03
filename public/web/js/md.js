@@ -1240,6 +1240,7 @@
 
     marked.defaults = {
         gfm: true,
+        headerPrefix: false,
         tables: true,
         breaks: false,
         pedantic: false,
