@@ -21,7 +21,7 @@ class Container
     private $_singletons = [];
 
     /**
-     * @param array $singletons
+     * @param object $singleton
      */
     public function setSingletons($name, $singleton)
     {

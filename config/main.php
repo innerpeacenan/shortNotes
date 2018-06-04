@@ -1,5 +1,8 @@
 <?php
 return [
+    'router' => [
+        'class' => \nxn\web\MatchRouter::class,
+    ],
     'db' => [
         // POD 构造函数的最后一个参数从这里传入
         'shareParam' => [
@@ -11,7 +14,7 @@ return [
             [
                 'class' => 'PDO',
                 'params' => [
-                    'mysql:host=' . getenv('DB_MASTER_HOST').';port=' . getenv('DB_MASTER_PORT') . ';dbname=' . getenv('DB_MASTER_NAME'),
+                    'mysql:host=' . getenv('DB_MASTER_HOST') . ';port=' . getenv('DB_MASTER_PORT') . ';dbname=' . getenv('DB_MASTER_NAME'),
                     getenv('DB_MASTER_USER'),
                     getenv('DB_MASTER_PASS'),
                 ]
@@ -21,7 +24,7 @@ return [
             [
                 'class' => 'PDO',
                 'params' => [
-                    'mysql:host=' . getenv('DB_MASTER_HOST').';port=' . getenv('DB_MASTER_PORT') . ';dbname=' . getenv('DB_MASTER_NAME'),
+                    'mysql:host=' . getenv('DB_MASTER_HOST') . ';port=' . getenv('DB_MASTER_PORT') . ';dbname=' . getenv('DB_MASTER_NAME'),
                     getenv('DB_MASTER_USER'),
                     getenv('DB_MASTER_PASS'),
                 ]

@@ -1,32 +1,23 @@
 <?php
+
 namespace nxn\web;
 
 use nxn\di\Container;
 
-
 /**
- * @todo 目前还很不健全,需要进一步优化, 但是我还没有想好怎么做
- * @package nxn\web
- * Description: description
+ * @property \nxn\web\RouterInterface router
  *
- * @ 重构,重新写一个 component 类用于依赖加载的单例模式的处理
  */
 class Application extends Container
 {
     public $conf;
+
     /**
      * @var Container 注入的新建对象的容器
      */
+
     public $container;
-    /**
-     * [module,controller,action]
-     * @var array  array consist of module, controller , action whill be reswhen called [[Application::setRouter]]
-     */
-    public $router = [
-        'module' => 'n\\modules\\index\\controllers\\',
-        'controller' => 'IndexController',
-        'action' => 'indexGET'
-    ];
+
 
     /**
      * @var null| \nxn\web\Controller | \nxn\web\AuthController $controller is a string before instantiate
@@ -72,39 +63,7 @@ class Application extends Container
     {
         if (isset($router)) {
             $this->router = $router;
-            return;
         }
-        //如果从来没有设置过,则从uri中解析
-        // 从 uri 中解析  getfriends?fid=2Action
-//       防止有 '/' 这种类型的路径直接访问
-        $baseUri = explode('?', $_SERVER['REQUEST_URI'])[0];
-        $method = $_SERVER['REQUEST_METHOD'];
-        $left = preg_split('/\\//', $baseUri, -1, PREG_GREP_INVERT);
-        if (empty($left)) return;
-        if (empty($_FILES) && !in_array($method, ['POST', 'GET'])) {
-            if (false != ($rawData = file_get_contents('php://input'))) {
-                if (false != mb_parse_str($rawData, $data)) {
-                    $_REQUEST = $data;
-                }
-            }
-        }
-        $this->router['action'] = $method . static::camelCase(array_pop($left));
-        if (empty($left)) return;
-        $this->router['controller'] = static::camelCase(array_pop($left)) . 'Controller';
-        if (empty($left)) return;
-        // 到 module 的时候,只做简单的替换,大小写等其他信息均保留
-        $this->router['module'] = 'n\\modules\\' . join('\\', $left) . '\\controllers\\';
-    }
-
-    /**
-     * @access
-     * @param $string
-     * @return string
-     * turn string like 'information-detect' into 'InformationDetect'
-     */
-    public static function camelCase($string)
-    {
-        return str_replace('-', '', ucwords($string, '-'));
     }
 
 
@@ -112,51 +71,25 @@ class Application extends Container
      * 通过 [[setRouter]] 方法, 保证 controller 和 action 都是正确的
      * @access
      * @return string
-     *
      */
     public function runAction()
     {
-        $this->setRouter();
-        $controller = $this->router['module'] . $this->router['controller'];
-        if (!class_exists($controller, true)) {
-            header('HTTP/1.1 400 BAD REQUEST(invalide controller)', true, 400);
-            header('Content-type:text/html;charset=utf-8');
-            echo '400 BAD REQUEST(invalide controller)';
-            exit();
-        }
-        $this->controller = new $controller();
-        $this->controller->beforeAction();
-        if (!method_exists($this->controller, $this->router['action'])) {
-            $msg = 'HTTP/1.1 400 BAD REQUEST(invalid action' . json_encode($this->router, 256) . ')';
-            header($msg, true, 400);
-            echo '400 bad request,invalide action name' . json_encode($this->router['action'],256);
-            exit();
-        }
-        list($baseUri, $queryString) = array_pad(explode('?', $_SERVER['REQUEST_URI'], 2), 2, '0');
-        $method = $_SERVER['REQUEST_METHOD'];
-        if(strtolower($method) === 'get'){
-            $params = $queryString;
-        }else{
-            $params = json_encode($_REQUEST, JSON_UNESCAPED_UNICODE);
-        }
-        \Log::request('method[' . $method . ']path[' . $baseUri . ']params[' . $params . ']');
-        // 解析 action 的类名称
-        return call_user_func([$this->controller, $this->router['action']]);
+        $this->setRouter($this->router);
     }
 
     public function run()
     {
-        try{
-            return $this->runAction();
-        }catch (\Exception $e){
+        try {
+            $this->runAction();
+        } catch (\Exception $e) {
             $msg = $e->getMessage();
             $code = $e->getCode();
             $header = [];
             Ajax::json($code, [], $msg, $code);
-        }catch (\Throwable $err){
-            $msg =  $err->getMessage();
+        } catch (\Throwable $err) {
+            $msg = $err->getMessage();
             $code = $err->getCode();
-            if(empty($code)){
+            if (empty($code)) {
                 $code = 500;
             }
             \Log::error($err->getTraceAsString());

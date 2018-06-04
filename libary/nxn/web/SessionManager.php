@@ -30,6 +30,7 @@ class SessionManager
         $this->driver = $sessionConf['driver'];
         $this->name = $sessionConf['name'];
 
+        //@todo extend array session for test
         if('file' == $sessionConf['driver']){
             //要想使用命名会话，请在调用 session_start() 函数 之前调用 session_name() 函数。
             session_name($this->name);
