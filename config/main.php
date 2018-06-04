@@ -35,7 +35,6 @@ return [
         'driver' => getenv('SESSION_DRIVER'),
         'name' => getenv('SESSION_VALUE'),
     ],
-
     'redis' => [
         'ip' => getenv('REDIS_HOST'),
         'port' => getenv('REDIS_PORT'),
