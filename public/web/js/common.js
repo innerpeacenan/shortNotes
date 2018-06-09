@@ -1,11 +1,30 @@
-function l(message) {
-    window.console.log(message);
-}
+// 统一的全局状态管理
+var VGLOBAL = new Vue();
+Vue.directive('focus', {
+	inserted: function (el) {
+		el.focus()
+	}
+});
+
+Vue.directive('highlightjs', {
+	inserted: function (el) {
+		var blocks = el.querySelectorAll('pre code');
+		Array.prototype.forEach.call(blocks, hljs.highlightBlock);
+	},
+	update: function (el, binding, vnode, oldVnode) {
+		if (vnode.data.domProps.innerHTML !== oldVnode.data.domProps.innerHTML) {
+			var blocks = el.querySelectorAll('pre code');
+			Array.prototype.forEach.call(blocks, hljs.highlightBlock);
+		}
+
+	}
+});
 
 
 function getParam(name, url) {
     if (!url) url = window.location.href;
     name = name.replace(/[\[\]]/g, "\\$&");
+    console.log('name', name);
     var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
         results = regex.exec(url);
     if (!results) return null;
