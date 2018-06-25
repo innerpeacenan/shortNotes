@@ -60,7 +60,7 @@ var notesPanel = Vue.component('notes-panel', {
 				id: 0,
 				item_id: itemId,
 				content: "",
-				c_time: '',
+				c_time: now(),
 				seen: true,
 				modifiedContent: ""
 			};
