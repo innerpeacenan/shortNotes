@@ -237,7 +237,6 @@ var notesPanel = Vue.component('notes-panel', {
     <div>
         <ul>
             <li v-for="(note,index) in notes"  :id="'note_' + note.id">
-                <span title="笔记唯一编号">{{note.id}}</span>
                 <span class="hidden-xs" title="创建时间">{{note.c_time}}</span>
                 <span>
                     <select title="选择其他目录,则自动将笔记移动到其他目录下了" class="items" v-model="note.item_id" @change="mv(note,index)" >
