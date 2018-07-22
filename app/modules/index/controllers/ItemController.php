@@ -4,6 +4,7 @@ namespace n\modules\index\controllers;
 
 use n\models\Items;
 use nxn\debug\VarDumper;
+use nxn\pipeline\PipeLine;
 use nxn\web\Ajax;
 use n\modules\account\controllers\AuthController;
 use Log;
@@ -18,8 +19,54 @@ use Log;
  */
 class ItemController extends AuthController
 {
+    public function __construct()
+    {
+        $this->pipelineTest();
+    }
+
+    protected function pipelineTest()
+    {
+        $pipeline = new PipeLine();
+        $travelor = [];
+        // 从log上看,后加入的被先执行了
+        $pipeline->send($travelor)->through([function ($travelor, \Closure $next) {
+            \Log::pipelineTest('middleWare1');
+            return $next($travelor);
+        }, function ($travelor, \Closure $next) {
+            \Log::pipelineTest('middleWare2');
+            return $next($travelor);
+            //  代码中有是否为 closure的实例对象的检查
+        }, function ($travelor, \Closure $next) {
+            \Log::pipelineTest('middleware3');
+            return $next($travelor);
+        }])->then(function ($travelor) {
+            \Log::pipelineTest(json_encode($travelor) . '  down');
+        });
+    }
+
     public function getItems()
     {
+        $rulle = [
+            'fid' => [
+                'sometimes' => [],
+                'int' => []
+            ],
+            'status' => [
+                'inArray' => [
+                    [
+                        Items::STATUS_ENABLE,
+                    ]
+                ],
+            ],
+        ];
+
+        $desciption = [
+            'fid' => '父级事项ID',
+            'status' => '事项状态'
+        ];
+
+        $this->validate($rulle, $desciption);
+
         $fid = empty($_REQUEST['fid']) ? 0 : intval($_REQUEST['fid']);
         $status = $_REQUEST['status'];
         $status = empty($status) ? [Items::STATUS_ENABLE] : (is_string($status) ? [$status] : $status);

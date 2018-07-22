@@ -58,22 +58,28 @@ LIMIT :limit OFFSET :offset';
         return $notes;
     }
 
-    public static function deleteNotes($item_id)
+    public static function deleteNotes($itemId)
     {
-        return Query::execute('DELETE FROM notes WHERE item_id = :item_id', [':item_id' => $item_id]);
+        return Query::execute('DELETE FROM notes WHERE item_id = :item_id', [':item_id' => $itemId]);
+    }
+
+    public function addTodoLog($itemId)
+    {
+        \Log::info('item_id ' . $itemId . ' has been deleted, so take an note');
+        \Log::info('item_id ' . $itemId . ' will Test tomorrow');
     }
 
     public static function checkNoteBelongsToUser($noteId, $userId)
     {
         $params = [':note_id' => $noteId, ':user_id' => $userId];
-        $sql = 'select `item_id` from notes where id = :note_id limit 1';
+        $sql = 'SELECT `item_id` FROM notes WHERE id = :note_id LIMIT 1';
 
         $itemId = Query::scalar($sql, $params);
         if (empty($itemId)) {
             throw new \Exception('该笔记对应事项已经被删除', 402);
         }
         \Log::info('item_id' . $itemId);
-        $sql = 'select `user_id` from `items` where `id` = :id';
+        $sql = 'SELECT `user_id` FROM `items` WHERE `id` = :id';
         $params = [':id' => $itemId];
         $actualUserId = Query::scalar($sql, $params);
         return (int)$actualUserId === (int)$userId;

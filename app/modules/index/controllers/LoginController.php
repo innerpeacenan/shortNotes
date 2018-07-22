@@ -30,7 +30,7 @@ class LoginController extends Controller
      */
     public function postIn()
     {
-        $this->validate();
+//        $this->validate();
 
         $sessionManger = new SessionManager();
         if ($sessionManger->name !== session_name()) {
@@ -56,26 +56,5 @@ class LoginController extends Controller
             }
             Ajax::json(0, ['errorMsg' => json_encode($err)]);
         }
-    }
-
-    /**
-     * @access
-     * @return void
-     * Created by: xiaoning nan
-     * Last Modify: xiaoning nan
-     *
-     * Description:
-     *
-     * @todo validate request by regular expression
-     * request params:
-     * name |meaning
-     * ---|---
-     *
-     *
-     *
-     */
-    public function validate()
-    {
-
     }
 }

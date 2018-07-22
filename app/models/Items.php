@@ -76,13 +76,26 @@ ORDER BY `visible_range` DESC, `rank` DESC';
         if ($item->user_id != $userId) {
             throw new \Exception('items 不属于该用户', 402);
         }
+
+        $note = new Notes();
+        // 生产者消费者模式演示 (不支持按照优先级排序, 不支持传对象, 暂时不支持移除列出接听位置的队列)
+        $disPatcher = new \nxn\Event\Dispatcher();
+        //callback [类名,静态方法] [实例,方法] function
+        $disPatcher->on('item_delete', [$note, 'deleteNotes'], $item->id);
+        $disPatcher->on('item_delete', [$note, 'addTodoLog'], $item->id);
         $status = $item->delete();
         return $status;
     }
 
     public function afterDelete()
     {
-        Notes::deleteNotes($this->id);
+        // 生产者消费者模式演示
+        $disPatcher = new \nxn\Event\Dispatcher();
+        $note = new Notes();
+        //callback [类名,静态方法] [实例,方法] function
+        $disPatcher->on('item_delete', [$note, 'deleteNotes'], $this->id);
+        $disPatcher->on('item_delete', [$note, 'addTodoLog'], $this->id);
+        $disPatcher->dispatch('item_delete');
         parent::afterDelete();
     }
 
@@ -163,7 +176,7 @@ ORDER BY `visible_range` DESC, `rank` DESC';
     public function beforeInsert()
     {
         $this->user_id = $_SESSION['user_id'];
-        $sql = 'select rank from items where user_id = :user_id ORDER BY rank DESC';
+        $sql = 'SELECT rank FROM items WHERE user_id = :user_id ORDER BY rank DESC';
         $maxRank = Query::scalar($sql, [':user_id' => $this->user_id]);
         $this->rank = $maxRank + 2;
     }
