@@ -14,7 +14,7 @@
     },
     "scripts": {
         "post-root-package-install":[
-            "echo 'done'"
+            "composer dump-autoload && echo done"
         ]
     }
 
