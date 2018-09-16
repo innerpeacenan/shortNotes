@@ -264,6 +264,14 @@ var itemsPanel = Vue.component('items-panel', {
 				}
 			});
 		},
+		getDetails: function (item) {
+			var my = this;
+			my.getNotes(item);
+			my.getTodoList(item);
+		},
+		getTodoList: function (item) {
+			VGLOBAL.$emit('should-get-todo-list', item)
+		},
 		getNotes: function (item) {
 			var my = this;
 			// 完成 items 和 notes 的相互绑定
@@ -329,7 +337,7 @@ var itemsPanel = Vue.component('items-panel', {
         </div>
         <div class="panel-body">
             <ul class="list-group" v-for="(item,index) in items">
-                <li class="list-group-item" @click.stop="getNotes(item)" draggable='true'
+                <li class="list-group-item" @click.stop="getDetails(item)" draggable='true'
                     @dragstart="drag(item)"
                     @dragover.prevent @drop="drop(item)">
                     <div class="checkbox">

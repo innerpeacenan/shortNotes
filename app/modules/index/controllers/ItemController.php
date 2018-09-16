@@ -2,7 +2,12 @@
 
 namespace n\modules\index\controllers;
 
+use n\models\Collection;
+use n\models\CollectionChecked;
+use n\models\CollectionExpiredDay;
 use n\models\Items;
+use n\models\Todo;
+use n\models\TodoCheckInLog;
 use nxn\debug\VarDumper;
 use nxn\pipeline\PipeLine;
 use nxn\web\Ajax;
@@ -194,5 +199,66 @@ class ItemController extends AuthController
         $id = $_REQUEST['id'];
         $visibleRange = Items::toggleVisibleRange($id, $_SESSION['user_id']);
         Ajax::json(1, ['visible_range' => $visibleRange]);
+    }
+
+    public function getTodoList()
+    {
+        $itemId = $_REQUEST['item_id'];
+
+        $collections = Collection::getByItemId($itemId);
+        $collections = array_column($collections, null, 'id');
+        $ids = array_column($collections, 'id');
+        $expiredList = CollectionExpiredDay::getByCollectionIds($ids);
+        $expiredList = array_column($expiredList, null, 'id');
+        //todo 这部分代码待测试 过期的要改状态
+        foreach ($expiredList as $expired) {
+            $exp = Collection::load($expired['id']);
+            $exp->status = Collection::STATUS_DISABLE;
+            $exp->save();
+        }
+
+        $checkedList = CollectionChecked::getManualChecked($ids);
+        $checkedList = array_column($checkedList, null, 'collection_id');
+        $collections = array_diff_key($collections, $expiredList, $checkedList);
+        foreach ($collections as $id => $collection){
+            $collections[$id]['total_count'] = Collection::getTotalDaysCount($id);
+            $collections[$id]['check_in_count'] = Collection::getCheckedIndayCount($id);
+        }
+        if(!empty($collections)){
+            // find todos
+            $todoList = Todo::getByCollectionIds($ids);
+            $todoIds = array_column($todoList, 'id');
+            $todoList = array_column($todoList, null, 'id');
+            // 今天签到过的统统移除
+            $todoFilter = TodoCheckInLog::getBlackLists($todoIds);
+            $todoFilter = array_column($todoFilter, null, 'todo_id');
+            $todoList = array_diff_key($todoList, $todoFilter);
+            // reformat json
+            foreach ($todoList as $todo) {
+                $cid = $todo['collection_id'];
+                if (!isset($collections[$cid]['todo'])) {
+                    $collections[$cid]['todo'] = [];
+                }
+                $collections[$cid]['todo'][] = $todo;
+            }
+        }
+        $collections = array_values($collections);
+        Ajax::json(1, $collections);
+    }
+
+    public function postTodoDoneToday()
+    {
+        // 数据权限检查
+        $todoId = $_REQUEST['todo_id'];
+        $todo = Todo::load($todoId);
+        $todoId = TodoCheckInLog::todoDoneToday($todoId);
+        CollectionChecked::autoDoneToday($todo->collection_id);
+        Ajax::json(1, ['todo_id' => $todoId]);
+    }
+
+    public function postCollectionDoneToday(){
+        $collectionId = $_REQUEST['collection_id'];
+        $collectionId = CollectionChecked::doneToday($collectionId);
+        Ajax::json(1, ['collection_id' => $collectionId]);
     }
 }

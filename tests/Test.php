@@ -5,8 +5,10 @@
  * Date: 6/23/17
  * Time: 1:37 PM
  */
+
 namespace tests;
 
+use nxn\Str;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -20,7 +22,8 @@ use PHPUnit\Framework\TestCase;
 class Test extends TestCase
 {
     /**
-     * @access
+     *
+     * @deprecated
      * @param $obj
      * @return  mixed
      * 用于获取对象的
@@ -34,5 +37,54 @@ class Test extends TestCase
 //      不要影响该类的属性的正常使用
         $p->setAccessible(false);
         return $reult;
+    }
+
+    protected function method($obj, $name, $args = [])
+    {
+        $class = new \ReflectionClass(get_class($obj));
+        $method = $class->getMethod($name);
+        $method->setAccessible(true);
+        return $method->invokeArgs($obj, $args);
+    }
+
+    public function __get($name)
+    {
+        if (Str::endsWith($name, 'Stub')) {
+            $name = Str::substr($name, 0, -strlen('Stub'));
+        }
+        return $this->getProperty($this->stub, $name);
+    }
+
+    public function __set($name, $value)
+    {
+        if (Str::endsWith($name, 'Stub')) {
+            $name = Str::substr($name, 0, -strlen('Stub'));
+        }
+        return $this->setProperty($this->stub, $name, $value);
+    }
+
+
+    public function __call($name, $arguments)
+    {
+        if (Str::endsWith($name, 'Stub')) {
+            $name = Str::substr($name, 0, -strlen('Stub'));
+        }
+        return $this->method($this->stub, $name, $arguments);
+    }
+
+    protected function getProperty($obj, $name)
+    {
+        $class = new \ReflectionClass(get_class($obj));
+        $property = $class->getProperty($name);
+        $property->setAccessible(true);
+        return $property->getValue($obj);
+    }
+
+    protected function setProperty($obj, $name, $value)
+    {
+        $class = new \ReflectionClass(get_class($obj));
+        $property = $class->getProperty($name);
+        $property->setAccessible(true);
+        $property->setValue($obj, $value);
     }
 }

@@ -1,6 +1,8 @@
 <?php
+
 namespace nxn\db;
 
+use nxn\Str;
 use PDO;
 
 class ActiveRecord
@@ -92,8 +94,10 @@ class ActiveRecord
         'tinyint' => 'integer',
         'char' => 'string',
         'varchar' => 'string',
-        'text' => 'string',
+        'date' => 'string',
+        'datetime' => 'string',
         'timestamp' => 'string',
+        'text' => 'string',
         'enum' => 'string',
         'decimal' => 'double',
         'float' => 'float',
@@ -116,7 +120,8 @@ class ActiveRecord
      */
     public static function tableName()
     {
-        throw new \Exception('tableName must be override by subClass of ' . get_class());
+        $parts = explode('\\', get_called_class());
+        return Str::snakeCase(end($parts));
     }
 
     public function getValidator()
@@ -330,7 +335,7 @@ class ActiveRecord
         $this->beforeInsert();
         foreach ($this->_columns as $name => $def) {
             //如果值为null,检查是否允许未null,如果允许,跳过.不允许,检查是否有默认值,如果有默认值,则赋予默认值,否则,直接返回
-            if (in_array($name, $this->_primaryKey) || true === $this->_columns[$name]['Null']) {
+            if (in_array($name, $this->_primaryKey)) {
                 continue;
             }
             if (isset($this->_attributes[$name])) {
@@ -340,6 +345,8 @@ class ActiveRecord
                 settype($val, $def['Type']);
                 $this->_attributes[$name] = $val;
                 $kv[self::quoteName($name)] = $this->safeString($val);
+            } elseif (true === $this->_columns[$name]['Null']) {
+                continue;
             } else {
                 if (getenv(N_DEBUG)) {
                     throw new \Exception($tableName . '.' . $name . ' must have value when insert!');

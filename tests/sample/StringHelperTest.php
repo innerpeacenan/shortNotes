@@ -10,7 +10,7 @@ namespace tests\sample;
 use nxn\StringHelper;
 use tests\Test;
 
-class StringHelperTest extends Test
+class StrTest extends Test
 {
     /**
      * @var StringHelper
@@ -20,7 +20,7 @@ class StringHelperTest extends Test
     public function setUp()
     {
         parent::setUp();
-        $this->stub = new StringHelper();
+        $this->stub = new Str();
     }
 
     public function testStrrev()

@@ -34,12 +34,14 @@
 
     <div title="同时按下<CtrL>和<ENTER>,可隐藏或显示左侧导航栏" v-bind:class="seen_items == 1 ? 'col-lg-8' : 'col-lg-12'" tabindex="0"
          @keyup.ctrl.enter="toggleItemsTab()">
+        <todo-lists-panel></todo-lists-panel>
         <notes-panel></notes-panel>
     </div>
 </div>
 
 
 <script type="application/javascript" src="/web/js/index/items.js"></script>
+<script type="application/javascript" src="/web/js/index/todo.js"></script>
 <script type="application/javascript" src="/web/js/index/notes.js"></script>
 
 <!--用来清除浮动, 针对pull-right-->

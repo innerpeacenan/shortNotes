@@ -142,6 +142,28 @@ blockquote {
     color: rgb(128, 144, 160);
 }
 
+/**
+ todolist 区域样式设置
+ */
+.collection {
+    text-decoration: none;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: 5px;
+    padding-left: 15px;
+    padding-top: 5px;
+    padding-right: 5px;
+    padding-bottom: 5px;
+    /*display: list-item;*/
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 1);
+}
+
+.collection_header {
+    margin-bottom: 10px;
+    border-bottom: 3px solid #ccc;
+}
 
 /* 设置笔记距离页面顶部的边距*/
 #c_notes {
