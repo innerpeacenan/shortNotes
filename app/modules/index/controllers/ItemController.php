@@ -208,22 +208,24 @@ class ItemController extends AuthController
         $collections = Collection::getByItemId($itemId);
         $collections = array_column($collections, null, 'id');
         $ids = array_column($collections, 'id');
-        $expiredList = CollectionExpiredDay::getByCollectionIds($ids);
-        $expiredList = array_column($expiredList, null, 'id');
-        //todo 这部分代码待测试 过期的要改状态
-        foreach ($expiredList as $expired) {
-            $exp = Collection::load($expired['id']);
-            $exp->status = Collection::STATUS_DISABLE;
-            $exp->save();
+        if(!empty($ids)){
+            $expiredList = CollectionExpiredDay::getByCollectionIds($ids);
+            $expiredList = array_column($expiredList, null, 'id');
+            //todo 这部分代码待测试 过期的要改状态
+            foreach ($expiredList as $expired) {
+                $exp = Collection::load($expired['id']);
+                $exp->status = Collection::STATUS_DISABLE;
+                $exp->save();
+            }
+            $checkedList = CollectionChecked::getManualChecked($ids);
+            $checkedList = array_column($checkedList, null, 'collection_id');
+            $collections = array_diff_key($collections, $expiredList, $checkedList);
+            foreach ($collections as $id => $collection){
+                $collections[$id]['total_count'] = Collection::getTotalDaysCount($id);
+                $collections[$id]['check_in_count'] = Collection::getCheckedIndayCount($id);
+            }
         }
 
-        $checkedList = CollectionChecked::getManualChecked($ids);
-        $checkedList = array_column($checkedList, null, 'collection_id');
-        $collections = array_diff_key($collections, $expiredList, $checkedList);
-        foreach ($collections as $id => $collection){
-            $collections[$id]['total_count'] = Collection::getTotalDaysCount($id);
-            $collections[$id]['check_in_count'] = Collection::getCheckedIndayCount($id);
-        }
         if(!empty($collections)){
             // find todos
             $todoList = Todo::getByCollectionIds($ids);

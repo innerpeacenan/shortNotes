@@ -12,7 +12,7 @@ class CollectionExpiredDay extends ActiveRecord
 
     public static function getByCollectionIds(array $collectionIds)
     {
-        $sql = 'SELECT * FROM `collection_expired_day` WHERE collection_id IN (:collection_id) AND `status` = :status AND `date` = :date';
+        $sql = 'SELECT * FROM `collection_expired_day` WHERE collection_id IN (:collection_id) AND `status` = :status AND `date` <= :date';
         $results = Query::all($sql, [
             ':collection_id' => $collectionIds,
             ':status' => self::SATUS_ENABLE,
@@ -22,15 +22,17 @@ class CollectionExpiredDay extends ActiveRecord
     }
 
     public static function getStoppedDays($collectionId){
-        $sql = 'SELECT * FROM `collection_expired_day` WHERE collection_id = :collection_id AND `status` = :status ORDER BY `date` DESC ';
+        $sql = 'SELECT * FROM `collection_expired_day` WHERE collection_id = :collection_id AND `status` = :status ORDER BY `date`';
         $days = Query::all($sql, [
             ':collection_id' => $collectionId,
             ':status' => self::STATUS_DISABLE,
         ]);
         $total = 0;
-        $prevDay = reset($days);
         foreach ($days as $day){
-            $total += (strtotime($day) - strtotime($prevDay))/(24 * 3600);
+            // 两个间隔日期的两头都算做停滞日期,因此数量为 日期差 + 1
+            if(isset($prevDay)){
+                $total += (strtotime($day['date']) - strtotime($prevDay['date']))/(24 * 3600) + 1;
+            }
             $prevDay = $day;
         }
         // @todo 加上免签的天数
