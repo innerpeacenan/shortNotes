@@ -81,7 +81,7 @@ var todoPanel = Vue.component('todo-lists-panel', {
                 <span>
                     <input type="checkbox"  title="选中表示今天任务完成" @click.stop.prevent="collectionDoneToday(collection,ck)"/>
                 </span>
-                <span>共{{collection.total_count}}天,已打卡{{collection.check_in_count}}天,坚持率{{collection.check_in_count / collection.total_count * 100}}%</span> 
+                <span>共{{collection.total_count}}天,已打卡{{collection.check_in_count}}天,坚持率{{(collection.check_in_count / collection.total_count * 100).toFixed(2)}}%</span> 
             </li>
             <li  v-for="(todo,tk) in collection.todo"  :id="'collections_' + collection.id">
                 <div class="action-buttons">
