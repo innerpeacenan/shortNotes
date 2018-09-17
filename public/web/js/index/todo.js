@@ -20,9 +20,8 @@ var todoPanel = Vue.component('todo-lists-panel', {
 	methods: {
 		getList: function (item) {
 			var my = this
-			if (typeof item == "undefined") {
-				console.log('item is undefined', item)
-				return;
+			if (item !== my.item) {
+				my.collections = [];
 			}
 			$.ajax({
 				type: "GET",
@@ -36,6 +35,7 @@ var todoPanel = Vue.component('todo-lists-panel', {
 						return false;
 					}
 					my.collections = data
+					my.item = item
 				}
 			});
 		},
