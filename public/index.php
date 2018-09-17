@@ -1,4 +1,6 @@
 <?php
+// 同意设置时区
+date_default_timezone_set("Asia/Shanghai");
 // set up env
 $envirementVariables = require(__DIR__ . '/../.env');
 if(!is_array($envirementVariables)){
