@@ -92,7 +92,6 @@ class Application extends Container
             if (empty($code)) {
                 $code = 500;
             }
-            \Log::error($err->getTraceAsString());
             Ajax::json($code, [], $msg, $code);
         }
 

@@ -69,6 +69,13 @@ blockquote {
     background-color: #f1f1f1
 }
 
+/*设置图片不要超过指定长度*/
+img {
+    max-width: 100%;
+    overflow: scroll;
+}
+
+
 /*顶部导航栏样式*/
 .AppHeader-navItem {
     padding: 0 1em;
@@ -201,7 +208,6 @@ blockquote {
 
 /*消除bootstrap 默认的段落设置*/
 .textarea ul li p {
-    margin: 0 0 0px;
     margin-top: 0px;
     margin-right: 0px;
     margin-bottom: 0px;
@@ -212,16 +218,8 @@ blockquote {
     -webkit-margin-end: 0;
 }
 
-/*#c_notes*/
-image{
-    max-width: 100%;
-    overflow:scroll;
-}
 
-img {
-    max-width: 100%;
-    overflow: scroll;
-}
+
 
 
 /*笔记的下拉跨*/

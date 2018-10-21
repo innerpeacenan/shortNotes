@@ -83,21 +83,6 @@ class NoteController extends AuthController
     {
         $message = "";
         $note = new Notes();
-        $pictures = $_REQUEST['pictures'];
-        if(!empty($pictures)){
-            $imagesInDb =Image::findNoteImages($_REQUEST['id']);
-            $imagesInDb = array_column($imagesInDb,null, 'index');
-            foreach ($pictures as $index => $base64){
-                $image = new Image();
-                if(isset($imagesInDb[$index])){
-                    $image->id = $imagesInDb[$index]->id;
-                }
-                $image->note_id = $_REQUEST['id'];
-                $image->base64 = $base64;
-                $image->index = $index;
-                $image->save();
-            }
-        };
         $note->setAttributes($_REQUEST);
         $status = $note->save(false);
         $id = $note->id;

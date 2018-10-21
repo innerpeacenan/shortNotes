@@ -6,6 +6,19 @@ var notesPanel = Vue.component('notes-panel', {
 				// 单位是像素
 				textarea_default_height: 50
 			},
+            constant: {
+                status: {
+                    enable: {
+                        code: 10,
+						// 后端的默认状态
+                        desc: "有效且已保存"
+                    },
+                    disable: {
+                        code: 20,
+                        desc: "未保存"
+                    }
+                }
+            },
 			notes: [],
 			// 记录当前的item
 			item: {},
@@ -63,7 +76,7 @@ var notesPanel = Vue.component('notes-panel', {
 				c_time: now(),
 				seen: true,
 				modifiedContent: "",
-				picture:[],
+                pictures:[],
 			};
 		},
 		doGetNotes: function (item, type) {
@@ -98,9 +111,11 @@ var notesPanel = Vue.component('notes-panel', {
 					} else {
 						data = data.map(function (note) {
                             var preFix = '\n\r';
-                            var plen = note.picture.length;
+                            var plen = note.pictures.length;
+
                             for(var j = 0; j < plen; j++) {
-                                preFix += '[' + j  + ']:' + note.picture[j] + '\n\r'
+                            	var picture = note.pictures[j];
+                                preFix += '[' + j  + ']:' + picture.base64 + '\n\r'
                             }
                             note.md = marked(note.content + preFix, {sanitize: true});
 							note.seen = false;
@@ -120,6 +135,29 @@ var notesPanel = Vue.component('notes-panel', {
 			// 在列表头部加一条数据
 			this.notes.unshift(note);
 			return true;
+		},
+		// 单张图片保存
+        saveImage: function (note, image, index){
+			var my = this;
+            var ajax = $.ajax({
+                type: 'POST',
+                url: URL_Manager.image,
+                data: {
+                    note_id: note.id,
+                    item_id: note.item_id,
+                    base64: image.base64,
+					index: image.index,
+                },
+                success: function (result) {
+                    if (result.status) {
+                        image.status = my.constant.status.enable.code
+						my.$emit('input')
+					}else{
+                        console.log('image_unsaved', result, 'image_unsaved')
+					}
+                },
+            })
+            return ajax;
 		},
         image:function ($event, note) {
             var my = this;
@@ -145,14 +183,27 @@ var notesPanel = Vue.component('notes-panel', {
                         reader.onload = function ($e) {
                             // event.target.result 即为图片的Base64编码字符串
                             var base64_str = $e.target.result
-                            if(undefined === note.picture){
-                                note.picture = [];
+                            if(undefined === note.pictures){
+                                note.pictures = [];
                             }
-                            var picIndex = note.picture.length
+                            var picIndex = note.pictures.length
                             var value =  base64_str + '\n\r';
                             note.modifiedContent += '![][' +  picIndex + ']\n\r'
                             $event.target.value = note.modifiedContent
-                            note.picture.push(value);
+                            image = Object.create({
+                                "base64":value,
+                                'index':picIndex,
+                                'status':my.constant.status.disable.code
+                            });
+                            var len = note.pictures.push(image);
+                            if(!note.id){
+                            	var ajax = my.save(note, true);
+                            	ajax.then(function () {
+									return my.saveImage(note, image, len - 1)
+                                });
+							}else{
+                                my.saveImage(note, image, len - 1)
+							}
                         }
 
                     }
@@ -179,7 +230,7 @@ var notesPanel = Vue.component('notes-panel', {
 			note.modifiedContent = note.content
 			note.seen = true
 		},
-		save: function (note) {
+		save: function (note, onlySave) {
 			var my = this
 			// 单击保存的时候，$event 为什么是 undefine 呢？
 			if (!note.item_id) {
@@ -188,14 +239,13 @@ var notesPanel = Vue.component('notes-panel', {
 			}
 			// 将原来的及时更新改为非及时，以提高性能
 			note.content = note.modifiedContent;
-			$.ajax({
+			var ajax = $.ajax({
 				type: 'POST',
 				url: URL_Manager.savenote,
 				data: {
 					id: note.id,
 					item_id: note.item_id,
 					content: note.content,
-					pictures: note.picture,
 				},
 				success: function (result) {
 					// 为新增加 note 更新其对应 id 值
@@ -203,22 +253,29 @@ var notesPanel = Vue.component('notes-panel', {
 						if (0 == note.id) {
 							note.id = result.data.id
 						}
-                        var preFix = '\n\r';
-                        var plen = note.picture.length;
+
+						if(!note.pictures){
+                            note.pictures = []
+                            console.log(note.pictures)
+						}
+                        var preFix = '';
+                        var plen = note.pictures.length;
                         for(var j = 0; j < plen; j++) {
-                            preFix += '[' + j  + ']:' + note.picture[j] + '\n\r'
+                        	var picture = note.pictures[j];
+                            preFix += '\n\r' + '[' + j  + ']:' + picture.base64;
                         }
                         // senitize 对 html 标签用实体替换，尽量避免跨站点脚本攻击
                         note.md = marked(note.content + preFix, {sanitize: true});
 						// senitize 对 html 标签用实体替换，尽量避免跨站点脚本攻击
-						// note.md = marked(note.content, {sanitize: true});
 					}
-
-					// 不管有没有实际更新数据,都自动保存数据
-					note.seen = false
-					my.item.offset = my.notes.length
+                   if(!onlySave){
+                       // 不管有没有实际更新数据,都自动保存数据
+                       note.seen = false
+				   }
+				   my.item.offset = my.notes.length
 				}
 			})
+			return ajax;
 		},
 		/**
 		 * delete 是 javascript 的//保留字
@@ -331,9 +388,20 @@ var notesPanel = Vue.component('notes-panel', {
                           v-focus>
                 </textarea>
                
-			   <div v-for="(img,index) in note.picture">
-					  <p v-if="note.seen"><span>{{index}}</span><img :src="img"></p> 
-				</div>
+			   <table class="table" v-if="note.seen  && undefined !== note.pictures && note.pictures.length > 0">
+			          <thead>
+			          	  <tr>
+			          	      <th>序号</th>
+			          	      <th>图片</th>
+			          	  </tr>
+			          </thead>
+			          <tbody>
+						  <tr  v-for="(img,index) in note.pictures" v-bind:class="img.status == 10 ? '' : 'warning'"  v-if="note.seen">
+							  <td>{{img.index}}</td>
+							  <td><img :src="img.base64"></td>
+						  </tr> 
+                      </tbody>
+				</table>
                 
 				
                 <div class="textarea" v-if="!note.seen" @dblclick.stop="edit(note)"
