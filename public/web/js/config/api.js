@@ -19,6 +19,7 @@ var URL_Manager = {
 	savenote: "/note/note",
 	deletenote: "/note/note",
 	noteDone: "/note/note-done",
+	image:'image/base64',
 };
 
 /**

@@ -15,5 +15,6 @@ return [
     '/note/item-notes' => 'n\modules\index\controllers\NoteController@itemNotes',
     '/note/move-note' => 'n\modules\index\controllers\NoteController@moveNote',
     "/note/note" => 'n\modules\index\controllers\NoteController@note',
-    "/note/note-done" => 'n\modules\index\controllers\NoteController@noteDone'
+    "/note/note-done" => 'n\modules\index\controllers\NoteController@noteDone',
+    "/image/base64" => 'n\modules\index\controllers\ImageController@base64',
 ];

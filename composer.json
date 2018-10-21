@@ -4,8 +4,13 @@
     "keywords":["php-play"],
     "license":"MIT",
     "type":"project",
-    "require":{},
+    "require":{
+      "php": ">=7.0"
+    },
     "autoload":{
+        "files":[
+            "libary/facade/N.php"
+        ],
         "psr-4": {
             "nxn\\": "libary/nxn/",
             "n\\": "app/",

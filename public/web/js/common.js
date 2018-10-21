@@ -1,5 +1,7 @@
 // 统一的全局状态管理
-var VGLOBAL = new Vue();
+var VGLOBAL = new Vue({data: {
+    picture_index: 1,
+}});
 Vue.directive('focus', {
 	inserted: function (el) {
 		el.focus()

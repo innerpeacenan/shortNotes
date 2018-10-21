@@ -16,6 +16,11 @@ class NTest extends TestCase
         parent::setUp();
     }
 
+    public function testIfPHPUnitWork(){
+        $note = new \n\models\Notes();
+        var_export($note);
+    }
+
     public function testCreateObject()
     {
         $config = [

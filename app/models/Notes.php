@@ -55,6 +55,12 @@ WHERE i.id = :id AND i.user_id = :user_id AND ((nt.tag_id IS NULL) OR (nt.tag_id
 ORDER BY n.c_time DESC
 LIMIT :limit OFFSET :offset';
         $notes = Query::all($sql, $params);
+
+        foreach ($notes as $i => $note){
+            $rows = array_column(Image::findNoteImages($note['id']),'base64', 'index');
+            ksort($rows,SORT_NUMERIC);
+            $notes[$i]['picture'] = array_values($rows);
+        }
         return $notes;
     }
 

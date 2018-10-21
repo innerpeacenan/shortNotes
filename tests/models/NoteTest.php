@@ -13,7 +13,8 @@ class NoteTest extends TestCase
      */
     public $notes;
 
-    public function setUp()
+    public function setUp(){
+        $config = [];
         \N::$app = new Application($config);
 //      需要将 config 配置过来
         \N::$app->conf = $config;

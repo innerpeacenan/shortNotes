@@ -212,6 +212,13 @@ blockquote {
     -webkit-margin-end: 0;
 }
 
+/*#c_notes*/
+image {
+    max-height:100%;
+    max-width: 100%;
+    overflow:scroll;
+}
+
 /*笔记的下拉跨*/
 select.items {
     border: 1px solid #cccccc;

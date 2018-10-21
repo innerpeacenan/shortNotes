@@ -90,6 +90,7 @@ class ActiveRecord
      *  mysql type vs php type
      */
     protected static $_typeCast = [
+        'bigint' => 'integer',
         'int' => 'integer',
         'tinyint' => 'integer',
         'char' => 'string',
@@ -98,6 +99,7 @@ class ActiveRecord
         'datetime' => 'string',
         'timestamp' => 'string',
         'text' => 'string',
+        'longtext' => 'string',
         'enum' => 'string',
         'decimal' => 'double',
         'float' => 'float',
@@ -573,7 +575,7 @@ class ActiveRecord
             $this->_attributes[$name] = $value;
         } else {
             //@todo  可在 debug 模式下记录更多日志内容(包括请求的路由,方便表结构变更后,开展进行代码清理工作)
-            throw new \Exception('column :' . $name . ' does not exists in table ' . $this->tableName());
+//            throw new \Exception('column :' . $name . ' does not exists in table ' . $this->tableName());
         }
     }
 

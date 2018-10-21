@@ -62,7 +62,8 @@ var notesPanel = Vue.component('notes-panel', {
 				content: "",
 				c_time: now(),
 				seen: true,
-				modifiedContent: ""
+				modifiedContent: "",
+				picture:[],
 			};
 		},
 		doGetNotes: function (item, type) {
@@ -96,7 +97,12 @@ var notesPanel = Vue.component('notes-panel', {
 						data = 'append' === type ? [] : [my.newNote()]
 					} else {
 						data = data.map(function (note) {
-							note.md = marked(note.content, {sanitize: true});
+                            var preFix = '\n\r';
+                            var plen = note.picture.length;
+                            for(var j = 0; j < plen; j++) {
+                                preFix += '[' + j  + ']:' + note.picture[j] + '\n\r'
+                            }
+                            note.md = marked(note.content + preFix, {sanitize: true});
 							note.seen = false;
 							return note;
 						});
@@ -115,6 +121,44 @@ var notesPanel = Vue.component('notes-panel', {
 			this.notes.unshift(note);
 			return true;
 		},
+        image:function ($event, note) {
+            var my = this;
+            // Edge 支持 event.clipboardData属性
+            if ( $event.clipboardData || $event.originalEvent ) {
+                //not for ie11  某些chrome版本使用的是event.originalEvent
+                clipboardData = ($event.clipboardData || $event.originalEvent.clipboardData);
+                if ( clipboardData.items ) {
+                    // for chrome
+                    var  items = clipboardData.items,
+                        len = items.length,
+                        blob = null;
+                    //在items里找粘贴的image,据上面分析,需要循环
+                    for (var i = 0; i < len; i++) {
+                        if (items[i].type.indexOf("image") !== -1) {
+                            //getAsFile() 此方法只是living standard firefox ie11 并不支持
+                            blob = items[i].getAsFile();
+                        }
+                    }
+                    if ( blob) {
+                        var reader = new FileReader();
+                        reader.readAsDataURL(blob);
+                        reader.onload = function ($e) {
+                            // event.target.result 即为图片的Base64编码字符串
+                            var base64_str = $e.target.result
+                            if(undefined === note.picture){
+                                note.picture = [];
+                            }
+                            var picIndex = note.picture.length
+                            var value =  base64_str + '\n\r';
+                            note.modifiedContent += '![][' +  picIndex + ']\n\r'
+                            $event.target.value = note.modifiedContent
+                            note.picture.push(value);
+                        }
+
+                    }
+                }
+            }
+        },
 		/**
 		 * auto-height 在编辑的时候,自动调整 textarea 高度
 		 * @param $event
@@ -150,7 +194,8 @@ var notesPanel = Vue.component('notes-panel', {
 				data: {
 					id: note.id,
 					item_id: note.item_id,
-					content: note.content
+					content: note.content,
+					pictures: note.picture,
 				},
 				success: function (result) {
 					// 为新增加 note 更新其对应 id 值
@@ -158,9 +203,17 @@ var notesPanel = Vue.component('notes-panel', {
 						if (0 == note.id) {
 							note.id = result.data.id
 						}
+                        var preFix = '\n\r';
+                        var plen = note.picture.length;
+                        for(var j = 0; j < plen; j++) {
+                            preFix += '[' + j  + ']:' + note.picture[j] + '\n\r'
+                        }
+                        // senitize 对 html 标签用实体替换，尽量避免跨站点脚本攻击
+                        note.md = marked(note.content + preFix, {sanitize: true});
 						// senitize 对 html 标签用实体替换，尽量避免跨站点脚本攻击
-						note.md = marked(note.content, {sanitize: true});
+						// note.md = marked(note.content, {sanitize: true});
 					}
+
 					// 不管有没有实际更新数据,都自动保存数据
 					note.seen = false
 					my.item.offset = my.notes.length
@@ -168,7 +221,7 @@ var notesPanel = Vue.component('notes-panel', {
 			})
 		},
 		/**
-		 * delete 是 javascript 的保留字
+		 * delete 是 javascript 的//保留字
 		 * 删除笔记
 		 */
 		del: function (index) {
@@ -274,10 +327,16 @@ var notesPanel = Vue.component('notes-panel', {
                 <div>
                 <textarea class="col-xs-12" v-if="note.seen" v-model="note.modifiedContent"
                           @keyup.esc="save(note)"
-                          @keyup.enter="h($event)" @focus="h($event, note)" @paste="h($event, note)"
+                          @keyup.enter="h($event)" @focus="h($event, note)"  @paste="image($event, note)"
                           v-focus>
                 </textarea>
-                    <div class="textarea" v-if="!note.seen" @dblclick.stop="edit(note)"
+               
+			   <div v-for="(img,index) in note.picture">
+					  <p v-if="note.seen"><span>{{index}}</span><img :src="img"></p> 
+				</div>
+                
+				
+                <div class="textarea" v-if="!note.seen" @dblclick.stop="edit(note)"
                          v-html="note.md" v-highlightjs></div>
                 </div>
             </li>

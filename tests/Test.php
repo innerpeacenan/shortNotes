@@ -9,6 +9,7 @@
 namespace tests;
 
 use nxn\Str;
+use nxn\web\Application;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -21,6 +22,9 @@ use PHPUnit\Framework\TestCase;
  */
 class Test extends TestCase
 {
+    public function setup(){
+        parent::setup();
+    }
     /**
      *
      * @deprecated
