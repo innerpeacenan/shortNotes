@@ -213,11 +213,16 @@ blockquote {
 }
 
 /*#c_notes*/
-image {
-    max-height:100%;
+image{
     max-width: 100%;
     overflow:scroll;
 }
+
+img {
+    max-width: 100%;
+    overflow: scroll;
+}
+
 
 /*笔记的下拉跨*/
 select.items {
