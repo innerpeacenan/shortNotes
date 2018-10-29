@@ -31,7 +31,7 @@ class Ajax
             header('Content-Type:application/json; charset=utf-8');
             header('Content-Encoding: deflate');
             if (!getenv('N_TEST')) {
-                $gzip = gzdeflate(json_encode($row, 256));
+                $gzip = gzdeflate(json_encode($row));
                 \Log::info('before_compress_content_length:' . mb_strlen(json_encode($row, 256), '8bit') . 
                 ',after_gzip_content_length:' . mb_strlen($gzip, '8bit') . 
                 'compress_rate:' . 100 * mb_strlen($gzip, '8bit') / mb_strlen(json_encode($row, 256), '8bit'));

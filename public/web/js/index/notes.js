@@ -178,34 +178,24 @@ var notesPanel = Vue.component('notes-panel', {
                         }
                     }
                     if ( blob) {
-                        var reader = new FileReader();
-                        reader.readAsDataURL(blob);
-                        reader.onload = function ($e) {
-                            // event.target.result 即为图片的Base64编码字符串
-                            var base64_str = $e.target.result
-                            if(undefined === note.pictures){
-                                note.pictures = [];
+                        var text = $event.target;
+                        var fm = new FormData();
+                        fm.append('img', blob);
+                        $.ajax(
+                            {
+                                url: URL_Manager.image,
+                                type: 'POST',
+                                data: fm,
+                                contentType: false, //禁止设置请求类型
+                                processData: false, //禁止jquery对DAta数据的处理,默认会处理
+                                //禁止的原因是,FormData已经帮我们做了处理
+                                success: function (result) {
+                                	result = JSON.parse(result);
+                                    note.modifiedContent = $event.target.value = text.value.substr(0,text.selectionStart+1) + "![]("
+										+ result.data.url + ")" + text.value.substr(text.selectionStart);
+                                }
                             }
-                            var picIndex = note.pictures.length
-                            var value =  base64_str + '\n\r';
-                            note.modifiedContent += '![][' +  picIndex + ']\n\r'
-                            $event.target.value = note.modifiedContent
-                            image = Object.create({
-                                "base64":value,
-                                'index':picIndex,
-                                'status':my.constant.status.disable.code
-                            });
-                            var len = note.pictures.push(image);
-                            if(!note.id){
-                            	var ajax = my.save(note, true);
-                            	ajax.then(function () {
-									return my.saveImage(note, image, len - 1)
-                                });
-							}else{
-                                my.saveImage(note, image, len - 1)
-							}
-                        }
-
+                        );
                     }
                 }
             }

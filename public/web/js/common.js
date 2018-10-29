@@ -93,3 +93,4 @@ $(document)
             window.location.href = '/web/page/account/login.html';
         }
     })
+
