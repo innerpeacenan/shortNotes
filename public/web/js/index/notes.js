@@ -224,7 +224,6 @@ var notesPanel = Vue.component('notes-panel', {
 			var my = this
 			// 单击保存的时候，$event 为什么是 undefine 呢？
 			if (!note.item_id) {
-				console.log('note is:', note)
 				return
 			}
 			// 将原来的及时更新改为非及时，以提高性能
@@ -246,19 +245,22 @@ var notesPanel = Vue.component('notes-panel', {
 
 						if(!note.pictures){
                             note.pictures = []
-                            console.log(note.pictures)
 						}
-                        var preFix = '';
-                        var plen = note.pictures.length;
-                        for(var j = 0; j < plen; j++) {
-                        	var picture = note.pictures[j];
-                            preFix += '\n\r' + '[' + j  + ']:' + picture.base64;
+						// 如果为提交的时候,渲染markdown,否则不渲染对应的markdown
+                        if(!onlySave) {
+                            var preFix = '';
+                            var plen = note.pictures.length;
+                            for (var j = 0; j < plen; j++) {
+                                var picture = note.pictures[j];
+                                preFix += '\n\r' + '[' + j + ']:' + picture.base64;
+                            }
+                            // senitize 对 html 标签用实体替换，尽量避免跨站点脚本攻击
+                            note.md = marked(note.content + preFix, {sanitize: true});
+                            // senitize 对 html 标签用实体替换，尽量避免跨站点脚本攻击
                         }
-                        // senitize 对 html 标签用实体替换，尽量避免跨站点脚本攻击
-                        note.md = marked(note.content + preFix, {sanitize: true});
-						// senitize 对 html 标签用实体替换，尽量避免跨站点脚本攻击
 					}
                    if(!onlySave){
+                       // $event.preventDefault();
                        // 不管有没有实际更新数据,都自动保存数据
                        note.seen = false
 				   }
@@ -372,7 +374,7 @@ var notesPanel = Vue.component('notes-panel', {
                 </span>
                 </div>
                 <div>
-                <textarea class="col-xs-12" v-if="note.seen" v-model="note.modifiedContent"
+                <textarea class="col-xs-12" v-if="note.seen" v-model="note.modifiedContent" @keydown.ctrl.83.prevent="save(note, 1)"
                           @keyup.esc="save(note)"
                           @keyup.enter="h($event)" @focus="h($event, note)"  @paste="image($event, note)"
                           v-focus>
