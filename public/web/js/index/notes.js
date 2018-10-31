@@ -247,7 +247,7 @@ var notesPanel = Vue.component('notes-panel', {
                             note.pictures = []
 						}
 						// 如果为提交的时候,渲染markdown,否则不渲染对应的markdown
-                        if(!onlySave) {
+                        if(1 !== onlySave) {
                             var preFix = '';
                             var plen = note.pictures.length;
                             for (var j = 0; j < plen; j++) {
@@ -259,7 +259,7 @@ var notesPanel = Vue.component('notes-panel', {
                             // senitize 对 html 标签用实体替换，尽量避免跨站点脚本攻击
                         }
 					}
-                   if(!onlySave){
+                   if(1 === onlySave){
                        // $event.preventDefault();
                        // 不管有没有实际更新数据,都自动保存数据
                        note.seen = false
