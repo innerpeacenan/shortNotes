@@ -64,7 +64,6 @@ var notesPanel = Vue.component('notes-panel', {
 	methods: {
 		newNote: function () {
 			if (typeof this.item == 'undefined') {
-				window.console.log.error('this.items is undefined')
 				var itemId = 0;
 			} else {
 				var itemId = this.item.id;
@@ -82,7 +81,6 @@ var notesPanel = Vue.component('notes-panel', {
 		doGetNotes: function (item, type) {
 			var my = this
 			if (typeof item == "undefined") {
-				console.log('item is undefined', item)
 				return;
 			}
 			$.ajax({
@@ -117,7 +115,7 @@ var notesPanel = Vue.component('notes-panel', {
                             	var picture = note.pictures[j];
                                 preFix += '[' + j  + ']:' + picture.base64 + '\n\r'
                             }
-                            note.md = marked(note.content + preFix, {sanitize: true});
+                            note.md = marked(note.content, {sanitize: true, gfm:true});
 							note.seen = false;
 							return note;
 						});
@@ -193,6 +191,7 @@ var notesPanel = Vue.component('notes-panel', {
                                 	result = JSON.parse(result);
                                     note.modifiedContent = $event.target.value = text.value.substr(0,text.selectionStart+1) + "![]("
 										+ result.data.url + ")" + text.value.substr(text.selectionStart);
+                                    note.pictures = [result.data.url];
                                 }
                             }
                         );
@@ -254,8 +253,7 @@ var notesPanel = Vue.component('notes-panel', {
 							preFix += '\n\r' + '[' + j + ']:' + picture.base64;
 						}
 						// senitize 对 html 标签用实体替换，尽量避免跨站点脚本攻击
-						note.md = marked(note.content + preFix, {sanitize: true});
-						// senitize 对 html 标签用实体替换，尽量避免跨站点脚本攻击
+						note.md = marked(note.content, {sanitize: true, gfm:true});
 					}
                    if(!onlySave){
                        // 不管有没有实际更新数据,都自动保存数据
@@ -385,9 +383,9 @@ var notesPanel = Vue.component('notes-panel', {
 			          	  </tr>
 			          </thead>
 			          <tbody>
-						  <tr  v-for="(img,index) in note.pictures" v-bind:class="img.status == 10 ? '' : 'warning'"  v-if="note.seen">
+						  <tr  v-for="(img,index) in note.pictures"  v-if="note.seen">
 							  <td>{{img.index}}</td>
-							  <td><img :src="img.base64"></td>
+							  <td><img :src="img"></td>
 						  </tr> 
                       </tbody>
 				</table>

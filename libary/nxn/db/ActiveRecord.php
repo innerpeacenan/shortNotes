@@ -99,6 +99,7 @@ class ActiveRecord
         'datetime' => 'string',
         'timestamp' => 'string',
         'text' => 'string',
+        'tinytext' => 'string',
         'longtext' => 'string',
         'enum' => 'string',
         'decimal' => 'double',
@@ -158,7 +159,7 @@ class ActiveRecord
     public function setAttributes(array $columns)
     {
         foreach ($columns as $name => $value) {
-            // 如主键已近存在，则直接过滤
+            // 如主键已经存在，则直接过滤
             if (in_array($name, $this->_primaryKey) and array_key_exists($name, $this->_attributes)) {
                 continue;
             }
@@ -350,7 +351,7 @@ class ActiveRecord
             } elseif (true === $this->_columns[$name]['Null']) {
                 continue;
             } else {
-                if (getenv(N_DEBUG)) {
+                if (getenv('N_DEBUG')) {
                     throw new \Exception($tableName . '.' . $name . ' must have value when insert!');
                 }
                 return 0;
@@ -359,6 +360,7 @@ class ActiveRecord
         $colums = join(',', array_keys($kv));
         $values = join(',', array_values($kv));
         $sql = 'INSERT INTO ' . $tableName . ' ( ' . $colums . ' ) VALUES ( ' . $values . ')';
+        $colums = join(',', array_keys($kv));
         if (false === $transaction) {
             return $this->doInsert($sql);
         }
@@ -371,6 +373,7 @@ class ActiveRecord
             return $status;
         } catch (\Exception $e) {
             $this->db->rollBack();
+            \Log::error('数据库插入失败', $e->getMessage());
             throw $e;
         }
     }

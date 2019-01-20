@@ -26,7 +26,6 @@ class ItemController extends AuthController
 {
     public function __construct()
     {
-        $this->pipelineTest();
     }
 
     protected function pipelineTest()
@@ -92,11 +91,15 @@ class ItemController extends AuthController
      */
     public function putItem()
     {
-        $_REQUEST['fid'] = $_REQUEST['fid'] ?? 0;
+        if(empty($_REQUEST['fid'])){
+            $_REQUEST['fid'] =  0;
+        }
+        $_REQUEST['visible_range'] = 10;
+        $_REQUEST['u_time'] = date('Y-m-d H:i:s');
         $item = new Items();
         $item->setAttributes($_REQUEST);
         $status = $item->save(false);
-        Ajax::json($status, ['id' => $item->id]);
+        Ajax::json($status, ['id' => $item->id, 'rank' => $item->rank]);
     }
 
 
@@ -210,17 +213,18 @@ class ItemController extends AuthController
         $ids = array_column($collections, 'id');
         if(!empty($ids)){
             $expiredList = CollectionExpiredDay::getByCollectionIds($ids);
-            $expiredList = array_column($expiredList, null, 'id');
-            //todo 这部分代码待测试 过期的要改状态
+            $expiredList = array_column($expiredList, null, 'collection_id');
             foreach ($expiredList as $expired) {
-                $exp = Collection::load($expired['id']);
+                $exp = Collection::load($expired['collection_id']);
                 $exp->status = Collection::STATUS_DISABLE;
                 $exp->save();
             }
             $checkedList = CollectionChecked::getManualChecked($ids);
             $checkedList = array_column($checkedList, null, 'collection_id');
             $collections = array_diff_key($collections, $expiredList, $checkedList);
+            $ids = [];
             foreach ($collections as $id => $collection){
+                $ids[] = $id;
                 $collections[$id]['total_count'] = Collection::getTotalDaysCount($id);
                 $collections[$id]['check_in_count'] = Collection::getCheckedIndayCount($id);
             }

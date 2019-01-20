@@ -85,14 +85,14 @@ class Application extends Container
             $msg = $e->getMessage();
             $code = $e->getCode();
             $header = [];
-            Ajax::json($code, [], $msg, $code);
+            Ajax::json($code, $e->getTrace(), $msg, $code);
         } catch (\Throwable $err) {
             $msg = $err->getMessage();
             $code = $err->getCode();
             if (empty($code)) {
                 $code = 500;
             }
-            Ajax::json($code, [], $msg, $code);
+            Ajax::json($code, $e->getTrace(), $msg, $code);
         }
 
     }

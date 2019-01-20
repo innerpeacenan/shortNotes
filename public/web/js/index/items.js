@@ -46,6 +46,7 @@ var itemsPanel = Vue.component('items-panel', {
 	// 组件初始化的钩子, 不能放到普通的 methods 中去
 	created: function () {
 		this.runtimeState.fid = getParam('fid');
+    window.console.log(this.runtimeState)
 		this.getItems();
 		if (typeof VGLOBAL == 'undefined') {
 			return;
@@ -97,7 +98,6 @@ var itemsPanel = Vue.component('items-panel', {
 							// 初始化 page 参数
 							one.offset = 0;
 							one.limit = my.settings.perpage;
-							// 全局显示的和启用的都勾选，这样更加美观
 							one.isChecked = my.constant.status.staging.code == one.status ? 1 : 0;
 							return one;
 						});
@@ -134,6 +134,7 @@ var itemsPanel = Vue.component('items-panel', {
 			var that = this;
 			// 记录当前items所在的父目录
 			that.runtimeState.fid = item.id;
+      window.console.log('that.runtimeState', that.runtimeState)
 			// 请求该父目录下的所有itmes
 			that.getItems();
 		},
@@ -150,13 +151,23 @@ var itemsPanel = Vue.component('items-panel', {
 			$.ajax({
 				type: 'put',
 				url: URL_Manager.item,
-				data: {id: item.id, name: item.name, fid: item.fid},
+				data: {
+                  id: item.id, 
+                  name: item.name, 
+                 fid: my.runtimeState.fid
+        },
 				success: function (result) {
 					// 针对插入的情况下,取出最后插入的主键
+          var needSort = false
 					if (item.id == 0) {
-						item.id = result.data.id;
+            needSort = true 
+						item.id = result.data.id
+            item.rank = result.data.rank
 					}
 					item.seen = !item.seen;
+          if(needSort){
+              my.sort()
+          }
 				}
 			})
 		},
