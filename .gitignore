@@ -32,3 +32,5 @@ tests/_output/*
 .env
 
 .editorconfig
+storage/
+public/md_pictures/
