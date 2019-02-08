@@ -24,23 +24,23 @@ password:111111
 cd /etc/nginx/conf.d
 vim  86.conf
 
-server {
-    listen 86;
-    server_name local_86;
-    root /home/wwwroot/87/public;
-    index web/page/index.html index.php;
-   location / {
-        try_files $uri $uri/ /index.php$is_args$query_string;
-    }
+    server {
+        listen 86;
+        server_name local_86;
+        root /home/wwwroot/87/public;
+        index web/page/index.html index.php;
+       location / {
+            try_files $uri $uri/ /index.php$is_args$query_string;
+        }
 
-    location ~ \.php$ {
-        try_files $uri =404;
-        fastcgi_pass 127.0.0.1:9000;
-        fastcgi_split_path_info ^(.+\.php)(/.+)$;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        include fastcgi_params;
+        location ~ \.php$ {
+            try_files $uri =404;
+            fastcgi_pass 127.0.0.1:9000;
+            fastcgi_split_path_info ^(.+\.php)(/.+)$;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            include fastcgi_params;
+        }
     }
-}
 
 
 nginx -s reload
