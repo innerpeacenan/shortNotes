@@ -21,14 +21,20 @@ password:111111
 
 ### 服务器部署
 
+
+cd /home/wwwroot/
+mkdir 85
+
+
 cd /etc/nginx/conf.d
-vim  86.conf
+
+vim  85.conf
 
     server {
-        listen 86;
-        server_name local_86;
-        root /home/wwwroot/87/public;
-        index web/page/index.html index.php;
+        listen 85;
+        server_name local_85;
+        root /home/wwwroot/85/public;
+        index web/index.html index.php;
        location / {
             try_files $uri $uri/ /index.php$is_args$query_string;
         }
@@ -43,12 +49,43 @@ vim  86.conf
     }
 
 
+
+
+### 项目下载
+
+    cd /home/wwwroot/
+    git clone https://github.com/innerpeacenan/shortNotes.git 85
+
+    cd /home/wwwroot/85
+
+    git clone https://github.com/innerpeacenan/easyNoteFrontEnd easyNoteFrontEnd
+
+### 编译
+
+* 前端编译
+
+如果没有安装node和npm,则安装这两个工具.
+
+    apt install npm
+    apt install nodejs-legacy
+    修改npm 源为淘宝镜像
+    npm config set registry http://registry.cnpmjs.org
+
+安装完毕后,进行编译
+    npm install
+    npm run build
+
+* 后端部署
+
+    composer install
+
+* 文件夹权限复制
+
+    cd /home/wwwroot/
+
+    chown -r www:www 85
+
 nginx -s reload
-
-### 前端构建
-
-apt install npm
-apt install nodejs-legacy
 
 
 
