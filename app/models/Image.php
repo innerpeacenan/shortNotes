@@ -1,9 +1,9 @@
 <?php
 
-namespace n\models;
+namespace app\models;
 
-use nxn\db\ActiveRecord;
-use nxn\db\Query;
+use play\db\ActiveRecord;
+use play\db\Query;
 
 
 class Image extends ActiveRecord

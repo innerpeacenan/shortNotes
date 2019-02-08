@@ -5,3 +5,4 @@ CREATE TABLE `collection_not_need_check` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='集合免签到表';
 
+select * from todo_check_in_log where id = 4 order by `date` asc;

@@ -1,9 +1,9 @@
 <?php
 
-namespace n\models;
+namespace app\models;
 
-use nxn\db\ActiveRecord;
-use nxn\db\Query;
+use play\db\ActiveRecord;
+use play\db\Query;
 
 //  天数统计,总天数(需要签到的总天数) = 当前日期 - 集合创建时间 - 集合间隔天数综合 - 免签到天数;
 //  已经签到的总天数(手动签到次数 + 自动签到次数)

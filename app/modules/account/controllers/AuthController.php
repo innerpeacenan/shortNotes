@@ -5,14 +5,14 @@
  * Date: 8/13/17
  * Time: 9:12 PM
  */
-namespace n\modules\account\controllers;
+namespace app\modules\account\controllers;
 
-use nxn\web\Ajax;
-use nxn\web\Controller;
-use nxn\web\SessionManager;
+use play\web\Ajax;
+use play\web\Controller;
+use play\web\SessionManager;
 /**
  * Class AuthController
- * @package libary\nxn\web
+ * @package library\play\web2
  * User: xiaoning nan
  * Date: 2017-08-13
  * Time: xx:xx
@@ -29,7 +29,6 @@ class AuthController extends Controller
         }
         $ok = new SessionManager();
         if (!$ok) throw new \Exception('session manageer error',500);
-
         // 检测cookie 对应的字段，没有，跳转到登录页
         if (isset($_COOKIE[$sessionName], $_SESSION['user_id']) && $_COOKIE[$sessionName] == session_id()) {
             // 正常登录 pass

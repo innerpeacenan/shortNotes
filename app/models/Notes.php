@@ -1,9 +1,9 @@
 <?php
 
-namespace n\models;
+namespace app\models;
 
-use nxn\db\ActiveRecord;
-use nxn\db\Query;
+use play\db\ActiveRecord;
+use play\db\Query;
 
 /**
  * Class Notes
@@ -28,7 +28,7 @@ class Notes extends ActiveRecord
         return 'notes';
     }
 
-    public static function notesByItem($userId, $item_id, $opt = [], $tagIds = [])
+    public static function notesByItem($userId, $item_id, $opt = [], $tagIds = [1])
     {
         if (!isset($opt['offset'])) {
             $opt['offset'] = 0;
@@ -36,8 +36,6 @@ class Notes extends ActiveRecord
         if (!isset($opt['limit'])) {
             $opt['limit'] = 10;
         }
-        $tagfilter = [Tags::$defaultTags['todo']];
-        $tagIds = array_unique(array_merge($tagIds, $tagfilter));
         $params = [
             ':id' => (int)$item_id,
             ':user_id' => (int)$userId,
@@ -46,6 +44,7 @@ class Notes extends ActiveRecord
             ':limit' => (int)$opt['limit'],
             ':offset' => (int)$opt['offset'],
         ];
+
         // 值选择没有tag的笔记和具有指定的tag的笔记
         $sql = 'SELECT DISTINCT n.*
 FROM `notes` AS n INNER JOIN `items` AS i ON n.`item_id` = i.`id`
@@ -55,10 +54,9 @@ WHERE i.id = :id AND i.user_id = :user_id AND ((nt.tag_id IS NULL) OR (nt.tag_id
 ORDER BY n.c_time DESC
 LIMIT :limit OFFSET :offset';
         $notes = Query::all($sql, $params);
-        foreach ($notes as $i => $note){
-            $rows = array_column(Image::findNoteImages($note['id'], $withBase64 = true),null, 'index');
-            ksort($rows,SORT_NUMERIC);
-            $notes[$i]['pictures'] = array_values($rows);
+        // 历史原因,为前端初始化数据
+        foreach ($notes as $i => $note) {
+            $notes[$i]['pictures'] = [];
         }
         return $notes;
     }

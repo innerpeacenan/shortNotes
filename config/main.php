@@ -1,7 +1,10 @@
 <?php
 return [
+    'HttpKernel' => [
+        'class' => \play\web\Kernel::class,
+    ],
     'router' => [
-        'class' => \nxn\web\MatchRouter::class,
+        'class' => \play\web\MatchRouter::class,
     ],
     'db' => [
         // POD 构造函数的最后一个参数从这里传入

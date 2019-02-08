@@ -1,9 +1,9 @@
 <?php
 
-namespace n\models;
+namespace app\models;
 
-use nxn\db\ActiveRecord;
-use nxn\db\Query;
+use play\db\ActiveRecord;
+use play\db\Query;
 
 class Items extends ActiveRecord
 {
@@ -79,7 +79,7 @@ ORDER BY `visible_range` DESC, `rank` DESC';
 
         $note = new Notes();
         // 生产者消费者模式演示 (不支持按照优先级排序, 不支持传对象, 暂时不支持移除列出接听位置的队列)
-        $disPatcher = new \nxn\Event\Dispatcher();
+        $disPatcher = new \play\Event\Dispatcher();
         //callback [类名,静态方法] [实例,方法] function
         $disPatcher->on('item_delete', [$note, 'deleteNotes'], $item->id);
         $disPatcher->on('item_delete', [$note, 'addTodoLog'], $item->id);
@@ -90,7 +90,7 @@ ORDER BY `visible_range` DESC, `rank` DESC';
     public function afterDelete()
     {
         // 生产者消费者模式演示
-        $disPatcher = new \nxn\Event\Dispatcher();
+        $disPatcher = new \play\Event\Dispatcher();
         $note = new Notes();
         //callback [类名,静态方法] [实例,方法] function
         $disPatcher->on('item_delete', [$note, 'deleteNotes'], $this->id);

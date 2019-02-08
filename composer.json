@@ -9,12 +9,12 @@
     },
     "autoload":{
         "files":[
-            "libary/facade/N.php"
+            "app/library/helper/functions.php"
         ],
         "psr-4": {
-            "nxn\\": "libary/nxn/",
-            "n\\": "app/",
-            "tests\\": "tests/"
+            "play\\": "app/library/play/",
+            "app\\": "app/",
+            "Tests\\": "Tests/"
         }
     },
     "scripts": {

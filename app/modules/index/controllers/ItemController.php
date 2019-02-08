@@ -1,17 +1,16 @@
 <?php
 
-namespace n\modules\index\controllers;
+namespace app\modules\index\controllers;
 
-use n\models\Collection;
-use n\models\CollectionChecked;
-use n\models\CollectionExpiredDay;
-use n\models\Items;
-use n\models\Todo;
-use n\models\TodoCheckInLog;
-use nxn\debug\VarDumper;
-use nxn\pipeline\PipeLine;
-use nxn\web\Ajax;
-use n\modules\account\controllers\AuthController;
+use app\models\Collection;
+use app\models\CollectionChecked;
+use app\models\CollectionExpiredDay;
+use app\models\Items;
+use app\models\Todo;
+use app\models\TodoCheckInLog;
+use app\modules\account\controllers\AuthController;
+use play\pipeline\PipeLine;
+use play\web\Ajax;
 use Log;
 
 /**
@@ -96,6 +95,9 @@ class ItemController extends AuthController
         $item = new Items();
         $item->setAttributes($_REQUEST);
         $status = $item->save(false);
+        if(0 === $status){
+            $status = 1;
+        }
         Ajax::json($status, ['id' => $item->id]);
     }
 
@@ -210,17 +212,18 @@ class ItemController extends AuthController
         $ids = array_column($collections, 'id');
         if(!empty($ids)){
             $expiredList = CollectionExpiredDay::getByCollectionIds($ids);
-            $expiredList = array_column($expiredList, null, 'id');
-            //todo 这部分代码待测试 过期的要改状态
+            $expiredList = array_column($expiredList, null, 'collection_id');
             foreach ($expiredList as $expired) {
-                $exp = Collection::load($expired['id']);
+                $exp = Collection::load($expired['collection_id']);
                 $exp->status = Collection::STATUS_DISABLE;
                 $exp->save();
             }
             $checkedList = CollectionChecked::getManualChecked($ids);
             $checkedList = array_column($checkedList, null, 'collection_id');
             $collections = array_diff_key($collections, $expiredList, $checkedList);
+            $ids = [];
             foreach ($collections as $id => $collection){
+                $ids[] = $id;
                 $collections[$id]['total_count'] = Collection::getTotalDaysCount($id);
                 $collections[$id]['check_in_count'] = Collection::getCheckedIndayCount($id);
             }

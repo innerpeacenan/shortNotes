@@ -13,7 +13,7 @@ foreach($envirementVariables as $name => $value){
 }
 
 // declare constant
-defined('N_APPLICATION') or define('N_APPLICATION', __DIR__ . '/..');
+defined('APP_BASE_PATH') or define('APP_BASE_PATH', __DIR__ . '/..');
 
 $ini = require(__DIR__ . '/../config/main.php');
 
@@ -21,4 +21,4 @@ require(__DIR__ .'/../vendor/autoload.php');
 
 require(__DIR__ . '/../config/helper.php');
 
-new \nxn\web\Application($ini);
+new \play\web\Application($ini);

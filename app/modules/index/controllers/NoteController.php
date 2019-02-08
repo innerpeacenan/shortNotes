@@ -1,13 +1,12 @@
 <?php
-namespace n\modules\index\controllers;
+namespace app\modules\index\controllers;
 
-use n\models\Image;
-use n\models\Notes;
-use n\models\Tags;
-use nxn\web\Ajax;
-use n\modules\account\controllers\AuthController;
+use app\models\Image;
+use app\models\Notes;
+use app\models\Tags;
+use play\web\Ajax;
+use app\modules\account\controllers\AuthController;
 
-use PDO;
 
 /**
  * Class AjaxController
@@ -38,8 +37,19 @@ class NoteController extends AuthController
     {
         $userId = $_SESSION['user_id'];
         $itemId = $_REQUEST['item_id'];
-        $result = Notes::notesByItem($userId, $itemId, $_REQUEST, [] );
-        if ($_REQUEST) {
+        $result = Notes::notesByItem($userId, $itemId, $_REQUEST );
+        if ($result) {
+            Ajax::json(true, $result, 'success');
+        } else {
+            Ajax::json(0);
+        }
+    }
+
+    public function getItemBackupNotes(){
+        $userId = $_SESSION['user_id'];
+        $itemId = $_REQUEST['item_id'];
+        $result = Notes::notesByItem($userId, $itemId, $_REQUEST, [Tags::$defaultTags['done']]);
+        if ($result) {
             Ajax::json(true, $result, 'success');
         } else {
             Ajax::json(0);
@@ -58,7 +68,7 @@ class NoteController extends AuthController
     {
         $note = Notes::load($_REQUEST['id']);
         if (null === $note) {
-            Ajax::json(false, [], 'can not find related note wiht id:' . $_REQUEST['id']);
+            Ajax::json(false, [], 'can not find related note with id:' . $_REQUEST['id']);
         }
         $deleted = $note->delete();
         return Ajax::json($deleted);
@@ -86,6 +96,9 @@ class NoteController extends AuthController
         $note->setAttributes($_REQUEST);
         $status = $note->save(false);
         $id = $note->id;
+        if(0 === $status){
+            $status = 1;
+        }
         Ajax::json($status, ['id' => $id], $message);
     }
 
@@ -104,9 +117,7 @@ class NoteController extends AuthController
         }
         $note->scenario = 'update';
         $note->setAttributes($_REQUEST);
-        l(['type_of_item_id' => $note->item_id]);;
         $status = $note->update(false);
-        l(['status' => $status]);
         Ajax::json($status);
     }
 
@@ -114,6 +125,16 @@ class NoteController extends AuthController
         $noteId = $_REQUEST['note_id'];
         // 增加结束标签
         $tagId = Tags::$defaultTags['done'];
+        $userId = $_SESSION['user_id'];
+        // 之前此处有bug,结果浪费了很多时间
+        $status = tags::toggleTodoAndDone($noteId, $userId, $tagId);
+        Ajax::json($status);
+    }
+
+    public function putNoteTodo(){
+        $noteId = $_REQUEST['note_id'];
+        // 增加结束标签
+        $tagId = Tags::$defaultTags['todo'];
         $userId = $_SESSION['user_id'];
         // 之前此处有bug,结果浪费了很多时间
         $status = tags::toggleTodoAndDone($noteId, $userId, $tagId);

@@ -5,10 +5,10 @@
  * Date: 8/14/17
  * Time: 10:19 AM
  */
-namespace n\models;
+namespace app\models;
 
-use nxn\db\ActiveRecord;
-use nxn\db\Query;
+use play\db\ActiveRecord;
+use play\db\Query;
 
 /**
  * Class User
