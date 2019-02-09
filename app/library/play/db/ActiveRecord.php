@@ -201,7 +201,7 @@ class ActiveRecord
         }
     }
 
-    public function getAttribute()
+    public function getAttributes()
     {
         return $this->_attributes;
     }
@@ -657,10 +657,24 @@ class ActiveRecord
             $name = static::$map[$this->scenario][$name];
             return $this->_attributes[$name];
         } else {
-            throw new \Exception('column ' . $name . ' does not exists in table ' . $this->tableName());
+            throw new \Exception('column ' . $name . ' does not exists in current model ' . $this->tableName());
         }
     }
 
+    public function hasAttribute($name){
+        $getter = 'get' . $name;
+        if (method_exists($this, $getter)) {
+            return true;
+        }
+        if (array_key_exists($name, $this->_attributes)) {
+            return true;
+        } elseif (isset(static::$map[$this->scenario][$name])) {
+            $name = static::$map[$this->scenario][$name];
+            return true;
+        } else {
+            false;
+        }
+    }
     /**
      * Quotes a simple table name for use in a query.
      * A simple table name should contain the table name only without any schema prefix.

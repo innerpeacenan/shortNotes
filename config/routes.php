@@ -19,5 +19,5 @@ return [
     "/note/note" => 'app\modules\index\controllers\NoteController::note',
     "/note/note-done" => 'app\modules\index\controllers\NoteController::noteDone',
     '/note/note-todo' => 'app\modules\index\controllers\NoteController::noteTodo',
-    "/image/save" => 'app\modules\index\controllers\ImageController::base64',
+    "/image/save" => 'app\modules\index\controllers\ImageController::imageSave',
 ];

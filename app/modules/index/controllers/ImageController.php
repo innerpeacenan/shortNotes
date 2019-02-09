@@ -10,7 +10,7 @@ class ImageController extends Controller
     /**
      * @todo 检查用户权限(没有注册的用户不允许上传,防止用户大量上传,并且记录用户上传的文件数量,放置一个用户上传过多图片)
      */
-    public function postBase64()
+    public function postImageSave()
     {
         $time = date('His');
         $date = date('Ymd');
