@@ -38,11 +38,7 @@ class NoteController extends AuthController
         $userId = $_SESSION['user_id'];
         $itemId = $_REQUEST['item_id'];
         $result = Notes::notesByItem($userId, $itemId, $_REQUEST );
-        if ($result) {
-            Ajax::json(true, $result, 'success');
-        } else {
-            Ajax::json(0);
-        }
+        Ajax::json(true, $result, 'success');
     }
 
     public function getItemBackupNotes(){

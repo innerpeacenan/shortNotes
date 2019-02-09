@@ -98,7 +98,7 @@ class ItemController extends AuthController
         if(0 === $status){
             $status = 1;
         }
-        Ajax::json($status, ['id' => $item->id]);
+        Ajax::json($status, ['id' => $item->id, 'rank' => $item->rank]);
     }
 
 
