@@ -25,10 +25,10 @@ class Collection extends ActiveRecord
     }
 
     // @todo 待测试
-    public static function getTotalDaysCount($id)
+    public static function getTotalDaysCount($id, $date)
     {
         $instance = self::load($id);
-        $total = (strtotime(date('Y-m-d')) - strtotime($instance->create_date)) / (24 * 3600) + 1;
+        $total = (strtotime($date) - strtotime($instance->create_date)) / (24 * 3600) + 1;
         $total = $total - CollectionExpiredDay::getStoppedDays($id);
         return $total;
     }

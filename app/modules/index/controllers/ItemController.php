@@ -212,25 +212,25 @@ class ItemController extends AuthController
     public function getTodoList()
     {
         $itemId = $_REQUEST['item_id'];
-
+        $date = $_REQUEST['date'];//Y-m-d
         $collections = Collection::getByItemId($itemId);
         $collections = array_column($collections, null, 'id');
         $ids = array_column($collections, 'id');
         if(!empty($ids)){
-            $expiredList = CollectionExpiredDay::getByCollectionIds($ids);
+            $expiredList = CollectionExpiredDay::getByCollectionIds($ids, $date);
             $expiredList = array_column($expiredList, null, 'collection_id');
             foreach ($expiredList as $expired) {
                 $exp = Collection::load($expired['collection_id']);
                 $exp->status = Collection::STATUS_DISABLE;
                 $exp->save();
             }
-            $checkedList = CollectionChecked::getManualChecked($ids);
+            $checkedList = CollectionChecked::getManualChecked($ids, $date);
             $checkedList = array_column($checkedList, null, 'collection_id');
             $collections = array_diff_key($collections, $expiredList, $checkedList);
             $ids = [];
             foreach ($collections as $id => $collection){
                 $ids[] = $id;
-                $collections[$id]['total_count'] = Collection::getTotalDaysCount($id);
+                $collections[$id]['total_count'] = Collection::getTotalDaysCount($id, $date);
                 $collections[$id]['check_in_count'] = Collection::getCheckedIndayCount($id);
             }
         }
@@ -241,7 +241,7 @@ class ItemController extends AuthController
             $todoIds = array_column($todoList, 'id');
             $todoList = array_column($todoList, null, 'id');
             // 今天签到过的统统移除
-            $todoFilter = TodoCheckInLog::getBlackLists($todoIds);
+            $todoFilter = TodoCheckInLog::getBlackLists($todoIds, $date);
             $todoFilter = array_column($todoFilter, null, 'todo_id');
             $todoList = array_diff_key($todoList, $todoFilter);
             // reformat json
@@ -261,15 +261,17 @@ class ItemController extends AuthController
     {
         // 数据权限检查
         $todoId = $_REQUEST['todo_id'];
+        $date = $_REQUEST['date'];
         $todo = Todo::load($todoId);
-        $todoId = TodoCheckInLog::todoDoneToday($todoId);
-        CollectionChecked::autoDoneToday($todo->collection_id);
+        $todoId = TodoCheckInLog::todoDoneToday($todoId, $date);
+        CollectionChecked::autoDoneToday($todo->collection_id, $date);
         Ajax::json(1, ['todo_id' => $todoId]);
     }
 
     public function postCollectionDoneToday(){
         $collectionId = $_REQUEST['collection_id'];
-        $collectionId = CollectionChecked::doneToday($collectionId);
+        $date = $_REQUEST['date'];
+        $collectionId = CollectionChecked::doneToday($collectionId, $date);
         Ajax::json(1, ['collection_id' => $collectionId]);
     }
 }

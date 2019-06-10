@@ -20,7 +20,7 @@ class NoteController extends AuthController
 {
 
     /**
-     * @access
+     * @deprecated
      * @return void
      * Created by: xiaoning nan
      * Last Modify: xiaoning nan

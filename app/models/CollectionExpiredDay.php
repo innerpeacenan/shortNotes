@@ -10,13 +10,13 @@ class CollectionExpiredDay extends ActiveRecord
     const SATUS_ENABLE = 10;
     const STATUS_DISABLE = 20;
 
-    public static function getByCollectionIds(array $collectionIds)
+    public static function getByCollectionIds(array $collectionIds, $date)
     {
         $sql = 'SELECT * FROM `collection_expired_day` WHERE collection_id IN (:collection_id) AND `status` = :status AND `date` <= :date';
         $results = Query::all($sql, [
             ':collection_id' => $collectionIds,
             ':status' => self::SATUS_ENABLE,
-            ':date' => date('Y-m-d'),
+            ':date' => $date,
         ]);
         return $results;
     }

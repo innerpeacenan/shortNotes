@@ -25,7 +25,8 @@ class MatchRouter implements RouterInterface
         if (isset($routesMap[$baseUri])) {
             list($controller, $action) = explode('::', $routesMap[$baseUri]);
         } else {
-            throw new HttpResponseException('path [' . $baseUri . '] not exist!');
+            require APP_BASE_PATH . '/../84/public/index.php';//如果原始路由没有命中,则到新项目中找
+//            throw new HttpResponseException('path [' . $baseUri . '] not exist!');
         }
         // 如果没有文件上传, 对put方法,直接从输入流里边获取数据
         if (empty($_FILES) && !in_array($method, ['GET'])) {
@@ -99,6 +100,8 @@ class MatchRouter implements RouterInterface
         if (method_exists($this->getController(), 'beforeAction')) {
             call_user_func_array([$this->getController(), 'beforeAction'], $params);
         }
-        call_user_func_array([$this->getController(), $this->getAction()], $params);
+        if(method_exists($this->getController(), $this->getAction())){
+            call_user_func_array([$this->getController(), $this->getAction()], $params);
+        }
     }
 }

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://unpkg.com/vue@2.1.10/dist/vue.js"></script>
+    <script src="https://unpkg.com/vue-select@2.0.0/dist/vue-select.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>JS Bin</title>
+</head>
+<body>
+<div id="app">
+    <ul>
+        <li>
+            <v-select :placeholder="placeholder"
+                      multiple
+                      :options="options" label="name"></v-select>
+        </li>
+    </ul>
+
+</div>
+</body>
+</html>
+
+
+<style>
+
+</style>
+
+
+<script>
+    Vue.component('v-select', VueSelect.VueSelect);
+
+    new Vue({
+        el: '#app',
+        data: function() {
+            return {
+                options: [
+                    {"student_id": 1, "name": "Vence"},
+                    {"student_id": 2, "name": "Job"},
+                    {"student_id": 3, "name": "Jack"},
+                ],
+                placeholder: 'Choose a student..'
+            }
+        },
+    });
+</script>
