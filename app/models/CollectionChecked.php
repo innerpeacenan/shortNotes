@@ -61,11 +61,12 @@ class CollectionChecked extends ActiveRecord
         }
     }
 
-    public static function getTotalDaysCount($collectionId)
+    public static function getTotalDaysCount($collectionId, $date)
     {
-        $sql = 'SELECT DISTINCT `date` FROM `collection_checked` WHERE collection_id = :collection_id';
+        $sql = 'SELECT DISTINCT `date` FROM `collection_checked` WHERE collection_id = :collection_id and `date` <= :date';
         $results = Query::all($sql, [
             ':collection_id' => $collectionId,
+            ':date' => $date,
         ]);
         return count($results);
     }

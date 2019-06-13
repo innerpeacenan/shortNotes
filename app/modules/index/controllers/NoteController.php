@@ -53,6 +53,7 @@ class NoteController extends AuthController
     }
 
     /**
+     * @deprecated
      * @access
      * @return string
      * Created by: xiaoning nan
@@ -72,6 +73,7 @@ class NoteController extends AuthController
 
 
     /**
+     * @deprecated
      * @access
      * @return void
      * Created by: xiaoning nan
@@ -117,6 +119,10 @@ class NoteController extends AuthController
         Ajax::json($status);
     }
 
+    /**
+     * @throws \Exception
+     * @deprecated
+     */
     public function putNoteDone(){
         $noteId = $_REQUEST['note_id'];
         // 增加结束标签
@@ -127,6 +133,10 @@ class NoteController extends AuthController
         Ajax::json($status);
     }
 
+    /**
+     * @throws \Exception
+     * @deprecated
+     */
     public function putNoteTodo(){
         $noteId = $_REQUEST['note_id'];
         // 增加结束标签

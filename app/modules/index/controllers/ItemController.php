@@ -95,13 +95,13 @@ class ItemController extends AuthController
         $item = new Items();
         $item->setAttributes($_REQUEST);
         $status = $item->save(false);
-        if(0 === $status){
+        if (0 === $status) {
             $status = 1;
         }
         $data = [
             'id' => $item->id,
         ];
-        if($item->hasAttribute('rank')){
+        if ($item->hasAttribute('rank')) {
             $data['rank'] = $item->rank;
         }
         Ajax::json($status, $data);
@@ -216,26 +216,31 @@ class ItemController extends AuthController
         $collections = Collection::getByItemId($itemId);
         $collections = array_column($collections, null, 'id');
         $ids = array_column($collections, 'id');
-        if(!empty($ids)){
+        if (!empty($ids)) {
+            // 暂时并未过滤掉过期的集合
             $expiredList = CollectionExpiredDay::getByCollectionIds($ids, $date);
             $expiredList = array_column($expiredList, null, 'collection_id');
-            foreach ($expiredList as $expired) {
-                $exp = Collection::load($expired['collection_id']);
-                $exp->status = Collection::STATUS_DISABLE;
-                $exp->save();
+            foreach ($expiredList as $collectionId => $expired) {
+                //同一集合的按照时间排序的最后一条如果是恢复记录,则到给定日期不算过期
+                if ($expired['status'] == CollectionExpiredDay::STATUS_DISABLE) {
+                    unset($expiredList[$collectionId]);
+                }
             }
+            //获取既没有过期,也没有被签到的那部分集合
             $checkedList = CollectionChecked::getManualChecked($ids, $date);
             $checkedList = array_column($checkedList, null, 'collection_id');
             $collections = array_diff_key($collections, $expiredList, $checkedList);
             $ids = [];
-            foreach ($collections as $id => $collection){
+            foreach ($collections as $id => $collection) {
                 $ids[] = $id;
+                // 对每个集合,计算总天数
                 $collections[$id]['total_count'] = Collection::getTotalDaysCount($id, $date);
-                $collections[$id]['check_in_count'] = Collection::getCheckedIndayCount($id);
+                // 获取每个集合的签到总天数
+                $collections[$id]['check_in_count'] = Collection::getCheckedIndayCount($id, $date);
             }
         }
 
-        if(!empty($collections)){
+        if (!empty($collections)) {
             // find todos
             $todoList = Todo::getByCollectionIds($ids);
             $todoIds = array_column($todoList, 'id');
@@ -268,7 +273,8 @@ class ItemController extends AuthController
         Ajax::json(1, ['todo_id' => $todoId]);
     }
 
-    public function postCollectionDoneToday(){
+    public function postCollectionDoneToday()
+    {
         $collectionId = $_REQUEST['collection_id'];
         $date = $_REQUEST['date'];
         $collectionId = CollectionChecked::doneToday($collectionId, $date);

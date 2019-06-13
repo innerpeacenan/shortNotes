@@ -12,9 +12,9 @@ use play\db\Query;
 class Collection extends ActiveRecord
 {
     // 新增的状态以3为地精单元
-    const SATUS_ENABLE = 10;
+    const SATUS_ENABLE = 10;//
 
-    const STATUS_DISABLE = 20;
+    const STATUS_DISABLE = 20;//表示废除的集合(暂停请使用collection_expired_day表记录)
 
     const TYPE_TODO = 20;
 
@@ -28,15 +28,16 @@ class Collection extends ActiveRecord
     public static function getTotalDaysCount($id, $date)
     {
         $instance = self::load($id);
+        // 总天数减去暂停天数
         $total = (strtotime($date) - strtotime($instance->create_date)) / (24 * 3600) + 1;
-        $total = $total - CollectionExpiredDay::getStoppedDays($id);
+
+        $total = $total - CollectionExpiredDay::getStoppedDays($id, $date);
         return $total;
     }
 
-    // @todo 待测试
-    public static function getCheckedIndayCount($id)
+    public static function getCheckedIndayCount($id, $date)
     {
-        return CollectionChecked::getTotalDaysCount($id);
+        return CollectionChecked::getTotalDaysCount($id, $date);
     }
 
 
