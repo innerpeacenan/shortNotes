@@ -8,11 +8,11 @@ var itemsPanel = Vue.component('items-panel', {
 			// 项目用到的常量都放到这里
 			constant: {
 				visible_range: {
-					show_global: {
+					showGlobal: {
 						code: 20,
 						desc: "全局显示"
 					},
-					show_inside_parent: {
+					showInsideParent: {
 						code: 10,
 						desc: "只在父items下可见"
 					}
@@ -66,7 +66,7 @@ var itemsPanel = Vue.component('items-panel', {
 				name: " ",// make it not empty, so it can be saved where click save button directively
 				rank: 0,
 				status: this.constant.status.enable.code,
-				visible_range: this.constant.visible_range.show_inside_parent.code,
+				visible_range: this.constant.visible_range.showInsideParent.code,
 				// above are extra property
 				isChecked: 0,
 				seen: true, // make it editable, so you could see the textarea

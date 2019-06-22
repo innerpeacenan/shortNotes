@@ -26,6 +26,7 @@ class MatchRouter implements RouterInterface
             list($controller, $action) = explode('::', $routesMap[$baseUri]);
         } else {
             require APP_BASE_PATH . '/../84/public/index.php';//如果原始路由没有命中,则到新项目中找
+            return;
 //            throw new HttpResponseException('path [' . $baseUri . '] not exist!');
         }
         // 如果没有文件上传, 对put方法,直接从输入流里边获取数据
@@ -68,7 +69,9 @@ class MatchRouter implements RouterInterface
     public function setAction(string $action)
     {
         if (!method_exists($this->getController(), $action)) {
-            throw new HttpResponseException('400 bad request,invalide action name ' . $action, 400);
+            require APP_BASE_PATH . '/../84/public/index.php';//如果原始路由没有命中,则到新项目中找
+            return;
+//            throw new HttpResponseException('400 bad request,invalide action name ' . $action, 400);
         }
         $this->action = $action;
     }

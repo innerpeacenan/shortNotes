@@ -59,10 +59,10 @@ class Items extends ActiveRecord
         $status = array_unique(array_merge([self::STATUS_ENABLE], $status));
         $sql = 'SELECT *
 FROM `items`
-WHERE `user_id` = :user_id AND `status` IN (:status) AND (`visible_range` = :show_global OR `fid` = :fid)
+WHERE `user_id` = :user_id AND `status` IN (:status) AND (`visible_range` = :showGlobal OR `fid` = :fid)
 ORDER BY `visible_range` DESC, `rank` DESC';
         $params = [
-            ':show_global' => self::SHOW_GLOBAL,
+            ':showGlobal' => self::SHOW_GLOBAL,
             ':fid' => (int)$fid,
             ':user_id' => (int)$userId,
             ':status' => $status,

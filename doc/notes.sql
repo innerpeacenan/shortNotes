@@ -15,7 +15,7 @@ CREATE TABLE `items` (
   `u_time`  TIMESTAMP           NOT NULL DEFAULT '0000-00-00 00:00:00'
   COMMENT '更新时间,需要在修改basic_info后,或者更新了与之对应的note后,更新该字段',
   `status`  TINYINT(1) UNSIGNED NOT NULL DEFAULT '2'
-  COMMENT '{1:"show_global", 2:"enabled", 3:“draft"}',
+  COMMENT '{1:"showGlobal", 2:"enabled", 3:“draft"}',
   PRIMARY KEY (`id`),
   KEY `c_time` (`c_time`),
   KEY `u_time` (`u_time`),
