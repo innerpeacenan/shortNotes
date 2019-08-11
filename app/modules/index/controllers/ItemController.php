@@ -109,7 +109,7 @@ class ItemController extends AuthController
 
 
     /**
-     * @access
+     * @deprecated
      * @return void
      * Created by: xiaoning nan
      * Last Modify: xiaoning nan
@@ -179,7 +179,7 @@ class ItemController extends AuthController
     }
 
     /**
-     * @access
+     * @deprecated
      * @return  void
      * Created by: xiaoning nan
      * Last Modify: xiaoning nan
@@ -202,6 +202,9 @@ class ItemController extends AuthController
         }
     }
 
+    /**
+     * @deprecated
+     */
     public function putToggleVisibleRange()
     {
         $id = $_REQUEST['id'];
